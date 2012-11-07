@@ -1,0 +1,22 @@
+!SESSION 2012-11-07 15:23:40.076 -----------------------------------------------
+eclipse.buildId=I20070613-1755
+java.version=1.6.0_15
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=en_US
+Framework arguments:  -application com.freescale.core.ide.commandLineDriver.application -command updateWorkspace -noclose
+Command-line arguments:  -os win32 -ws win32 -arch x86 -application com.freescale.core.ide.commandLineDriver.application -command updateWorkspace -data C:\Users\hbarba\Desktop\My Solution -noclose
+
+!ENTRY org.eclipse.osgi 2 1 2012-11-07 15:23:50.966
+!MESSAGE NLS unused message: // in: org.eclipse.rse.internal.core.messages
+
+!ENTRY org.eclipse.cdt.core 1 0 2012-11-07 15:24:05.124
+!MESSAGE Indexed 'Generic Demo' (35 sources, 81 headers) in 3.70 sec: 5,984 declarations; 11,206 references; 5 unresolved inclusions; 364 syntax errors; 36 unresolved names (0.21%)
+!SESSION 2012-11-07 15:36:07.117 -----------------------------------------------
+eclipse.buildId=I20070613-1755
+java.version=1.6.0_15
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86
+
+!ENTRY org.eclipse.osgi 2 1 2012-11-07 15:36:35.148
+!MESSAGE NLS unused message: // in: org.eclipse.rse.internal.core.messages

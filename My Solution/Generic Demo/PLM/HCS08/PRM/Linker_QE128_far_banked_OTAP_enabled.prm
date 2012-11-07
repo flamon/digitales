@@ -1,0 +1,134 @@
+/******************************************************************************
+* This file contains some basic linker parameters.
+*
+* The linker file matches the architecture of the Freescale MC9S08QE128
+* controller.
+*
+*
+* (c) Copyright 2010, Freescale, Inc. All rights reserved.
+*
+*
+* No part of this document must be reproduced in any form - including copied,
+* transcribed, printed or by any electronic means - without specific written
+* permission from Freescale Semiconductor.
+*
+******************************************************************************/
+
+NAMES
+// Do not remove this block/section.
+// Description: The NAMES block contains a list of binary files building the
+// application. This block is mandatory and can only be specified once in a
+// prm file.
+// Additional files may be specified by the option -Add. The object files
+// specified with the option -Add are linked before the files mentioned in
+// the NAMES block. With the option -Add, additional files can be added to a
+// project without modifying the link parameter file.
+// If all binary files should be specified by the command line option -add,
+// then an empty NAMES block (just NAMES END) must be present in the link
+// parameter file. Object files added with this option are linked before the
+// object files specified in the NAMES block.
+END
+// **************************************************************************
+
+// Memory map for MC9S08QE128. The entire CPU memory space is defined.
+
+// Options
+// READ_WRITE   is for normal variables
+// READ_ONLY    is for const variables and code
+// NO_INIT      is for uninitialized variables
+//
+// Note: "RES_" means that the system is not allowed to use the specified memory.
+SECTIONS 
+    // Port registers
+    // HW registers - This section contains often used port registers
+    DIRECT_PAGE_REGISTERS       = READ_WRITE 0x0000 TO 0x007F;  // RAM
+ 
+    // Fast RAM memory
+    ZERO_PAGE_RAM               = READ_WRITE 0x0080 TO 0x00FF;  // RAM
+
+    // Stack space
+    // Reserve space for the stack.
+    APP_STACK_RAM               = READ_WRITE 0x0100 TO 0x02FF;  // RAM
+ 
+    // General use RAM. .
+    // All of RAM that isn't reserved for something else.
+    APP_RAM_1                   = READ_WRITE 0x0300 TO 0x17FF;  // RAM
+
+    //High page registers
+    HIGH_PAGE_REGISTERS         = READ_WRITE 0x1800 TO 0x187F;  // HW registers	
+
+    // General use RAM. .
+    // All of RAM that isn't reserved for something else.
+    APP_RAM_2                   = READ_WRITE 0x1880 TO 0x1F7F;  // RAM
+    
+    // Un-initialized data used by te application
+    // WARNING: The size of this section must be manually coordinated
+    // with the size of the data structure(s) it contains.
+    // Reserve 64 bytes.
+    UNINITIALIZED_RAM           = NO_INIT    0x1F80 TO 0x1FBF;  // RAM
+    
+    //Flash-Ram memory used by the Flash driver
+    FLASH_TO_RAM_RAM            = NO_INIT    0x1FC0 TO 0x207F;  // RAM
+
+	
+    //OTAP firmware loadrer component Flash
+    OFLC_FLASH                  = READ_ONLY 0x2080 TO 0x287F FILL 0xFF;   // Flash
+    
+    // SMAC/App. startup structure flash memory. 48 bytes.
+    APP_STARTUP_STRUC_FLASH     = READ_ONLY 0x2880 TO 0x28AF FILL 0xFF;   // Flash
+
+    // General use code space.
+    APP_STARTUP_SEGMENT         = READ_ONLY 0x28B0 TO 0x293F FILL 0xFF;
+    APP_CODE_0                  = READ_ONLY 0x2940 TO 0x3FFF FILL 0xFF;   // Flash
+    APP_CODE_1                  = READ_ONLY 0x4000 TO 0x7FFF FILL 0xFF;   // Flash
+    
+    //Flash-Ram memory used by the Flash driver
+    FLASH_TO_RAM                = READ_ONLY 0xC000 TO 0xC0BF  RELOCATE_TO 0x1FC0;   // Cmd_Handler function uses 0xBF code size
+
+    // General use code space.
+    APP_CODE_2                  = READ_ONLY 0xC0C0 TO 0xFFBF;   // Flash
+   
+    RES_NV_REGISTERS_FLASH      = READ_ONLY 0xFFB0 TO 0xFFBF;   // Non-volatile registers
+    RES_IRQ_VECTORS_TABLE_FLASH = READ_ONLY 0xFFC0 TO 0xFFFD;   // ISR vectors
+
+    // Note! SMAC/App. does not have its own reset vector.
+    RES_RESET_VECTOR_FLASH      = READ_ONLY 0xFFFE TO 0xFFFF;   // System reset vector
+        /* banked FLASH ROM */
+    NOT_USED_PPAGE_0            = READ_ONLY 0x008000 TO 0x00A07F FILL 0xFF;   
+    PPAGE_2                     = READ_ONLY 0x028000 TO 0x02BFFF; 
+    PPAGE_4                     = READ_ONLY 0x048000 TO 0x04BFFF; 
+    PPAGE_5                     = READ_ONLY 0x058000 TO 0x05BFFF; 
+    PPAGE_6                     = READ_ONLY 0x068000 TO 0x06BFFF; 
+    PPAGE_7                     = READ_ONLY 0x078000 TO 0x07BFFF; 
+END
+
+PLACEMENT  
+    MY_ZEROPAGE                 INTO ZERO_PAGE_RAM;
+    DEFAULT_RAM                 INTO APP_RAM_1, APP_RAM_2;
+    NOT_INIT_RAM                INTO UNINITIALIZED_RAM;
+    FLASH_ROUTINES_RAM          INTO FLASH_TO_RAM_RAM;
+    NON_BANKED                  INTO APP_CODE_0, APP_CODE_1, APP_CODE_2; 
+    COPY                        INTO APP_CODE_0, APP_CODE_1, APP_CODE_2;  
+    ROM_VAR, STRINGS            INTO APP_CODE_0, APP_CODE_1, APP_CODE_2; 
+    DEFAULT_ROM                 INTO APP_CODE_0, APP_CODE_1, APP_CODE_2, PPAGE_2,PPAGE_4,PPAGE_5,PPAGE_6,PPAGE_7;
+    .startData                  INTO APP_STARTUP_STRUC_FLASH;
+    
+    NV_REGISTERS_SECTION        INTO RES_NV_REGISTERS_FLASH;
+    SSTACK                      INTO APP_STACK_RAM;
+    IRQ_VECTOR_SECTION          INTO RES_IRQ_VECTORS_TABLE_FLASH;
+    /* routines which can be banked */    
+
+    OFLC_ROUTINES               INTO OFLC_FLASH; 
+    PAGED_ROM                   INTO PPAGE_2,PPAGE_4,PPAGE_5,PPAGE_6,PPAGE_7;
+    FLASH_ROUTINES              INTO FLASH_TO_RAM;
+    FLASH4OTAP_ROUTINES         INTO OFLC_FLASH;
+END
+
+// **************************************************************************
+
+VECTOR 0 _Startup /* reset vector: default entry point for a C/C++ application. */
+//VECTOR 0 Entry  /* reset vector: default entry point for a Assembly application. */
+//INIT Entry      /* for assembly applications: that this is as well the initialization entry point */
+
+
+

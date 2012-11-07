@@ -1,0 +1,1307 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<sln:solution displayName="My Solution" codebaseVersion="V01.00" xmlns:temp="http://freescale.com/ns/beekit/componentTemplate" xmlns:sln="http://freescale.com/ns/beekit/solution" xmlns="http://freescale.com/ns/beekit/solution" xmlns:plm="http://freescale.com/ns/beekit/smac/plm" xmlns:smac="http://freescale.com/ns/beekit/smac/smac" xmlns:generic="http://freescale.com/ns/beekit/smac/smacapps/generic">
+  <sln:description></sln:description>
+  <sln:projects>
+    <sln:project displayName="Generic Demo" wizard="SMACWizardV01">
+      <sln:description>
+        The Generic Demo gives a solution to start a new SMAC project in blank with the most common initialization.
+      </sln:description>
+      <sln:components>
+        <plm:component displayName="Platform" version="V01.00" maxUsage="1" xmlns:plm="http://freescale.com/ns/beekit/smac/plm" xmlns:ct="http://freescale.com/ns/beekit/commonTypes" xmlns:temp="http://freescale.com/ns/beekit/componentTemplate" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://freescale.com/ns/beekit/smac/plm Component.xsd">
+          <temp:description>The SMAC software packet is intended to work on current and future hardware and MCU platforms. This is made possible by isolating application software and SMAC as much as possible from the hardware. Instead of using macros and defines all around in the code, call hardware dependant functions in the Platform software (PLM).</temp:description>
+          <temp:files>
+            <temp:file version="1.0" source=".\Generic\Interface\board_config.h" destination=".\PLM\Generic\Interface\board_config.h">
+              <plm:properties>
+                <plm:Target displayName="Target hardware">
+                  <temp:description>Select HCS08 target hardware</temp:description>
+                  <temp:regExLib param1="gTargetBoard_c" name="define" />
+                  <plm:value>MC1320x_S08QE128_EVB</plm:value>
+                </plm:Target>
+                <plm:gUseQE128_d displayName="Target based on QE128 MCU" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Type of the transceiver: MC1320x.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gUseQE128_d" />
+                  <plm:value>false</plm:value>
+                </plm:gUseQE128_d>
+                <plm:gUseMC1323x_d displayName="Target based on MC1323x MCU" editor="BeeKitPlatformEditorV01">
+                  <temp:description>
+                    Type of the transceiver: MC1323x.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gUseMC1323x_d" />
+                  <plm:value>false</plm:value>
+                </plm:gUseMC1323x_d>
+                <plm:gUserTransceiverType_d displayName="User defined transceiver type" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Type of transceiver: MC1319x, MC1320x or MC1321x.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                    <br />
+                    If the transceiver type is set to MC1321x, and target is set to "User defined target configuration", then the following default settings must be used:
+                    <br />
+                    - ATTN Port = Port D,  <br />
+                    - ATTN mask = Pin 0,  <br />
+                    - Rx/Tx_EN Port = Port D,  <br />
+                    - Rx/Tx_EN mask = Pin 1,   <br />
+                    - Transceiver Reset Port = Port D,  <br />
+                    - Transceiver Reset mask = Pin 3,  <br />
+                    - GPIO1/OUT_OF_IDLE Port = Port E,  <br />
+                    - GPIO1/OUT_OF_IDLE mask = Pin 7,   <br />
+                    - GPIO2/CRC_VALID Port = Port E,  <br />
+                    - GPIO2/CRC_VALID mask = Pin 1.     <br /><br /></temp:description>
+                  <temp:regExLib name="define" param1="gUserTransceiverType_d" />
+                  <plm:value>MC1321x</plm:value>
+                </plm:gUserTransceiverType_d>
+              </plm:properties>
+              <temp:actions>
+                <temp:insertTransformationOutput stylesheet="./TargetBoard.xslt">
+                  <temp:regExLib name="beginEndSection" param1="Target Board Definition" />
+                </temp:insertTransformationOutput>
+              </temp:actions>
+            </temp:file>
+            <temp:file version="1.0" source=".\Generic\Interface\PLM_config.h" destination=".\PLM\Generic\Interface\PLM_config.h">
+              <plm:properties>
+                <plm:LEDSupported displayName="Led module enabled">
+                  <temp:description>
+                    This parameter defines if the LED support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gLEDSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:LEDSupported>
+                <plm:KeyboardSupported displayName="Keyboard module enabled">
+                  <temp:description>
+                    This parameter defines if the Keyboard support is enable or disabled.<br />
+                    Note: Only available for MC1323xRCM and MC1323xREM
+                  </temp:description>
+                  <temp:regExLib param1="gKeyboardSupported_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:KeyboardSupported>
+                <plm:BuzzerSupported displayName="Buzzer module enabled">
+                  <temp:description>
+                    This parameter defines if the Buzzer support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gBuzzerSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:BuzzerSupported>
+                <plm:LPMSupported displayName="Low power mode enabled">
+                  <temp:description>
+                    This parameter defines if the Low Power Modes support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gLPMSupported_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:LPMSupported>
+                <plm:AsmSupported displayName="ASM module enabled">
+                  <temp:description>
+                    This parameter defines if the ASM driver support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gAsmSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:AsmSupported>
+                <plm:AdcSupported displayName="ADC module enabled">
+                  <temp:description>
+                    This parameter defines if the ADCsupport is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gAdcSupported_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:AdcSupported>
+                <plm:CmtSupported displayName="CMT module enabled">
+                  <temp:description>
+                    This parameter defines if the CMT support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gCmtSupported_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:CmtSupported>
+                <plm:KbiSupported displayName="KBI module enabled">
+                  <temp:description>
+                    This parameter defines if the KBI support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gKbiSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:KbiSupported>
+                <plm:FlashSupported displayName="Flash module enabled">
+                  <temp:description>
+                    This parameter defines if the Flash memory driver support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gFlashSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:FlashSupported>
+                <plm:EepromSupported displayName="EEPROM module enabled">
+                  <temp:description>
+                    This parameter defines if the external EEPROM driver support is enable or disabled.<br />
+                    Note: Only MC1320xQE128EVB and MC1323xMRB provide external EEPROM.
+                  </temp:description>
+                  <temp:regExLib param1="gEepromSupported_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:EepromSupported>
+                <plm:AccelerometerSupported displayName="Accelerometer module enabled">
+                  <temp:description>
+                    This parameter defines if the Accelerometer driver support is enable or disabled.<br />
+                    Note: Only MC1321xSRB and MC1323xRCM provide an accelerometer.
+                  </temp:description>
+                  <temp:regExLib param1="gAccelerometerSupported_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:AccelerometerSupported>
+                <plm:IicSupported displayName="IIC module enabled">
+                  <temp:description>
+                    This parameter defines if the IIC driver support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gIicSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:IicSupported>
+                <plm:SpiSupported displayName="SPI module enabled">
+                  <temp:description>
+                    This parameter defines if the SPI driver support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gSpiSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:SpiSupported>
+                <plm:UartSupported displayName="UART module enabled">
+                  <temp:description>
+                    This parameter defines if the UART support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gUartSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:UartSupported>
+                <plm:RtiSupported displayName="RTI module enabled">
+                  <temp:description>
+                    This parameter defines if the RTI support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gRtiSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:RtiSupported>
+                <plm:TimerSupported displayName="Timer module enabled">
+                  <temp:description>
+                    This parameter defines if the Timer support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gTimerSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:TimerSupported>
+                <plm:LvdSupported displayName="LVD module enabled">
+                  <temp:description>
+                    This parameter defines if the Low Voltage Detect support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gLvdSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:LvdSupported>
+                <plm:LcdSupported displayName="Display module enabled">
+                  <temp:description>
+                    This parameter defines if the LCD support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gLcdSupported_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:LcdSupported>
+                <plm:TouchpadSupported displayName="Touchpad module enabled">
+                  <temp:description>
+                    This parameter defines if the Touchpad support is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gTouchpadSupported_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:TouchpadSupported>
+              </plm:properties>
+              <temp:actions>
+                <temp:insertTransformationOutput stylesheet="./ModulesSupportIndex.xslt">
+                  <temp:regExLib name="beginEndSection" param1="Modules Support Definition" />
+                </temp:insertTransformationOutput>
+              </temp:actions>
+            </temp:file>
+            <temp:file version="1.0" source=".\HCS08\Source\GPIO\GPIO.c" destination=".\PLM\HCS08\Source\GPIO\GPIO.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\GPIO\GPIO.h" destination=".\PLM\HCS08\Source\GPIO\GPIO.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\GPIO_interface.h" destination=".\PLM\HCS08\Interface\GPIO_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Accelerometer\Accelerometer.c" destination=".\PLM\HCS08\Source\Accelerometer\Accelerometer.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\Accelerometer\Accelerometer.h" destination=".\PLM\HCS08\Source\Accelerometer\Accelerometer.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\Accelerometer_Interface.h" destination=".\PLM\HCS08\Interface\Accelerometer_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\ADC\ADC.c" destination=".\PLM\HCS08\Source\ADC\ADC.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\ADC\ADC.h" destination=".\PLM\HCS08\Source\ADC\ADC.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\ADC_Interface.h" destination=".\PLM\HCS08\Interface\ADC_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\ASM\ASM.c" destination=".\PLM\HCS08\Source\ASM\ASM.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\ASM\ASM.h" destination=".\PLM\HCS08\Source\ASM\ASM.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\ASM_Interface.h" destination=".\PLM\HCS08\Interface\ASM_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Buzzer\Buzzer.c" destination=".\PLM\HCS08\Source\Buzzer\Buzzer.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\Buzzer\Buzzer.h" destination=".\PLM\HCS08\Source\Buzzer\Buzzer.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\Buzzer_Interface.h" destination=".\PLM\HCS08\Interface\Buzzer_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\CMT\Cmt.c" destination=".\PLM\HCS08\Source\CMT\Cmt.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\CMT\Cmt.h" destination=".\PLM\HCS08\Source\CMT\Cmt.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\Cmt_Interface.h" destination=".\PLM\HCS08\Interface\Cmt_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\EEPROM\Eeprom.c" destination=".\PLM\HCS08\Source\EEPROM\Eeprom.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\EEPROM\Eeprom.h" destination=".\PLM\HCS08\Source\EEPROM\Eeprom.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\Eeprom_Interface.h" destination=".\PLM\HCS08\Interface\Eeprom_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\EEPROM\Eeprom4OTAP\Eeprom4OTAP.c" destination=".\PLM\HCS08\Source\EEPROM\Eeprom4OTAP\Eeprom4OTAP.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\EEPROM\Eeprom4OTAP\Eeprom4OTAP.h" destination=".\PLM\HCS08\Source\EEPROM\Eeprom4OTAP\Eeprom4OTAP.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\EEPROM\Eeprom4OTAP\Eeprom4OTAP_Interface.h" destination=".\PLM\HCS08\Source\EEPROM\Eeprom4OTAP\Eeprom4OTAP_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Flash\Flash.c" destination=".\PLM\HCS08\Source\Flash\Flash.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\Flash\Flash.h" destination=".\PLM\HCS08\Source\Flash\Flash.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\Flash_Interface.h" destination=".\PLM\HCS08\Interface\Flash_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Flash\Flash4Otap\Flash4Otap.c" destination=".\PLM\HCS08\Source\Flash\Flash4Otap\Flash4Otap.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\Flash\Flash4Otap\Flash4Otap.h" destination=".\PLM\HCS08\Source\Flash\Flash4Otap\Flash4Otap.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Flash\Flash4Otap\Flash4Otap_Interface.h" destination=".\PLM\HCS08\Source\Flash\Flash4Otap\Flash4Otap_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\IIC\IIC.c" destination=".\PLM\HCS08\Source\IIC\IIC.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\IIC\IIC.h" destination=".\PLM\HCS08\Source\IIC\IIC.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\IIC_Interface.h" destination=".\PLM\HCS08\Interface\IIC_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\KBI\KBI.c" destination=".\PLM\HCS08\Source\KBI\KBI.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\KBI\KBI.h" destination=".\PLM\HCS08\Source\KBI\KBI.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\KBI_Interface.h" destination=".\PLM\HCS08\Interface\KBI_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Keyboard\Keyboard.c" destination=".\PLM\HCS08\Source\Keyboard\Keyboard.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\Keyboard\Keyboard.h" destination=".\PLM\HCS08\Source\Keyboard\Keyboard.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\Keyboard_Interface.h" destination=".\PLM\HCS08\Interface\Keyboard_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\LCD\LCD.c" destination=".\PLM\HCS08\Source\LCD\LCD.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\LCD\LCD.h" destination=".\PLM\HCS08\Source\LCD\LCD.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\LCD_Interface.h" destination=".\PLM\HCS08\Interface\LCD_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\LED\LED.c" destination=".\PLM\HCS08\Source\LED\LED.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\LED\LED.h" destination=".\PLM\HCS08\Source\LED\LED.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\LED_Interface.h" destination=".\PLM\HCS08\Interface\LED_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\LPM\LPM.c" destination=".\PLM\HCS08\Source\LPM\LPM.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\LPM\LPM.h" destination=".\PLM\HCS08\Source\LPM\LPM.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\LPM_Interface.h" destination=".\PLM\HCS08\Interface\LPM_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\LVD\LVD.c" destination=".\PLM\HCS08\Source\LVD\LVD.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\LVD\LVD.h" destination=".\PLM\HCS08\Source\LVD\LVD.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\LVD_interface.h" destination=".\PLM\HCS08\Interface\LVD_interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\RTI\RTI.c" destination=".\PLM\HCS08\Source\RTI\RTI.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\RTI\RTI.h" destination=".\PLM\HCS08\Source\RTI\RTI.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\RTI_Interface.h" destination=".\PLM\HCS08\Interface\RTI_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\TouchPad\TouchPad.c" destination=".\PLM\HCS08\Source\TouchPad\TouchPad.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\TouchPad\TouchPad.h" destination=".\PLM\HCS08\Source\TouchPad\TouchPad.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\TouchPad_Interface.h" destination=".\PLM\HCS08\Interface\TouchPad_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1323x\PhyPacketProcessor.c" destination=".\PLM\HCS08\Source\Radio\PhyMC1323x\PhyPacketProcessor.c" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x')) " />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1323x\PhyPacketProcessor.h" destination=".\PLM\HCS08\Source\Radio\PhyMC1323x\PhyPacketProcessor.h" includeCondition="false" />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1323x\PhyISR.c" destination=".\PLM\HCS08\Source\Radio\PhyMC1323x\PhyISR.c" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x'))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1323x\PhyPlmeData.c" destination=".\PLM\HCS08\Source\Radio\PhyMC1323x\PhyPlmeData.c" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x'))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1323x\PhyTime.c" destination=".\PLM\HCS08\Source\Radio\PhyMC1323x\PhyTime.c" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x')) " />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1323x\PhyMC1323X.h" destination=".\PLM\HCS08\Source\Radio\PhyMC1323x\PhyMC1323X.h" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x')) " />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1323x\PhyDebugMC1323X.h" destination=".\PLM\HCS08\Source\Radio\PhyMC1323x\PhyDebugMC1323X.h" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x')) " />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1323x\IrqControlLib.h" destination=".\PLM\HCS08\Source\Radio\PhyMC1323x\IrqControlLib.h" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x')) " />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\SimplePhy.h" destination=".\PLM\HCS08\Source\Radio\SimplePhy.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1320x\PhyMC1320X.c" destination=".\PLM\HCS08\Source\Radio\PhyMC1320x\PhyMC1320X.c" includeCondition="(//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB') or (//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') or ((//plm:Target/plm:value = 'USER_DEFINED') and ((//plm:gUserTransceiverType_d/plm:value = 'MC1320x') or (//plm:gUserTransceiverType_d/plm:value = 'MC1321x')))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1320x\PhyMC1320X.h" destination=".\PLM\HCS08\Source\Radio\PhyMC1320x\PhyMC1320X.h" includeCondition="(//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB') or (//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') or ((//plm:Target/plm:value = 'USER_DEFINED') and ((//plm:gUserTransceiverType_d/plm:value = 'MC1320x') or (//plm:gUserTransceiverType_d/plm:value = 'MC1321x')))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1320x\PhyMC1320X_Interface.h" destination=".\PLM\HCS08\Source\Radio\PhyMC1320x\PhyMC1320X_Interface.h" includeCondition="(//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB') or (//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') or ((//plm:Target/plm:value = 'USER_DEFINED') and ((//plm:gUserTransceiverType_d/plm:value = 'MC1320x') or (//plm:gUserTransceiverType_d/plm:value = 'MC1321x')))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1320x\MC1320xDriver\Radio.c" destination=".\PLM\HCS08\Source\Radio\PhyMC1320x\MC1320xDriver\Radio.c" includeCondition="(//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB') or (//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') or ( (//plm:Target/plm:value = 'USER_DEFINED') and ((//plm:gUserTransceiverType_d/plm:value = 'MC1320x') or (//plm:gUserTransceiverType_d/plm:value = 'MC1321x') )) " />
+            <temp:file version="1.0" source=".\HCS08\Source\Radio\PhyMC1320x\MC1320xDriver\Radio.h" destination=".\PLM\HCS08\Source\Radio\PhyMC1320x\MC1320xDriver\Radio.h" includeCondition="(//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB') or (//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') or ( (//plm:Target/plm:value = 'USER_DEFINED') and ((//plm:gUserTransceiverType_d/plm:value = 'MC1320x') or (//plm:gUserTransceiverType_d/plm:value = 'MC1321x') )) " />
+            <temp:file version="1.0" source=".\HCS08\Interface\Radio_Interface.h" destination=".\PLM\HCS08\Interface\Radio_Interface.h" includeCondition="(//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB') or (//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') or ((//plm:Target/plm:value = 'USER_DEFINED') and ((//plm:gUserTransceiverType_d/plm:value = 'MC1320x') or (//plm:gUserTransceiverType_d/plm:value = 'MC1321x')))" />
+            <temp:file version="1.0" source=".\HCS08\Interface\Phy.h" destination=".\PLM\HCS08\Interface\Phy.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\SCI\UART.c" destination=".\PLM\HCS08\Source\SCI\UART.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\SCI\UART.h" destination=".\PLM\HCS08\Source\SCI\UART.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\UART_Interface.h" destination=".\PLM\HCS08\Interface\UART_Interface.h">
+              <plm:properties>
+                <plm:gUARTBaudRate_c displayName="Uart Baud Rate">
+                  <temp:description>Baud rate for the Uart module </temp:description>
+                  <temp:regExLib param1="gUartDefaultBaud_c" name="define" />
+                  <plm:value>Baudrate_38400</plm:value>
+                </plm:gUARTBaudRate_c>
+                <plm:gUart1_Enabled_d displayName="Enable UART1">
+                  <temp:description>Enabled the Uart1 Port</temp:description>
+                  <temp:regExLib param1="gUart1_Enabled_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:gUart1_Enabled_d>
+                <plm:gUart2_Enabled_d displayName="Enable UART2">
+                  <temp:description>Enabled the Uart2 Port</temp:description>
+                  <temp:regExLib param1="gUart2_Enabled_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:gUart2_Enabled_d>
+                <plm:gUart1_EnableHWFlowControl_d displayName="Uart1 Hardware Flow Control Enabled">
+                  <temp:description>Enable Hardware Flow Control on Uart1 </temp:description>
+                  <temp:regExLib param1="gUart1_EnableHWFlowControl_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:gUart1_EnableHWFlowControl_d>
+                <plm:gUart2_EnableHWFlowControl_d displayName="Uart2 Hardware Flow Control Enabled">
+                  <temp:description>Enable Hardware Flow Control on Uart2</temp:description>
+                  <temp:regExLib param1="gUart2_EnableHWFlowControl_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:gUart2_EnableHWFlowControl_d>
+              </plm:properties>
+            </temp:file>
+            <temp:file version="1.0" source=".\HCS08\Source\SPI\SPI.c" destination=".\PLM\HCS08\Source\SPI\SPI.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\SPI\SPI.h" destination=".\PLM\HCS08\Source\SPI\SPI.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\SPI_Interface.h" destination=".\PLM\HCS08\Interface\SPI_Interface.h">
+              <plm:properties>
+                <plm:gSpiUsePort1_d displayName="Spi Port1">
+                  <temp:description>
+                    This parameter defines if the SPI Port 1 is enable or disabled.<br /></temp:description>
+                  <temp:regExLib param1="gSpiUsePort1_d" name="define" />
+                  <plm:value>true</plm:value>
+                </plm:gSpiUsePort1_d>
+                <plm:gSpiUsePort2_d displayName="Spi Port2">
+                  <temp:description>
+                    This parameter defines if the SPI Port 2 is enable or disabled.<br />
+                    Note: Only available for MC1320x-QE platform.
+                  </temp:description>
+                  <temp:regExLib param1="gSpiUsePort2_d" name="define" />
+                  <plm:value>false</plm:value>
+                </plm:gSpiUsePort2_d>
+              </plm:properties>
+              <temp:actions>
+                <temp:insertTransformationOutput stylesheet="./SPIPortIndex.xslt">
+                  <temp:regExLib name="beginEndSection" param1="SPI Ports Definition" />
+                </temp:insertTransformationOutput>
+              </temp:actions>
+            </temp:file>
+            <temp:file version="1.0" source=".\HCS08\Source\TPM\Timer.c" destination=".\PLM\HCS08\Source\TPM\Timer.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\TPM\Timer.h" destination=".\PLM\HCS08\Source\TPM\Timer.h" />
+            <temp:file version="1.0" source=".\HCS08\Interface\Timer_Interface.h" destination=".\PLM\HCS08\Interface\Timer_Interface.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\IRQ\IRQ.c" destination=".\PLM\HCS08\Source\IRQ\IRQ.c" />
+            <temp:file version="1.0" source=".\HCS08\Interface\IRQ_Interface.h" destination=".\PLM\HCS08\Interface\IRQ_Interface.h" />
+            <temp:file version="1.0" source=".\Generic\Interface\PortConfig.h" destination=".\PLM\Generic\Interface\PortConfig.h">
+              <temp:description />
+              <plm:properties>
+                <plm:UseExternalAntennaSwitch displayName="User defined internal or external Antenna switch configuration" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Select whether an external antenna switch should be used.<br />
+                    Note: is only applicable for MC1321x and MC1320x.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gUseExternalAntennaSwitch_c" />
+                  <plm:value>true</plm:value>
+                </plm:UseExternalAntennaSwitch>
+                <plm:LED_PORT displayName="LED Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the LEDs.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="LED_PORT" />
+                  <plm:value>PTDD</plm:value>
+                </plm:LED_PORT>
+                <plm:LED1_PIN displayName="LED 1 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls LED 1 of the LED Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="LED1_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>16</plm:value>
+                </plm:LED1_PIN>
+                <plm:LED2_PIN displayName="LED 2 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls LED 2 of the LED Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="LED2_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>32</plm:value>
+                </plm:LED2_PIN>
+                <plm:LED3_PIN displayName="LED 3 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls LED 3 of the LED Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="LED3_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>64</plm:value>
+                </plm:LED3_PIN>
+                <plm:LED4_PIN displayName="LED 4 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls LED 4 of the LED Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="LED4_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>128</plm:value>
+                </plm:LED4_PIN>
+                <plm:LED5_PORT displayName="LED 5 Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls LED 5.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br />
+                    If the user defined target configuration has only 4 LEDs the value of this property will not be used.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="LED5_PORT" />
+                  <plm:value>PTCD</plm:value>
+                </plm:LED5_PORT>
+                <plm:LED5_PIN displayName="LED 5 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls LED 5 of the LED 5 Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br />
+                    If the user defined target configuration has only 4 LEDs the value of this property must be set to 0.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="LED5_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>16</plm:value>
+                </plm:LED5_PIN>
+                <plm:PORT_PINS displayName="Debug Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the debug pins.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="PORT_PINS" />
+                  <plm:value>PTAD</plm:value>
+                </plm:PORT_PINS>
+                <plm:PORT1_PIN displayName="First debug pin mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the first debug pin of the Debug Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="PORT1_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>1</plm:value>
+                </plm:PORT1_PIN>
+                <plm:PORT2_PIN displayName="Second debug pin mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the second debug pin of the Debug Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="PORT2_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>2</plm:value>
+                </plm:PORT2_PIN>
+                <plm:PORT3_PIN displayName="Third debug pin mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the third debug pin of the Debug Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="PORT3_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>4</plm:value>
+                </plm:PORT3_PIN>
+                <plm:PORT4_PIN displayName="Fourth debug pin mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the fourth debug pin of the Debug Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="PORT4_PIN" />
+                  <temp:format base="hex" />
+                  <plm:value>8</plm:value>
+                </plm:PORT4_PIN>
+                <plm:SWITCH_PORT displayName="Switch Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the switches.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="SWITCH_PORT" />
+                  <plm:value>PTAD</plm:value>
+                </plm:SWITCH_PORT>
+                <plm:mSWITCH1_MASK displayName="Switch 1 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls SW1 of the Switch Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br />
+                    Note: On the S08QE128-EVB board, Switch 1 is the first push-button labeled SW2.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="mSWITCH1_MASK" />
+                  <temp:format base="hex" />
+                  <plm:value>4</plm:value>
+                </plm:mSWITCH1_MASK>
+                <plm:mSWITCH2_MASK displayName="Switch 2 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls SW2 of the Switch Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br />
+                    Note: On the S08QE128-EVB board, Switch 2 is the second push-button labeled SW3.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="mSWITCH2_MASK" />
+                  <temp:format base="hex" />
+                  <plm:value>8</plm:value>
+                </plm:mSWITCH2_MASK>
+                <plm:mSWITCH3_MASK displayName="Switch 3 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls SW3 of the Switch Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                    Note: On the S08QE128-EVB board, Switch 3 is the third push-button labeled SW4.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="mSWITCH3_MASK" />
+                  <temp:format base="hex" />
+                  <plm:value>16</plm:value>
+                </plm:mSWITCH3_MASK>
+                <plm:mSWITCH4_MASK displayName="Switch 4 mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls SW2 of the Switch Port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                    Note: On the S08QE128-EVB board, Switch 4 is the last push-button labeled SW5.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="mSWITCH4_MASK" />
+                  <temp:format base="hex" />
+                  <plm:value>32</plm:value>
+                </plm:mSWITCH4_MASK>
+                <plm:gAttnPort_c displayName="ATTN Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the ATTN signal to the radio.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gAttnPort_c" />
+                  <plm:value>PTDD</plm:value>
+                </plm:gAttnPort_c>
+                <plm:gAttnPinMask_c displayName="ATTN mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls ATTN of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gAttnPinMask_c" />
+                  <temp:format base="hex" />
+                  <plm:value>1</plm:value>
+                </plm:gAttnPinMask_c>
+                <plm:gRxTxEnablePort_c displayName="Rx/Tx_EN Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the Rx and Tx signal to the radio.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gRxTxEnablePort_c" />
+                  <plm:value>PTDD</plm:value>
+                </plm:gRxTxEnablePort_c>
+                <plm:gRxTxEnablePinMask_c displayName="Rx/Tx_EN mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the pin that controls Rx/Tx signal of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gRxTxEnablePinMask_c" />
+                  <temp:format base="hex" />
+                  <plm:value>2</plm:value>
+                </plm:gRxTxEnablePinMask_c>
+                <plm:gResetRadioPort_c displayName="Transceiver Reset Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the Reset signal to the radio.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gResetRadioPort_c" />
+                  <plm:value>PTDD</plm:value>
+                </plm:gResetRadioPort_c>
+                <plm:gResetRadioPinMask_c displayName="Transceiver Reset mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the Reset pin of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gResetRadioPinMask_c" />
+                  <temp:format base="hex" />
+                  <plm:value>8</plm:value>
+                </plm:gResetRadioPinMask_c>
+                <plm:gAntSwPort displayName="Antenna Switch Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the Antenna Switch.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property will only have effect on the MC1319x transceiver.<br />
+                    If the transceiver type is MC1321x the value of this property will not be used.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gAntSwPort" />
+                  <plm:value>PTBD</plm:value>
+                </plm:gAntSwPort>
+                <plm:gAntSwMask_c displayName="Antenna Switch mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the Antenna Switch pin of the port.<br />
+                    This property will only have effect on the MC1319x transceiver.<br />
+                    If the transceiver type is MC1321x the value of this property must be set to 0.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gAntSwMask_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gAntSwMask_c>
+                <plm:EnableLNA displayName="Enable Low Noise Amplifier Macro" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This property is a C macro editable by the user. The value of the property should contain the macro definition code for enabling the Low Noise Amplifier.<br /><b>The C code entered here must be syntactically correct. For instance the last statement of the C macro must end with a semicolon. </b></temp:description>
+                  <temp:regExLib name="spaceDefine" param1="EnableLNA" />
+                  <temp:format base="hex" />
+                  <plm:value>NotDefined</plm:value>
+                </plm:EnableLNA>
+                <plm:EnablePA displayName="Enable Power Amplifier Macro" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This property is a C macro editable by the user. The value of the property should contain the macro definition code for enabling the Power Amplifier.<br /><b>The C code entered here must be syntactically correct. For instance the last statement of the C macro must end with a semicolon. </b></temp:description>
+                  <temp:regExLib name="spaceDefine" param1="EnablePA" />
+                  <temp:format base="hex" />
+                  <plm:value>NotDefined</plm:value>
+                </plm:EnablePA>
+                <plm:DisableLNA displayName="Disable Low Noise Amplifier Macro" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This property is a C macro editable by the user. The value of the property should contain the macro definition code for disabling the Low Noise Amplifier.<br /><b>The C code entered here must be syntactically correct. For instance the last statement of the C macro must end with a semicolon. </b></temp:description>
+                  <temp:regExLib name="spaceDefine" param1="DisableLNA" />
+                  <temp:format base="hex" />
+                  <plm:value>NotDefined</plm:value>
+                </plm:DisableLNA>
+                <plm:DisablePA displayName="Disable Power Amplifier Macro" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This property is a C macro editable by the user. The value of the property should contain the macro definition code for disabling the Power Amplifier.<br /><b>The C code entered here must be syntactically correct. For instance the last statement of the C macro must end with a semicolon. </b></temp:description>
+                  <temp:regExLib name="spaceDefine" param1="DisablePA" />
+                  <temp:format base="hex" />
+                  <plm:value>NotDefined</plm:value>
+                </plm:DisablePA>
+                <plm:gOutOfIdlePort_c displayName="GPIO1/OUT_OF_IDLE Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the GPIO 1.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gOutOfIdlePort_c" />
+                  <plm:value>PTED</plm:value>
+                </plm:gOutOfIdlePort_c>
+                <plm:gOutOfIdlePinMask_c displayName="GPIO1/OUT_OF_IDLE mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the GPIO1 pin of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gOutOfIdlePinMask_c" />
+                  <temp:format base="hex" />
+                  <plm:value>128</plm:value>
+                </plm:gOutOfIdlePinMask_c>
+                <plm:gCrcValidPort_c displayName="GPIO2/CRC_VALID Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the GPIO 2.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gCrcValidPort_c" />
+                  <plm:value>PTED</plm:value>
+                </plm:gCrcValidPort_c>
+                <plm:gCrcValidPinMask_c displayName="GPIO2/CRC_VALID mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the GPIO2 pin of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gCrcValidPinMask_c" />
+                  <temp:format base="hex" />
+                  <plm:value>64</plm:value>
+                </plm:gCrcValidPinMask_c>
+                <plm:gSCI1RTSPort_c displayName="SCI 1 RTS Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the SCI 1 RTS.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="gSCI1RTSPort_c" />
+                  <plm:value>PTAD</plm:value>
+                </plm:gSCI1RTSPort_c>
+                <plm:gSCI1RTSPin_c displayName="SCI 1 RTS mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the SCI 1 RTS pin of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="gSCI1RTSPin_c" />
+                  <temp:format base="hex" />
+                  <plm:value>2</plm:value>
+                </plm:gSCI1RTSPin_c>
+                <plm:gSCI1CTSPort_c displayName="SCI 1 CTS Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the SCI 1 CTS.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="gSCI1CTSPort_c" />
+                  <plm:value>PTAD</plm:value>
+                </plm:gSCI1CTSPort_c>
+                <plm:gSCI1CTSPin_c displayName="SCI 1 CTS mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the SCI 1 CTS pin of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="gSCI1CTSPin_c" />
+                  <temp:format base="hex" />
+                  <plm:value>1</plm:value>
+                </plm:gSCI1CTSPin_c>
+                <plm:gSCI2RTSPort_c displayName="SCI 2 RTS Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the SCI 2 RTS.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="gSCI2RTSPort_c" />
+                  <plm:value>PTAD</plm:value>
+                </plm:gSCI2RTSPort_c>
+                <plm:gSCI2RTSPin_c displayName="SCI 2 RTS mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the SCI 2 RTS pin of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="gSCI2RTSPin_c" />
+                  <temp:format base="hex" />
+                  <plm:value>64</plm:value>
+                </plm:gSCI2RTSPin_c>
+                <plm:gSCI2CTSPort_c displayName="SCI 2 CTS Port" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    The port that controls the SCI 2 CTS.<br />
+                    This property must be set to one of the following values: PTAD, PTBD, PTCD, PTDD, PTED, PTFD, PTGD or PTHD.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="gSCI2CTSPort_c" />
+                  <plm:value>PTAD</plm:value>
+                </plm:gSCI2CTSPort_c>
+                <plm:gSCI2CTSPin_c displayName="SCI 2 CTS mask" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    This mask must be set to 2<sup>PinNumber</sup>, where PinNumber is the number of the SCI 2 CTS pin of the port.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.<br /></temp:description>
+                  <temp:regExLib name="define" param1="gSCI2CTSPin_c" />
+                  <temp:format base="hex" />
+                  <plm:value>128</plm:value>
+                </plm:gSCI2CTSPin_c>
+                <plm:gPTADValue_c displayName="Port A register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port A data register (PTAD).<br />
+                    Writes  are latched into all bits of this register. For port A pins that are configured as outputs, the logic level is driven out the corresponding MCU pin.<br />
+                    Reset forces PTAD to all 0s, but these 0s are not driven out the corresponding pins because reset also configures all port pins as high-impedance inputs with pullups disabled.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTADValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTADValue_c>
+                <plm:gPTAPEValue_c displayName="Port A pull-up enable register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port A pull-up enable register (PTAPE).<br />
+                    For port A pins that are inputs, these read/write control bits determine whether internal pullup devices are enabled. <br />
+                    For port A pins that are configured as outputs, these bits are ignored and the internal pullup devices are disabled.<br /><blockquote>
+                      1 = Internal pullup device enabled for pin n.<br />
+                      0 =Internal pullup device disabled  for pin n.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTAPEValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>60</plm:value>
+                </plm:gPTAPEValue_c>
+                <plm:gPTADDValue_c displayName="Port A data direction register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port A data direction register (PTADD).<br />
+                    These read/write bits control the direction of port A pins and what is read for PTAD reads.<br /><blockquote>
+                      1 = Output driver enabled for port A bit n and PTAD reads return the contents of PTADn.<br />
+                      0 = Input (output driver disabled) and reads return the pin value.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTADDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>66</plm:value>
+                </plm:gPTADDValue_c>
+                <plm:gPTADSValue_c displayName="Port A drive strength register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Port A drive strength register(PTADH).<br />
+                    An output pin can be selected to have high output drive strength by setting the corresponding bit in the
+                    drive strength select register (PTADSn). When high drive is selected, a pin is capable of sourcing and
+                    sinking greater current. Even though every I/O pin can be selected as high drive, the user must ensure that
+                    the total current source and sink limits for the MCU are not exceeded. Drive strength selection is intended
+                    to affect the DC behavior of I/O pins. However, the AC behavior is also affected. High drive allows a pin
+                    to drive a greater load with the same switching speed as a low drive enabled pin into a smaller load.
+                    Because of this, the EMC emissions may be affected by enabling pins as high drive.<br /><br />
+                    Output Drive Strength Selection for Port A Bits - Each of these control bits selects between low and high
+                    output drive for the associated PTA pin. For port A pins that are configured as inputs, these bits have no effect.<br />
+                    0 Low output drive strength selected for port A bit n.<br />
+                    1 High output drive strength selected for port A bit<br /></temp:description>
+                  <temp:regExLib name="define" param1="gPTADSValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTADSValue_c>
+                <plm:gPTBDValue_c displayName="Port B register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port B data register (PTBD).<br />
+                    Writes  are latched into all bits of this register. For port B pins that are configured as outputs, the logic level is driven out the corresponding MCU pin.<br />
+                    Reset forces PTBD to all 0s, but these 0s are not driven out the corresponding pins because reset also configures all port pins as high-impedance inputs with pullups disabled.   <br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTBDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTBDValue_c>
+                <plm:gPTBPEValue_c displayName="Port B pull-up enable register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port B pull-up enable register (PTBPE).<br />
+                    For port B pins that are inputs, these read/write control bits determine whether internal pullup devices are enabled. <br />
+                    For port B pins that are configured as outputs, these bits are ignored and the internal pullup devices are disabled.<br /><blockquote>
+                      1 = Internal pullup device enabled for pin n.<br />
+                      0 =Internal pullup device disabled  for pin n.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTBPEValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTBPEValue_c>
+                <plm:gPTBDDValue_c displayName="Port B data direction register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port B data direction register (PTBDD).<br />
+                    These read/write bits control the direction of port B pins and what is read for PTBD reads.<br /><blockquote>
+                      1 = Output driver enabled for port B bit n and PTBD reads return the contents of PTBDn.<br />
+                      0 = Input (output driver disabled) and reads return the pin value.
+                    </blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTBDDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTBDDValue_c>
+                <plm:gPTBDSValue_c displayName="Port B drive strength register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Port B drive strength register(PTBDH).<br />
+                    An output pin can be selected to have high output drive strength by setting the corresponding bit in the
+                    drive strength select register (PTBDSn). When high drive is selected, a pin is capable of sourcing and
+                    sinking greater current. Even though every I/O pin can be selected as high drive, the user must ensure that
+                    the total current source and sink limits for the MCU are not exceeded. Drive strength selection is intended
+                    to affect the DC behavior of I/O pins. However, the AC behavior is also affected. High drive allows a pin
+                    to drive a greater load with the same switching speed as a low drive enabled pin into a smaller load.
+                    Because of this, the EMC emissions may be affected by enabling pins as high drive.<br /><br />
+                    Output Drive Strength Selection for Port B Bits - Each of these control bits selects between low and high
+                    output drive for the associated PTB pin. For port B pins that are configured as inputs, these bits have no effect.<br />
+                    0 Low output drive strength selected for port B bit n.<br />
+                    1 High output drive strength selected for port B bit<br /></temp:description>
+                  <temp:regExLib name="define" param1="gPTBDSValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTBDSValue_c>
+                <plm:gPTCDValue_c displayName="Port C register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port C data register (PTCD).<br />
+                    Writes are latched into all bits of this register. For port C pins that are configured as outputs, the logic level is driven out the corresponding MCU pin.<br />
+                    Reset forces PTCD to all 0s, but these 0s are not driven out the corresponding pins because reset also configures all port pins as high-impedance inputs with pullups disabled.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTCDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>16</plm:value>
+                </plm:gPTCDValue_c>
+                <plm:gPTCPEValue_c displayName="Port C pull-up enable register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port C pull-up enable register (PTCPE).<br />
+                    For port C pins that are inputs, these read/write control bits determine whether internal pullup devices are enabled.<br />
+                    For port C pins that are configured as outputs, these bits are ignored and the internal pullup devices are disabled.<br /><blockquote>
+                      1 = Internal pullup device enabled for pin n.<br />
+                      0 = Internal pullup device disabled for pin n.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTCPEValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTCPEValue_c>
+                <plm:gPTCDDValue_c displayName="Port C data direction register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port C data direction register (PTCDD).<br />
+                    These read/write bits control the direction of port C pins and what is read for PTCD reads.<br /><blockquote>
+                      1 = Output driver enabled for port C bit n and PTCD reads return the contents of PTCDn.<br />
+                      0 = Input (output driver disabled) and reads return the pin value.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTCDDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>16</plm:value>
+                </plm:gPTCDDValue_c>
+                <plm:gPTCDSValue_c displayName="Port C drive strength register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Port C drive strength register(PTCDH).<br />
+                    An output pin can be selected to have high output drive strength by setting the corresponding bit in the
+                    drive strength select register (PTCDSn). When high drive is selected, a pin is capable of sourcing and
+                    sinking greater current. Even though every I/O pin can be selected as high drive, the user must ensure that
+                    the total current source and sink limits for the MCU are not exceeded. Drive strength selection is intended
+                    to affect the DC behavior of I/O pins. However, the AC behavior is also affected. High drive allows a pin
+                    to drive a greater load with the same switching speed as a low drive enabled pin into a smaller load.
+                    Because of this, the EMC emissions may be affected by enabling pins as high drive.<br /><br />
+                    Output Drive Strength Selection for Port C Bits - Each of these control bits selects between low and high
+                    output drive for the associated PTC pin. For port C pins that are configured as inputs, these bits have no effect.<br />
+                    0 Low output drive strength selected for port C bit n.<br />
+                    1 High output drive strength selected for port C bit<br /></temp:description>
+                  <temp:regExLib name="define" param1="gPTCDSValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTCDSValue_c>
+                <plm:gPTDDValue_c displayName="Port D register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port D data register (PTDD).<br />
+                    Writes are latched into all bits of this register. For port D pins that are configured as outputs, the logic level is driven out the corresponding MCU pin.<br />
+                    Reset forces PTDD to all 0s, but these 0s are not driven out the corresponding pins because reset also configures all port pins as high-impedance inputs with pullups disabled.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTDDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>242</plm:value>
+                </plm:gPTDDValue_c>
+                <plm:gPTDPEValue_c displayName="Port D pull-up enable register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port D pull-up enable register (PTDPE).<br />
+                    For port D pins that are inputs, these read/write control bits determine whether internal pullup devices are enabled.<br />
+                    For port D pins that are configured as outputs, these bits are ignored and the internal pullup devices are disabled.<br /><blockquote>
+                      1 = Internal pullup device enabled for pin n.<br />
+                      0 = Internal pullup device disabled for pin n.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTDPEValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTDPEValue_c>
+                <plm:gPTDDDValue_c displayName="Port D data direction register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port D data direction register(PTDDD).<br />
+                    These read/write bits control the direction of port D pins and what is read for PTDD reads.<br /><blockquote>
+                      1 = Output driver enabled for port D bit n and PTDD reads return the contents of PTDDn.<br />
+                      0 = Input (output driver disabled) and reads return the pin value.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTDDDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>251</plm:value>
+                </plm:gPTDDDValue_c>
+                <plm:gPTDDSValue_c displayName="Port D drive strength register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Port D drive strength register(PTDDH).<br />
+                    An output pin can be selected to have high output drive strength by setting the corresponding bit in the
+                    drive strength select register (PTDDSn). When high drive is selected, a pin is capable of sourcing and
+                    sinking greater current. Even though every I/O pin can be selected as high drive, the user must ensure that
+                    the total current source and sink limits for the MCU are not exceeded. Drive strength selection is intended
+                    to affect the DC behavior of I/O pins. However, the AC behavior is also affected. High drive allows a pin
+                    to drive a greater load with the same switching speed as a low drive enabled pin into a smaller load.
+                    Because of this, the EMC emissions may be affected by enabling pins as high drive.<br /><br />
+                    Output Drive Strength Selection for Port D Bits - Each of these control bits selects between low and high
+                    output drive for the associated PTD pin. For port D pins that are configured as inputs, these bits have no effect.<br />
+                    0 Low output drive strength selected for port D bit n.<br />
+                    1 High output drive strength selected for port D bit<br /></temp:description>
+                  <temp:regExLib name="define" param1="gPTDDSValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTDDSValue_c>
+                <plm:gPTEDValue_c displayName="Port E register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port E data register (PTED).<br />
+                    Writes are latched into all bits of this register. For port E pins that are configured as outputs, the logic level is driven out the corresponding MCU pin.<br />
+                    Reset forces PTED to all 0s, but these 0s are not driven out the corresponding pins because reset also configures all port pins as high-impedance inputs with pullups disabled.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTEDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>20</plm:value>
+                </plm:gPTEDValue_c>
+                <plm:gPTEPEValue_c displayName="Port E pull-up enable register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port E pull-up enable register (PTEPE).<br />
+                    For port E pins that are inputs, these read/write control bits determine whether internal pullup devices are enabled.<br />
+                    For port E pins that are configured as outputs, these bits are ignored and the internal pullup devices are disabled.<br /><blockquote>
+                      1 = Internal pullup device enabled for pin n.<br />
+                      0 = Internal pullup device disabled for pin n.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTEPEValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTEPEValue_c>
+                <plm:gPTEDDValue_c displayName="Port E data direction register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port E data direction register (PTEDD).<br />
+                    These read/write bits control the direction of port E pins and what is read for PTED reads.<br /><blockquote>
+                      1 = Output driver enabled for port E bit n and PTED reads return the contents of PTEDn.<br />
+                      0 = Input (output driver disabled) and reads return the pin value.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTEDDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>27</plm:value>
+                </plm:gPTEDDValue_c>
+                <plm:gPTEDSValue_c displayName="Port E drive strength register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Port E drive strength register(PTEDH).<br />
+                    An output pin can be selected to have high output drive strength by setting the corresponding bit in the
+                    drive strength select register (PTEDSn). When high drive is selected, a pin is capable of sourcing and
+                    sinking greater current. Even though every I/O pin can be selected as high drive, the user must ensure that
+                    the total current source and sink limits for the MCU are not exceeded. Drive strength selection is intended
+                    to affect the DC behavior of I/O pins. However, the AC behavior is also affected. High drive allows a pin
+                    to drive a greater load with the same switching speed as a low drive enabled pin into a smaller load.
+                    Because of this, the EMC emissions may be affected by enabling pins as high drive.<br /><br />
+                    Output Drive Strength Selection for Port E Bits - Each of these control bits selects between low and high
+                    output drive for the associated PTE pin. For port E pins that are configured as inputs, these bits have no effect.<br />
+                    0 Low output drive strength selected for port E bit n.<br />
+                    1 High output drive strength selected for port E bit<br /></temp:description>
+                  <temp:regExLib name="define" param1="gPTEDSValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTEDSValue_c>
+                <plm:gPTFDValue_c displayName="Port F register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port F data register (PTFD).<br />
+                    Writes are latched into all bits of this register. For port F pins that are configured as outputs, the logic level is driven out the corresponding MCU pin.<br />
+                    Reset forces PTFD to all 0s, but these 0s are not driven out the corresponding pins because reset also configures all port pins as high-impedance inputs with pullups disabled.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTFDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTFDValue_c>
+                <plm:gPTFPEValue_c displayName="Port F pull-up enable register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port F pull-up enable register (PTFPE).<br />
+                    For port F pins that are inputs, these read/write control bits determine whether internal pullup devices are enabled.<br />
+                    For port F pins that are configured as outputs, these bits are ignored and the internal pullup devices are disabled.<br /><blockquote>
+                      1 = Internal pullup device enabled for pin n.<br />
+                      0 = Internal pullup device disabled for pin n.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTFPEValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTFPEValue_c>
+                <plm:gPTFDDValue_c displayName="Port F data direction register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port F data direction register (PTFDD).<br />
+                    These read/write bits control the direction of port F pins and what is read for PTFD reads.<br /><blockquote>
+                      1 = Output driver enabled for port F bit n and PTFD reads return the contents of PTFDn.<br />
+                      0 = Input (output driver disabled) and reads return the pin value.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTFDDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTFDDValue_c>
+                <plm:gPTFDSValue_c displayName="Port F drive strength register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Port F drive strength register(PTFDH).<br />
+                    An output pin can be selected to have high output drive strength by setting the corresponding bit in the
+                    drive strength select register (PTFDSn). When high drive is selected, a pin is capable of sourcing and
+                    sinking greater current. Even though every I/O pin can be selected as high drive, the user must ensure that
+                    the total current source and sink limits for the MCU are not exceeded. Drive strength selection is intended
+                    to affect the DC behavior of I/O pins. However, the AC behavior is also affected. High drive allows a pin
+                    to drive a greater load with the same switching speed as a low drive enabled pin into a smaller load.
+                    Because of this, the EMC emissions may be affected by enabling pins as high drive.<br /><br />
+                    Output Drive Strength Selection for Port F Bits - Each of these control bits selects between low and high
+                    output drive for the associated PTF pin. For port F pins that are configured as inputs, these bits have no effect.<br />
+                    0 Low output drive strength selected for port F bit n.<br />
+                    1 High output drive strength selected for port F bit<br /></temp:description>
+                  <temp:regExLib name="define" param1="gPTFDSValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTFDSValue_c>
+                <plm:gPTGDValue_c displayName="Port G register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port G data register (PTGD).<br />
+                    Writes are latched into all bits of this register. For port G pins that are configured as outputs, the logic level is driven out the corresponding MCU pin.<br />
+                    Reset forces PTGD to all 0s, but these 0s are not driven out the corresponding pins because reset also configures all port pins as high-impedance inputs with pullups disabled.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTGDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTGDValue_c>
+                <plm:gPTGPEValue_c displayName="Port G pull-up enable register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port G pull-up enable register (PTGPE).<br />
+                    For port G pins that are inputs, these read/write control bits determine whether internal pullup devices are enabled.<br />
+                    For port G pins that are configured as outputs, these bits are ignored and the internal pullup devices are disabled.<br /><blockquote>
+                      1 = Internal pullup device enabled for pin n.<br />
+                      0 = Internal pullup device disabled for pin n.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTGPEValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTGPEValue_c>
+                <plm:gPTGDDValue_c displayName="Port G data direction register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port G data direction register (PTGDD).<br />
+                    These read/write bits control the direction of port G pins and what is read for PTGD reads.<br /><blockquote>
+                      1 = Output driver enabled for port G bit n and PTGD reads return the contents of PTGDn.<br />
+                      0 = Input (output driver disabled) and reads return the pin value.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTGDDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTGDDValue_c>
+                <plm:gPTGDSValue_c displayName="Port G drive strength register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Port G drive strength register(PTGDH).<br />
+                    An output pin can be selected to have high output drive strength by setting the corresponding bit in the
+                    drive strength select register (PTGDSn). When high drive is selected, a pin is capable of sourcing and
+                    sinking greater current. Even though every I/O pin can be selected as high drive, the user must ensure that
+                    the total current source and sink limits for the MCU are not exceeded. Drive strength selection is intended
+                    to affect the DC behavior of I/O pins. However, the AC behavior is also affected. High drive allows a pin
+                    to drive a greater load with the same switching speed as a low drive enabled pin into a smaller load.
+                    Because of this, the EMC emissions may be affected by enabling pins as high drive.<br /><br />
+                    Output Drive Strength Selection for Port G Bits - Each of these control bits selects between low and high
+                    output drive for the associated PTG pin. For port G pins that are configured as inputs, these bits have no effect.<br />
+                    0 Low output drive strength selected for port G bit n.<br />
+                    1 High output drive strength selected for port G bit<br /></temp:description>
+                  <temp:regExLib name="define" param1="gPTGDSValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTGDSValue_c>
+                <plm:gPTHDValue_c displayName="Port H register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port H data register (PTHD).<br />
+                    Writes are latched into all bits of this register. For port H pins that are configured as outputs, the logic level is driven out the corresponding MCU pin.<br />
+                    Reset forces PTGD to all 0s, but these 0s are not driven out the corresponding pins because reset also configures all port pins as high-impedance inputs with pullups disabled.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTHDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTHDValue_c>
+                <plm:gPTHPEValue_c displayName="Port H pull-up enable register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port H pull-up enable register (PTHPE).<br />
+                    For port H pins that are inputs, these read/write control bits determine whether internal pullup devices are enabled.<br />
+                    For port H pins that are configured as outputs, these bits are ignored and the internal pullup devices are disabled.<br /><blockquote>
+                      1 = Internal pullup device enabled for pin n.<br />
+                      0 = Internal pullup device disabled for pin n.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTHPEValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTHPEValue_c>
+                <plm:gPTHDDValue_c displayName="Port H data direction register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    I/O port H data direction register (PTHDD).<br />
+                    These read/write bits control the direction of port H pins and what is read for PTHD reads.<br /><blockquote>
+                      1 = Output driver enabled for port G bit n and PTHD reads return the contents of PTHDn.<br />
+                      0 = Input (output driver disabled) and reads return the pin value.<br /></blockquote>
+                    n - represents the pin number.<br />
+                    This property is only used when the Target hardware is set to User defined target configuration.
+                  </temp:description>
+                  <temp:regExLib name="define" param1="gPTHDDValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTHDDValue_c>
+                <plm:gPTHDSValue_c displayName="Port H drive strength register" editor="BeeKitSMACPlatformEditorV01">
+                  <temp:description>
+                    Port H drive strength register(PTHDH).<br />
+                    An output pin can be selected to have high output drive strength by setting the corresponding bit in the
+                    drive strength select register (PTHDSn). When high drive is selected, a pin is capable of sourcing and
+                    sinking greater current. Even though every I/O pin can be selected as high drive, the user must ensure that
+                    the total current source and sink limits for the MCU are not exceeded. Drive strength selection is intended
+                    to affect the DC behavior of I/O pins. However, the AC behavior is also affected. High drive allows a pin
+                    to drive a greater load with the same switching speed as a low drive enabled pin into a smaller load.
+                    Because of this, the EMC emissions may be affected by enabling pins as high drive.<br /><br />
+                    Output Drive Strength Selection for Port H Bits - Each of these control bits selects between low and high
+                    output drive for the associated PTH pin. For port H pins that are configured as inputs, these bits have no effect.<br />
+                    0 Low output drive strength selected for port H bit n.<br />
+                    1 High output drive strength selected for port H bit<br /></temp:description>
+                  <temp:regExLib name="define" param1="gPTHDSValue_c" />
+                  <temp:format base="hex" />
+                  <plm:value>0</plm:value>
+                </plm:gPTHDSValue_c>
+              </plm:properties>
+              <temp:actions>
+                <temp:insertTransformationOutput stylesheet="./PortIndex.xslt">
+                  <temp:regExLib name="beginEndSection" param1="Port Index Definition" />
+                </temp:insertTransformationOutput>
+              </temp:actions>
+            </temp:file>
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Sys\vectortable.c" destination=".\PLM\HCS08\Source\Common\Sys\vectortable.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Sys\mc9s08gb60.c" destination=".\PLM\HCS08\Source\Common\Sys\mc9s08gb60.c" includeCondition="(//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB') or ((//plm:Target/plm:value = 'USER_DEFINED') and ((//plm:gUserTransceiverType_d/plm:value = 'MC1321x')))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Sys\mc9s08qe128.c" destination=".\PLM\HCS08\Source\Common\Sys\mc9s08qe128.c" includeCondition="(//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1320x'))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Sys\mc13233c.c" destination=".\PLM\HCS08\Source\Common\Sys\mc13233c.c" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x'))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Sys\mc13233c.h" destination=".\PLM\HCS08\Source\Common\Sys\mc13233c.h" includeCondition="(//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or ((//plm:Target/plm:value = 'USER_DEFINED') and (//plm:gUserTransceiverType_d/plm:value = 'MC1323x'))" />
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Sys\Start08.c" destination=".\PLM\HCS08\Source\Common\Sys\Start08.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Sys\McuInit.c" destination=".\PLM\HCS08\Source\Common\Sys\McuInit.c" />
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Sys\McuInit.h" destination=".\PLM\HCS08\Source\Common\Sys\McuInit.h" />
+            <temp:file version="1.0" source=".\HCS08\Source\Common\Utilities\Utilities.c" destination=".\PLM\HCS08\Source\Common\Utilities\Utilities.c" />
+            <temp:file version="1.0" source=".\Generic\Interface\Mc1323xRegs.h" destination=".\PLM\Generic\Interface\Mc1323xRegs.h" />
+            <temp:file version="1.0" source=".\Generic\Interface\derivative.h" destination=".\PLM\Generic\Interface\derivative.h" />
+            <temp:file version="1.0" source=".\Generic\Interface\EmbeddedTypes.h" destination=".\PLM\Generic\Interface\EmbeddedTypes.h" />
+            <temp:file version="1.0" source=".\Generic\Interface\IntControl.h" destination=".\PLM\Generic\Interface\IntControl.h" />
+            <temp:file version="1.0" source=".\Generic\Interface\Utilities_Interface.h" destination=".\PLM\Generic\Interface\Utilities_Interface.h" />
+            <temp:file version="1.0" source=".\Generic\Interface\TargetMC1321xNCB.h" destination=".\PLM\Generic\Interface\TargetMC1321xNCB.h" includeCondition="(//plm:component/temp:files/temp:file/plm:properties/plm:Target/plm:value = 'MC1321x_NCB')" />
+            <temp:file version="1.0" source=".\Generic\Interface\TargetMC1321xSRB.h" destination=".\PLM\Generic\Interface\TargetMC1321xSRB.h" includeCondition="(//plm:component/temp:files/temp:file/plm:properties/plm:Target/plm:value = 'MC1321x_SRB')" />
+            <temp:file version="1.0" source=".\Generic\Interface\TargetMC1320xQE128EVB.h" destination=".\PLM\Generic\Interface\TargetMC1320xQE128EVB.h" includeCondition="(//plm:component/temp:files/temp:file/plm:properties/plm:Target/plm:value = 'MC1320x_S08QE128_EVB')" />
+            <temp:file version="1.0" source=".\Generic\Interface\TargetMC1323xMRB.h" destination=".\PLM\Generic\Interface\TargetMC1323xMRB.h" includeCondition="(//plm:component/temp:files/temp:file/plm:properties/plm:Target/plm:value = 'MC1323x_MRB')" />
+            <temp:file version="1.0" source=".\Generic\Interface\TargetMC1323xRCM.h" destination=".\PLM\Generic\Interface\TargetMC1323xRCM.h" includeCondition="(//plm:component/temp:files/temp:file/plm:properties/plm:Target/plm:value = 'MC1323x_RCM')" />
+            <temp:file version="1.0" source=".\Generic\Interface\TargetMC1323xREM.h" destination=".\PLM\Generic\Interface\TargetMC1323xREM.h" includeCondition="(//plm:component/temp:files/temp:file/plm:properties/plm:Target/plm:value = 'MC1323x_REM')" />
+            <temp:file version="1.0" source=".\HCS08\PRM\Linker_MC1323x_far_banked.prm" destination=".\PLM\HCS08\PRM\Linker_MC1323x_far_banked.prm" includeCondition="((//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or (//plm:Target/plm:value = 'USER_DEFINED')) and (//smac:OtapSupported/smac:value = 'false')" />
+            <temp:file version="1.0" source=".\HCS08\PRM\Linker_MC1323x_far_banked_OTAP_enabled.prm" destination=".\PLM\HCS08\PRM\Linker_MC1323x_far_banked_OTAP_enabled.prm" includeCondition="((//plm:Target/plm:value = 'MC1323x_RCM') or (//plm:Target/plm:value = 'MC1323x_REM') or (//plm:Target/plm:value = 'USER_DEFINED')) and (//smac:OtapSupported/smac:value = 'true')" />
+            <temp:file version="1.0" source=".\HCS08\PRM\Linker_QE128_far_banked_OTAP_enabled.prm" destination=".\PLM\HCS08\PRM\Linker_QE128_far_banked_OTAP_enabled.prm" includeCondition="(//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') and (//smac:OtapSupported/smac:value = 'true')" />
+            <temp:file version="1.0" source=".\HCS08\PRM\Linker_QE128_far_banked.prm" destination=".\PLM\HCS08\PRM\Linker_QE128_far_banked.prm" includeCondition="(//plm:Target/plm:value = 'MC1320x_S08QE128_EVB') and (//smac:OtapSupported/smac:value = 'false')" />
+            <temp:file version="1.0" source=".\HCS08\PRM\Linker_GT60.prm" destination=".\PLM\HCS08\PRM\Linker_GT60.prm" includeCondition="((//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB')) and (//smac:OtapSupported/smac:value = 'false')" />
+            <temp:file version="1.0" source=".\HCS08\PRM\Linker_GT60.prm" destination=".\PLM\HCS08\PRM\Linker_GT60_OTAP_enabled.prm" includeCondition="((//plm:Target/plm:value = 'MC1321x_SRB') or (//plm:Target/plm:value = 'MC1321x_NCB')) and (//smac:OtapSupported/smac:value = 'true')" />
+            <temp:file version="1.0" source=".\HCS08\PRM\beekit.hwc" destination=".\beekit.hwc" includeCondition="(false)" />
+            <temp:file version="1.0" source=".\HCS08\PRM\beekit.hwl" destination=".\beekit.hwl" includeCondition="(false)" />
+            <temp:file version="1.0" source=".\HCS08\PRM\postload.cmd" destination=".\postload.cmd" includeCondition="(false)" />
+            <temp:file version="1.0" source=".\HCS08\PRM\preload.cmd" destination=".\preload.cmd" includeCondition="(false)" />
+            <temp:file version="1.0" source=".\HCS08\PRM\reset.cmd" destination=".\reset.cmd" includeCondition="(false)" />
+            <temp:file version="1.0" source=".\HCS08\PRM\startup.cmd" destination=".\startup.cmd" includeCondition="(false)" />
+            <temp:file version="1.0" source=".\HCS08\PRM\BeeKit_debug_cw50.ini" destination=".\BeeKit_debug_cw50.ini" includeCondition="(false)" />
+            <temp:file version="1.0" source=".\HCS08\PRM\BeeKit_debug_cw60.ini" destination=".\BeeKit_debug_cw60.ini" includeCondition="(false)" />
+            <temp:file version="1.0" source=".\HCS08\PRM\BeeKit_debug_cw70.ini" destination=".\BeeKit_debug_cw70.ini" includeCondition="(false)" />
+          </temp:files>
+          <temp:components />
+        </plm:component>
+        <smac:component displayName="SMAC" version="V01.00" maxUsage="1" xmlns:smac="http://freescale.com/ns/beekit/smac/smac" xmlns:ct="http://freescale.com/ns/beekit/commonTypes" xmlns:temp="http://freescale.com/ns/beekit/componentTemplate" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://freescale.com/ns/beekit/smac/smac Component.xsd">
+          <temp:description>The Freescale Simple Media Access Controller (SMAC) is a simple ANSI C based code stack available as sample source code. The SMAC is used for developing proprietary RF transceiver applications using a Freescale 802.15.4 transceiver. </temp:description>
+          <temp:files>
+            <temp:file version="1.0" source=".\SMAC\Source\SMAC.c" destination=".\SMAC\Source\SMAC.c" />
+            <temp:file version="1.0" source=".\SMAC\Source\SMAC.h" destination=".\SMAC\Source\SMAC.h" />
+            <temp:file version="1.0" source=".\Generic\SMAC_config.h" destination=".\SMAC\Generic\SMAC_config.h">
+              <smac:properties>
+                <smac:OtapSupported displayName="Otap Supported">
+                  <temp:description>Enable the Otap support</temp:description>
+                  <temp:regExLib param1="gOtapSupported_d" name="define" />
+                  <smac:value>false</smac:value>
+                </smac:OtapSupported>
+              </smac:properties>
+              <temp:actions>
+                <temp:insertTransformationOutput stylesheet="./SMACConfigIndex.xslt">
+                  <temp:regExLib name="beginEndSection" param1="SMAC Config Options Definition" />
+                </temp:insertTransformationOutput>
+              </temp:actions>
+            </temp:file>
+            <temp:file version="1.0" source=".\SMAC\Interface\SMAC_Interface.h" destination=".\SMAC\Interface\SMAC_Interface.h">
+              <smac:properties>
+                <smac:promiscuousMode displayName="Promiscuous Mode Enabled">
+                  <temp:description>This parameter defines if SMAC enables its promiscuous mode by default. </temp:description>
+                  <temp:regExLib param1="gPromiscuousMode_d" name="define" />
+                  <smac:value>false</smac:value>
+                </smac:promiscuousMode>
+                <smac:CcaBeforeTx displayName="Clear Channel Assesment Enabled">
+                  <temp:description>This parameter defines if SMAC enables Clear Channel Assesment before transmissions. </temp:description>
+                  <temp:regExLib param1="gCcaBeforeTx_d" name="define" />
+                  <smac:value>false</smac:value>
+                </smac:CcaBeforeTx>
+                <smac:CcaAttemps displayName="CCA attemps">
+                  <temp:description>This parameter defines how many CCA attempts will SMAC perform before bive up with a data transmission. </temp:description>
+                  <temp:regExLib param1="gCcaAttemps_d" name="define" />
+                  <smac:value>1</smac:value>
+                </smac:CcaAttemps>
+              </smac:properties>
+              <temp:actions>
+                <temp:insertTransformationOutput stylesheet="./SMACInterfaceIndex.xslt">
+                  <temp:regExLib name="beginEndSection" param1="SMAC Interface file configuration options Definition" />
+                </temp:insertTransformationOutput>
+              </temp:actions>
+            </temp:file>
+            <temp:file version="1.0" source=".\OTAP\OTAP.c" destination=".\OTAP\OTAP.c" />
+            <temp:file version="1.0" source=".\OTAP\OTAP.h" destination=".\OTAP\OTAP.h" />
+            <temp:file version="1.0" source=".\OTAP\OTAP_interface.h" destination=".\OTAP\OTAP_interface.h">
+              <smac:properties>
+                <smac:OtapID displayName="Otap ID">
+                  <temp:description>Comments here</temp:description>
+                  <temp:regExLib param1="gOtapId_c" name="define" />
+                  <smac:value>0x0001</smac:value>
+                </smac:OtapID>
+                <smac:OtapRequestCode displayName="Otap Request Code">
+                  <temp:description>Comments here</temp:description>
+                  <temp:regExLib param1="gOtapRequestCode_c" name="define" />
+                  <smac:value>0xAABBCCDD</smac:value>
+                </smac:OtapRequestCode>
+                <smac:OtapDeviceDescription displayName="Otap Device Description">
+                  <temp:description>Comments here</temp:description>
+                  <temp:regExLib param1="gOtapDeviceDescription_c" name="define" />
+                  <smac:value>"AnyDeviceABCDEF1"</smac:value>
+                </smac:OtapDeviceDescription>
+              </smac:properties>
+              <temp:actions>
+                <temp:insertTransformationOutput stylesheet="./OtapConfigIndex.xslt">
+                  <temp:regExLib name="beginEndSection" param1="OTAP Config Options Definition" />
+                </temp:insertTransformationOutput>
+              </temp:actions>
+            </temp:file>
+          </temp:files>
+          <temp:components>
+            <generic:component displayName="Generic Demo" version="V01.00" maxUsage="1" xmlns:temp="http://freescale.com/ns/beekit/componentTemplate" xmlns:generic="http://freescale.com/ns/beekit/smac/smacapps/generic" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://freescale.com/ns/beekit/smac/smacapps/generic Component.xsd">
+              <temp:description>
+                <br />
+                <h1>Generic Demo</h1>
+                <p>
+                  The Generic App template allows any user to code his own application based on this project, because it provides the basic configuration structure for SMAC usage and drivers initializations and callbacks.<br /></p>
+              </temp:description>
+              <temp:categories />
+              <temp:files>
+                <temp:file version="1.0" source=".\Sources\main.c" destination=".\Application\Source\main.c" />
+                <temp:file version="1.0" source=".\Sources\app_config.h" destination=".\Application\Configure\app_config.h">
+                  <generic:properties>
+                    <generic:Channel displayName="Channel">
+                      <temp:description>Default value of the channel in which the device is going to operate.</temp:description>
+                      <temp:regExLib param1="gDefaultChannelNumber_c" name="define" />
+                      <generic:value>CHANNEL15</generic:value>
+                    </generic:Channel>
+                    <generic:gDefaultUartPort_c displayName="Default Uart Port">
+                      <temp:description>Default Uart Port used by the application. The selected port should be enabled on platform components</temp:description>
+                      <temp:regExLib param1="gDefaultUartPort_c" name="define" />
+                      <generic:value>SCI_Port2</generic:value>
+                    </generic:gDefaultUartPort_c>
+                    <generic:gDefaultOutputPower_c displayName="Default Output Power">
+                      <temp:description>Default Output Power used by the application.</temp:description>
+                      <temp:regExLib param1="gDefaultOutputPower_c" name="define" />
+                      <generic:value>8</generic:value>
+                    </generic:gDefaultOutputPower_c>
+                  </generic:properties>
+                  <temp:actions>
+                    <temp:insertTransformationOutput stylesheet="./AppConfigParams.xslt">
+                      <temp:regExLib name="beginEndSection" param1="BeeKit Configuration Parameters Definition" />
+                    </temp:insertTransformationOutput>
+                  </temp:actions>
+                </temp:file>
+              </temp:files>
+              <temp:components />
+            </generic:component>
+          </temp:components>
+        </smac:component>
+      </sln:components>
+    </sln:project>
+  </sln:projects>
+</sln:solution>
