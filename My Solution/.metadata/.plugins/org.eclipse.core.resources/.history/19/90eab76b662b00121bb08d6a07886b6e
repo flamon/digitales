@@ -82,36 +82,36 @@ void uMac_Engine(){
 			if(bScanDone==TRUE){
 				bScanDone = FALSE;
 				(void) MLMESetChannelRequest(bestChannel);
-				(void) MLMERXEnableRequest(AppRxPacket, 0); 
+				(void) MLMERXEnableRequest(AppRxPacket,0); 
 				uMac_Current_State = uMac_WaitRx;
 			}
 		break;
 		case uMac_WaitRx:
 			//Wait Rx
-			if(bRxDone == TRUE) {
+			if(bRxDone==TRUE){
 				bRxDone = FALSE;
 				//Analizar el paquete
-				if (AppRxPacket->rxStatus == rxSuccessStatus_c) {
+				if(AppRxPacket->rxStatus==rxSuccessStatus_c){
 					//El paquete esta chido
-					if (uMac_RxPacket->Packet_Type == uMac_Hello) {
+					uMac_RxPacket = (uMac_Packet *)&AppRxPacket->smacPdu.u8Data;
+					if(uMac_RxPacket->Packet_Type==uMac_Hello){
 						//Si el paquete es de control, responder con otro hello
 						uMac_TxPacket->Dest_Add = uMac_RxPacket->Source_Add;
 						uMac_TxPacket->Packet_Type = uMac_Hello;
-						uMac_TxPacket->Pan_ID = 10;
+						uMac_TxPacket->Pan_ID = 44;
 						uMac_TxPacket->Source_Add = 0;
-						AppTxPacket->u8DataLength = 4;
-						(void) MCPSDataRequest(AppTxPacket);
+						uMac_TxPacket->uMac_PDU[0] = 'H';
+						// AppTxPacket->smacPdu.u8Data = HelloResponse;
 					}
 				}
 			}
-			(void) MLMERXEnableRequest(AppRxPacket, 0);
-			uMac_Current_State = uMac_Tx;
+			
 		break;
 		case uMac_Rx:
 			//Rx
 		break;
 		case uMac_Tx:
-			if(bTxDone==TRUE){
+			if(bRxDone==TRUE){
 				uMac_Current_State = uMac_WaitRx;
 			}
 		break;
