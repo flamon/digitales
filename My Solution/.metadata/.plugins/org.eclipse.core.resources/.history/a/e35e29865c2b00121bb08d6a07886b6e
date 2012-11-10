@@ -1,0 +1,507 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * Public header file for the KBI driver.
+    3:  *
+    4:  *
+    5:  * (c) Copyright 2009, Freescale, Inc.  All rights reserved.
+    6:  *
+    7:  * No part of this document must be reproduced in any form - including copied,
+    8:  * transcribed, printed or by any electronic means - without specific written
+    9:  * permission from Freescale.
+   10:  *
+   11:  ************************************************************************************/
+   12:   
+   13:   /*Include files section*/
+   14:   
+   15:   #include "KBI.h"
+   16:   
+   17:  #if TRUE == gKbiSupported_d 
+   18:  
+   19:   /************************************************************************************
+   20:  *************************************************************************************
+   21:  * Public type definitions
+   22:  *************************************************************************************
+   23:  ************************************************************************************/
+   24:  
+   25:  /************************************************************************************
+   26:  *************************************************************************************
+   27:  * Public macros
+   28:  *************************************************************************************
+   29:  ************************************************************************************/
+   30:  
+   31:  /************************************************************************************
+   32:  *************************************************************************************
+   33:  * Public prototypes
+   34:  *************************************************************************************
+   35:  ************************************************************************************/
+   36:  
+   37:  /************************************************************************************
+   38:  *************************************************************************************
+   39:  * Public memory declarations
+   40:  *************************************************************************************
+   41:  ************************************************************************************/
+   42:  
+   43:  
+   44:  static kbiCallback_t pKbiCallback[gNumberOfKbiPorts_c]; 
+   45:  
+   46:  #if defined(gMcs08qe128Platform_d) || defined(gMc1323xPlatform_d)
+   47:    static uint8_t* gpKbiControl[] = {&KBI1SC,&KBI2SC};
+   48:  #elif defined(gMcs08Gt60Platform_d)
+   49:    static uint8_t* gpKbiControl[] = {&KBI1SC};
+   50:  #endif
+   51:  
+   52:  
+   53:  /************************************************************************************
+   54:  *************************************************************************************
+   55:  * Public functions
+   56:  *************************************************************************************
+   57:  ************************************************************************************/
+   58:  
+   59:  
+   60:  /************************************************************************************
+   61:  *  Kbi_Config
+   62:  *
+   63:  * The purpose of this function is to configure the posible KBI options of a selected  
+   64:  * KBI port specified as a parameter
+   65:  *
+   66:  ************************************************************************************/ 
+   67:  
+   68:  
+   69:   kbiErr_t	Kbi_Config(kbiPort_t mKbiPort, kbiConfig_t* mKbiConfigOption){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+   70:  	  	
+   71:    	kbiConfig_t* pmTempKbiConfigPtr;
+   72:    	
+   73:    	if(mKbiPort>= gKbiMax_c){
+  0002 a102     [2]             CMP   #2
+  0004 2504     [3]             BCS   LA ;abs = 000a
+   74:    	
+   75:    	  return gKbiErrInvalidParamater_c;
+  0006 a602     [2]             LDA   #2
+  0008 2033     [3]             BRA   L3D ;abs = 003d
+  000a          LA:     
+   76:    	
+   77:    	}
+   78:    	
+   79:    	pmTempKbiConfigPtr =(kbiConfig_t*)gpKbiControl[mKbiPort];
+  000a 48       [1]             LSLA  
+  000b 8c       [1]             CLRH  
+  000c 97       [1]             TAX   
+  000d 9ebe0000 [6]             LDHX  @gpKbiControl,X
+   80:      pmTempKbiConfigPtr->InterruptPin.Port = mKbiConfigOption->InterruptPin.Port;
+  0011 89       [2]             PSHX  
+  0012 8b       [2]             PSHH  
+  0013 9efe03   [5]             LDHX  3,SP
+  0016 e601     [3]             LDA   1,X
+  0018 87       [2]             PSHA  
+  0019 9ee602   [4]             LDA   2,SP
+  001c 87       [2]             PSHA  
+  001d 8a       [3]             PULH  
+  001e 86       [3]             PULA  
+  001f 89       [2]             PSHX  
+  0020 9eee03   [4]             LDX   3,SP
+  0023 e701     [3]             STA   1,X
+   81:  #if defined(gMcs08qe128Platform_d) || defined(gMc1323xPlatform_d)
+   82:     	pmTempKbiConfigPtr->EdgeSelect.Port = mKbiConfigOption->EdgeSelect.Port;
+  0025 9efe04   [5]             LDHX  4,SP
+  0028 e602     [3]             LDA   2,X
+  002a 95       [2]             TSX   
+  002b ee01     [3]             LDX   1,X
+  002d 89       [2]             PSHX  
+  002e 8a       [3]             PULH  
+  002f 88       [3]             PULX  
+  0030 9eee02   [4]             LDX   2,SP
+  0033 e702     [3]             STA   2,X
+   83:  #elif defined(gMcs08Gt60Platform_d)
+   84:      mKbiConfigOption->Control.Port &= 0x0F;
+   85:      mKbiConfigOption->EdgeSelect.Port &= 0xF0;
+   86:      mKbiConfigOption->Control.Port |= mKbiConfigOption->EdgeSelect.Port;
+   87:  #endif
+   88:  	  pmTempKbiConfigPtr->Control.Port = mKbiConfigOption->Control.Port;
+  0035 9efe03   [5]             LDHX  3,SP
+  0038 f6       [3]             LDA   ,X
+  0039 8a       [3]             PULH  
+  003a 88       [3]             PULX  
+  003b f7       [2]             STA   ,X
+   89:  	  	  
+   90:  	  return gKbiErrorNoError_c;
+  003c 4f       [1]             CLRA  
+  003d          L3D:    
+   91:  	  
+   92:  	}
+  003d a702     [2]             AIS   #2
+  003f 8d       [7]             RTC   
+   93:  	
+   94:  /************************************************************************************
+   95:  *  	Kbi_Init
+   96:  *
+   97:  * The purpose of this function is to set the initial status of the KBI module  
+   98:  * GPIO port specified as a parameter
+   99:  *
+  100:  ************************************************************************************/ 
+  101:  
+  102:  
+  103:    kbiErr_t	Kbi_Init(kbiCallback_t pKbiCallbackinit, kbiConfig_t* pKbiConfig, kbiPort_t kbiPort){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  104:        	
+  105:    	if(gKbiMax_c <= kbiPort){
+  0002 a102     [2]             CMP   #2
+  0004 2504     [3]             BCS   LA ;abs = 000a
+  106:    	  return gKbiErrInvalidParamater_c;
+  0006 a602     [2]             LDA   #2
+  0008 2022     [3]             BRA   L2C ;abs = 002c
+  000a          LA:     
+  107:    	}
+  108:    	
+  109:    	if(NULL == pKbiCallbackinit){
+  000a 9efe06   [5]             LDHX  6,SP
+  000d 2604     [3]             BNE   L13 ;abs = 0013
+  110:    	  return gKbiErrorNullPointer_c;
+  000f a601     [2]             LDA   #1
+  0011 2019     [3]             BRA   L2C ;abs = 002c
+  0013          L13:    
+  111:    	}
+  112:    	
+  113:    	pKbiCallback[kbiPort] = pKbiCallbackinit;
+  0013 87       [2]             PSHA  
+  0014 48       [1]             LSLA  
+  0015 8c       [1]             CLRH  
+  0016 97       [1]             TAX   
+  0017 9ee608   [4]             LDA   8,SP
+  001a d70001   [4]             STA   @pKbiCallback:1,X
+  001d 9ee607   [4]             LDA   7,SP
+  0020 d70000   [4]             STA   @pKbiCallback,X
+  114:      (void)Kbi_Config(kbiPort,pKbiConfig);	
+  0023 86       [3]             PULA  
+  0024 9efe01   [5]             LDHX  1,SP
+  0027 ac000000 [8]             CALL  Kbi_Config
+  115:      return gKbiErrorNoError_c;
+  002b 4f       [1]             CLRA  
+  002c          L2C:    
+  116:    
+  117:    }
+  002c a702     [2]             AIS   #2
+  002e 8d       [7]             RTC   
+  118:  
+  119:  /************************************************************************************
+  120:  *  Kbi_PortValue
+  121:  *
+  122:  * The purpose of this function is to obtain the KBI port value in order to know 
+  123:  * which keys are pressed. The return value is the value of the KBI port where each 
+  124:  * key is mapped to a bit therefore KBI key 7 is mapped to bit possition 7 and so on
+  125:  *
+  126:  ************************************************************************************/  
+  127:    uint8_t	Kbi_PortValue(kbiPort_t kbiPort){
+  0000 8b       [2]             PSHH  
+  128:  
+  129:    volatile uint8_t KbiActivePort;	 	
+  130:  	 	 
+  131:  	 	if(kbiPort == gKbi1_c){  	
+  0001 4d       [1]             TSTA  
+  0002 261a     [3]             BNE   L1E ;abs = 001e
+  132:    	  KbiActivePort = ((~KbiEdgePort1) ^ Kbi1Port) & (KbiEnabledPinsPort1); 
+  0004 b600     [3]             LDA   _PTBD
+  0006 a40f     [2]             AND   #15
+  0008 62       [1]             NSA   
+  0009 a4f0     [2]             AND   #-16
+  000b 87       [2]             PSHA  
+  000c b600     [3]             LDA   _PTAD
+  000e a40f     [2]             AND   #15
+  0010 95       [2]             TSX   
+  0011 fa       [3]             ORA   ,X
+  0012 f7       [2]             STA   ,X
+  0013 b600     [3]             LDA   _KBI1ES
+  0015 43       [1]             COMA  
+  0016 f8       [3]             EOR   ,X
+  0017 b400     [3]             AND   _KBI1PE
+  0019 e701     [3]             STA   1,X
+  133:   	  	#if defined(gMcs08Gt60Platform_d)
+  134:      	 KbiActivePort>>=2;
+  135:      	#endif 
+  136:  
+  137:     	  return KbiActivePort;  	
+  001b 8a       [3]             PULH  
+  001c 2009     [3]             BRA   L27 ;abs = 0027
+  001e          L1E:    
+  138:    	}
+  139:  	    	
+  140:    	#if defined(gMcs08qe128Platform_d) || defined(gMc1323xPlatform_d)
+  141:    	
+  142:    	else{   	  
+  143:    	  KbiActivePort = ((~KbiEdgePort2) ^ Kbi2Port) & (KbiEnabledPinsPort2);  	
+  001e b600     [3]             LDA   _KBI2ES
+  0020 43       [1]             COMA  
+  0021 b800     [3]             EOR   _PTDD
+  0023 b400     [3]             AND   _KBI2PE
+  0025 95       [2]             TSX   
+  0026 f7       [2]             STA   ,X
+  0027          L27:    
+  144:    	  return KbiActivePort;  	
+  0027 95       [2]             TSX   
+  0028 f6       [3]             LDA   ,X
+  145:    	}    
+  146:      #endif
+  147:  	}
+  0029 8a       [3]             PULH  
+  002a 8d       [7]             RTC   
+  148:  	
+  149:  
+  150:  /************************************************************************************
+  151:  * Kbi_task/Kbi interrupt
+  152:  *
+  153:  * The purpose of this function is, if used as Kbi_Task(), to poll
+  154:  * every time it is called, the status of the Kbi flag, assert it and call the callback function. 
+  155:  * When used as interrupt it asserts the Kbi flag and calls the callback. 
+  156:  * 
+  157:  ************************************************************************************/ 
+  158:  
+  159:  #ifdef gMcs08qe128Platform_d
+  160:    
+  161:    #if gKbiMode_d == gKbiInterruption_c 
+  162:      #pragma CODE_SEG ISR_SEGMENT
+  163:      INTERRUPT_KEYWORD void KBI1_ISR (void){
+  0000 8b       [2]             PSHH  
+  164:    #else 
+  165:      void Kbi_KbiTask(void){
+  166:    #endif
+  167:      
+  168:      if(Kbi1Flag){
+  0001 07000c   [5]             BRCLR 3,_KBI1SC,L10 ;abs = 0010
+  169:          
+  170:        Kbi1Acknowledge();
+  0004 1400     [5]             BSET  2,_KBI1SC
+  171:        pKbiCallback[gKbi1_c](Kbi_PortValue(gKbi1_c));
+  0006 4f       [1]             CLRA  
+  0007 ac000000 [8]             CALL  Kbi_PortValue
+  000b 320000   [5]             LDHX  pKbiCallback
+  172:      } 
+  000e 200e     [3]             BRA   L1E ;abs = 001e
+  0010          L10:    
+  173:      
+  174:      else if (Kbi2Flag){
+  0010 07000c   [5]             BRCLR 3,_KBI2SC,L1F ;abs = 001f
+  175:        
+  176:        Kbi2Acknowledge();
+  0013 1400     [5]             BSET  2,_KBI2SC
+  177:        pKbiCallback[gKbi2_c](Kbi_PortValue(gKbi2_c));
+  0015 a601     [2]             LDA   #1
+  0017 ac000000 [8]             CALL  Kbi_PortValue
+  001b 320002   [5]             LDHX  pKbiCallback:2
+  001e          L1E:    
+  001e fd       [5]             JSR   ,X
+  001f          L1F:    
+  178:      }
+  179:    }
+  001f 8a       [3]             PULH  
+  0020 80       [9]             RTI   
+  180:      #pragma CODE_SEG DEFAULT
+  181:    
+  182:  #endif
+  183:  
+  184:  
+  185:  
+  186:  #ifdef gMc1323xPlatform_d
+  187:  
+  188:    
+  189:    #if gKbiMode_d == gKbiInterruption_c 
+  190:        #pragma CODE_SEG ISR_SEGMENT
+  191:        INTERRUPT_KEYWORD void KBI1_ISR (void){
+  192:      
+  193:        Kbi1Acknowledge();
+  194:        pKbiCallback[gKbi1_c](Kbi_PortValue(gKbi1_c));
+  195:  
+  196:    }
+  197:        #pragma CODE_SEG DEFAULT
+  198:    
+  199:       #pragma CODE_SEG ISR_SEGMENT
+  200:       INTERRUPT_KEYWORD void KBI2_ISR (void){
+  201:      
+  202:      
+  203:       Kbi2Acknowledge();
+  204:       pKbiCallback[gKbi2_c](Kbi_PortValue(gKbi2_c));
+  205:     
+  206:    }
+  207:       #pragma CODE_SEG DEFAULT
+  208:     
+  209:    #else 
+  210:      
+  211:      void Kbi_KbiTask(void){
+  212:    
+  213:      Kbi1Acknowledge();
+  214:      pKbiCallback[gKbi1_c](Kbi_PortValue(gKbi1_c));
+  215:        
+  216:      Kbi2Acknowledge();
+  217:      pKbiCallback[gKbi2_c](Kbi_PortValue(gKbi2_c));  
+  218:      }
+  219:    
+  220:    #endif
+  221:  
+  222:  
+  223:  
+  224:  #endif
+  225:  
+  226:  
+  227:  
+  228:  
+  229:  #ifdef gMcs08Gt60Platform_d
+  230:  
+  231:  //interrupt VectorNumber_Vkeyboard void KBI1_ISR (void){
+  232:    #if gKbiMode_d == gKbiInterruption_c 
+  233:      #pragma CODE_SEG ISR_SEGMENT
+  234:      INTERRUPT_KEYWORD  void KBI1_ISR (void){
+  235:    #else 
+  236:      void Kbi1_KbiTask(void){
+  237:    #endif
+  238:    
+  239:      Kbi1Acknowledge();
+  240:      pKbiCallback[gKbi1_c](Kbi_PortValue(gKbi1_c));
+  241:     
+  242:  }
+  243:      #pragma CODE_SEG DEFAULT
+  244:    
+  245:  #endif
+  246:  
+  247:  
+  248:  #else                            /* FALSE == gKbiSupported_d */
+  249:  
+  250:  
+  251:  
+  252:  /************************************************************************************
+  253:  *************************************************************************************
+  254:  * Public functions
+  255:  *************************************************************************************
+  256:  ************************************************************************************/
+  257:  
+  258:  
+  259:  /************************************************************************************
+  260:  *  Kbi_Config
+  261:  *
+  262:  * The purpose of this function is to configure the posible KBI options of a selected  
+  263:  * KBI port specified as a parameter
+  264:  *
+  265:  ************************************************************************************/ 
+  266:  
+  267:  
+  268:   kbiErr_t	Kbi_Config(kbiPort_t mKbiPort, kbiConfig_t* mKbiConfigOption){
+  269:  	  	
+  270:        (void)mKbiPort;
+  271:        (void)mKbiConfigOption;
+  272:  	  return gKbiErrorNoError_c;
+  273:  	  
+  274:  	}
+  275:  	
+  276:  /************************************************************************************
+  277:  *  	Kbi_Init
+  278:  *
+  279:  * The purpose of this function is to set the initial status of the KBI module  
+  280:  * GPIO port specified as a parameter
+  281:  *
+  282:  ************************************************************************************/ 
+  283:  
+  284:  
+  285:    kbiErr_t	Kbi_Init(kbiCallback_t pKbiCallbackinit, kbiConfig_t* pKbiConfig, kbiPort_t kbiPort){
+  286:       
+  287:       (void)pKbiCallbackinit;
+  288:       (void)pKbiConfig;
+  289:       (void)kbiPort; 	
+  290:       return gKbiErrorNoError_c;
+  291:    
+  292:    }
+  293:  
+  294:  /************************************************************************************
+  295:  *  Kbi_PortValue
+  296:  *
+  297:  * The purpose of this function is to obtain the KBI port value in order to know 
+  298:  * which keys are pressed. The return value is the value of the KBI port where each 
+  299:  * key is mapped to a bit therefore KBI key 7 is mapped to bit possition 7 and so on
+  300:  *
+  301:  ************************************************************************************/  
+  302:  	
+  303:  	
+  304:    uint8_t	Kbi_PortValue(kbiPort_t kbiPort){
+  305:  
+  306:      (void)kbiPort;
+  307:      return 0;
+  308:      
+  309:  	}
+  310:  	
+  311:  
+  312:  /************************************************************************************
+  313:  * Kbi_task/Kbi interrupt
+  314:  *
+  315:  * The purpose of this function is, if used as Kbi_Task(), to poll
+  316:  * every time it is called, the status of the Kbi flag, assert it and call the callback function. 
+  317:  * When used as interrupt it asserts the Kbi flag and calls the callback. 
+  318:  * 
+  319:  ************************************************************************************/ 
+  320:  
+  321:  #ifdef gMcs08qe128Platform_d
+  322:    
+  323:    #if gKbiMode_d == gKbiInterruption_c 
+  324:      #pragma CODE_SEG ISR_SEGMENT
+  325:      INTERRUPT_KEYWORD void KBI1_ISR (void){
+  326:    #else 
+  327:      void Kbi_KbiTask(void){
+  328:    #endif
+  329:      
+  330:      }
+  331:      #pragma CODE_SEG DEFAULT
+  332:    
+  333:  #endif
+  334:  
+  335:  
+  336:  
+  337:  #ifdef gMc1323xPlatform_d
+  338:  
+  339:    
+  340:    #if gKbiMode_d == gKbiInterruption_c 
+  341:        #pragma CODE_SEG ISR_SEGMENT
+  342:        INTERRUPT_KEYWORD void KBI1_ISR (void){
+  343:  
+  344:    }
+  345:        #pragma CODE_SEG DEFAULT
+  346:    
+  347:       #pragma CODE_SEG ISR_SEGMENT
+  348:       INTERRUPT_KEYWORD void KBI2_ISR (void){
+  349:     
+  350:    }
+  351:       #pragma CODE_SEG DEFAULT
+  352:     
+  353:    #else 
+  354:      
+  355:      void Kbi_KbiTask(void){
+  356:      }
+  357:    
+  358:    #endif
+  359:  
+  360:  
+  361:  
+  362:  #endif
+  363:  
+  364:  
+  365:  
+  366:  
+  367:  #ifdef gMcs08Gt60Platform_d
+  368:  
+  369:  //interrupt VectorNumber_Vkeyboard void KBI1_ISR (void){
+  370:    #if gKbiMode_d == gKbiInterruption_c 
+  371:      #pragma CODE_SEG ISR_SEGMENT
+  372:      INTERRUPT_KEYWORD  void KBI1_ISR (void){
+  373:    #else 
+  374:      void Kbi1_KbiTask(void){
+  375:    #endif
+  376:  }
+  377:      #pragma CODE_SEG DEFAULT
+  378:    
+  379:  #endif
+  380:  
+  381:  
+  382:  
+  383:  
+  384:  #endif
+  385:  
+  386:  
+  387:  

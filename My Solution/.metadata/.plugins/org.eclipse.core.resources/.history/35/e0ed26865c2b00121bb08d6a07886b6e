@@ -1,0 +1,531 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * EEPROM driver implementation. 
+    3:  *
+    4:  * (c) Copyright 2010, Freescale, Inc.  All rights reserved.
+    5:  *
+    6:  * Freescale Semiconductor Confidential Proprietary
+    7:  *
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  ************************************************************************************/
+   13:  
+   14:  #include "Eeprom4OTAP.h"
+   15:  #include "SMAC_config.h"
+   16:  
+   17:  #if(TRUE == gOtapSupported_d)
+   18:  
+   19:  
+   20:  
+   21:  /************************************************************************************
+   22:  *************************************************************************************
+   23:  * Private memory declarations
+   24:  *************************************************************************************
+   25:  ************************************************************************************/
+   26:                                            
+   27:  
+   28:  static uint8_t   mu8EepromAddress[8] = {0};
+   29:  static uint8_t  mgTemporal = 0;
+   30:  
+   31:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+   32:  static uint8_t   mu8DeviceAddress;
+   33:  #endif
+   34:  
+   35:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+   36:  static uint16_t	 mu16EepromPageNumber = 0;
+   37:  #endif
+   38:  
+   39:  /************************************************************************************
+   40:  *************************************************************************************
+   41:  * Public functions
+   42:  *************************************************************************************
+   43:  ************************************************************************************/
+   44:  #pragma CODE_SEG OFLC_ROUTINES
+   45:  
+   46:  
+   47:  /************************************************************************************
+   48:  *
+   49:  *  Eeprom4OTAP_Init
+   50:  *
+   51:  ************************************************************************************/
+   52:  
+   53:  // Eeprom_Init function for Target Board 1320xQE128EVB, which has AT24C1024B eeprom  
+   54:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c 
+   55:   eepromOTAPErr_t  Eeprom4OTAP_Init (void) 
+   56:   {
+   57:      uint8_t au8TestMemAddress[2] = {0x00, 0x00};
+   58:      uint8_t au8TestMemBuffer[5] = {0}; 
+   59:      
+   60:      //Init PTC5 pin port as output to drive the write protection signal
+   61:      PTCDD_PTCDD5 = 1;
+   62:      
+   63:      // Init IIC
+   64:      IIC1C |= (0x80);
+   65:      IIC1F = ((0x00<<6)|0x18);   // mIic100KhzBaudInitParameters_c = gIicMul_1_c, gIicICR_18_c 
+   66:        
+   67:      (void)Iic4OTAP_Write(mEepromOTAPAt24C1024bwI2cAddress_c,&au8TestMemAddress[0], 2, TRUE); 
+   68:      (void)Iic4OTAP_Read(mEepromOTAPAt24C1024bwI2cAddress_c,&au8TestMemBuffer[0], 5, TRUE);
+   69:      Iic4OTAP_StopTransaction(); 
+   70:  
+   71:      return gEepromOTAPNoErr_c;
+   72:   
+   73:   }
+   74:  #endif
+   75:  
+   76:  // Eeprom_Init function for Target Board based on 1323xMRB, which has 
+   77:  // AT45DB021D eeprom
+   78:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)    
+   79:   eepromOTAPErr_t  Eeprom4OTAP_Init (void) 
+   80:   {
+   81:      uint8_t au8TestMemBuffer[8] = {0};
+   82:      uint8_t au8Pwr2PageSizeBuffer[] = {mEepromOTAPCmdPwrTwoPageSizeSeq_c};
+   83:    
+   84:      //Init PTC5 pin port as output to drive the SPI SS signal
+   85:      PTCDD_PTCDD5 = 1;
+   86:    
+   87:      Spi4OTAP_Init ();
+   88:   
+   89:      mSPI1OTAP_AssertPeripheralSsPin();   
+   90:      // SPI Write the Status Register number.
+   91:      au8TestMemBuffer[0] = mEepromOTAPCmdReadStatusReg_c;
+   92:      Spi4OTAP_Write(au8TestMemBuffer, 1);
+   93:      // Read the Status Register
+   94:      Spi4OTAP_Read(au8TestMemBuffer, 1);
+   95:      mSPI1OTAP_DeassertPeripheralSsPin();
+   96:   
+   97:      // Check if Eeprom Busy
+   98:      if(!(au8TestMemBuffer[0] & mEepromOTAPStatusBusyMask_c)) 
+   99:      {   
+  100:        return gEepromOTAPErrBusBusy_c;
+  101:      }
+  102:      
+  103:      if(!(au8TestMemBuffer[0] & mEepromOTAPPageSize264Mask_c)) // if Eeprom Page Size = 264 
+  104:      { 
+  105:        // This will be done once per every Eeprom device, because this procedure is 
+  106:        // one-time programmable. After starting this procedure the Eeprom will be 
+  107:        // busy during 2 to 4 ms. This will program the Eeprom to work with 
+  108:        // Page size = 256 bytes    
+  109:        
+  110:        mSPI1OTAP_AssertPeripheralSsPin(); 
+  111:        Spi4OTAP_Write(au8Pwr2PageSizeBuffer, 4);
+  112:        mSPI1OTAP_DeassertPeripheralSsPin();
+  113:      } 
+  114:    
+  115:      mSPI1OTAP_AssertPeripheralSsPin(); 
+  116:      au8TestMemBuffer[0] = mEepromOTAPCmdMainMemRead_c;  
+  117:      Spi4OTAP_Write(au8TestMemBuffer, 8); 
+  118:      Spi4OTAP_Read(au8TestMemBuffer, 5);
+  119:      mSPI1OTAP_DeassertPeripheralSsPin();
+  120:      
+  121:      return gEepromOTAPNoErr_c;    
+  122:   }
+  123:  #endif 
+  124:  
+  125:   
+  126:  /************************************************************************************
+  127:  *
+  128:  *  Eeprom4OTAP_Write
+  129:  *
+  130:  ************************************************************************************/
+  131:  
+  132:  // Eeprom_Write function for Target Board 1320xQE128EVB, which uses I2C interface with
+  133:  // the external eeprom   
+  134:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c 
+  135:  eepromOTAPErr_t  Eeprom4OTAP_Write (uint32_t EepromAddress, uint8_t* pu8Data, uint8_t u8DataSize)
+  136:  {
+  137:  
+  138:      if(mEepromOTAPAt24C1024bwPageOffset_c <= EepromAddress)
+  139:      {
+  140:      mu8DeviceAddress = (mEepromOTAPAt24C1024bwI2cAddress_c | mEepromOTAPAt24C1024bwPageMask_c) ; 
+  141:      mu8EepromAddress[0] = (uint8_t)((EepromAddress - mEepromOTAPAt24C1024bwPageOffset_c) >> 8);
+  142:      mu8EepromAddress[1] = (uint8_t)(EepromAddress - mEepromOTAPAt24C1024bwPageOffset_c);
+  143:      } 
+  144:      else
+  145:      {
+  146:      if(mEepromOTAPAt24C1024bwPageOffset_c <= (EepromAddress + u8DataSize)) 
+  147:      {
+  148:         return gEepromOTAPErrAddrOverflow_c; 
+  149:      }
+  150:  
+  151:      mu8DeviceAddress = mEepromOTAPAt24C1024bwI2cAddress_c;
+  152:      
+  153:      mu8EepromAddress[0] = (uint8_t)((EepromAddress) >> 8);
+  154:      mu8EepromAddress[1] = (uint8_t)(EepromAddress);
+  155:      }
+  156:      
+  157:      (void)Iic4OTAP_Write (mu8DeviceAddress,mu8EepromAddress,2, TRUE); 
+  158:  
+  159:      (void)Iic4OTAP_Write (mu8DeviceAddress, pu8Data, u8DataSize, FALSE);
+  160:                                           
+  161:      Iic4OTAP_StopTransaction();
+  162:      
+  163:      return gEepromOTAPNoErr_c; 
+  164:  }
+  165:  #endif
+  166:   
+  167:  // Eeprom_Write function for Target Board based on 1323xMRB, which uses SPI Interface 
+  168:  // with the external eeprom
+  169:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c) 
+  170:  eepromOTAPErr_t  Eeprom4OTAP_Write (uint32_t EepromAddress, uint8_t* pu8Data, uint8_t u8DataSize)
+  171:   {
+  172:      uint8_t u8TempRxBuffer = 0;
+  173:      uint8_t u8TempCounter = 0;
+  174:     
+  175:      mu8EepromAddress[1] = (uint8_t)((EepromAddress >> 16) & 0x03);
+  176:      mu8EepromAddress[2] = (uint8_t) (EepromAddress >> 8);
+  177:      mu8EepromAddress[3] = (uint8_t) EepromAddress;
+  178:      
+  179:      mu16EepromPageNumber =  (uint16_t)((EepromAddress >> 8) & 0x03FF);
+  180:      
+  181:      if((mEepromOTAPAT45DB021DPageSize_c - mu8EepromAddress[3]) < u8DataSize) 
+  182:      {
+  183:         return gEepromOTAPErrAddrOverflow_c;
+  184:      }
+  185:   
+  186:      //-------- Copy Page to Buffer from main memory -------
+  187:      mu8EepromAddress[0] = mEepromOTAPCmdMainMem2Buffer_c;
+  188:      mSPI1OTAP_AssertPeripheralSsPin();   
+  189:      // SPI Write the Status Register number.  
+  190:      Spi4OTAP_Write (mu8EepromAddress, 4); 
+  191:      mSPI1OTAP_DeassertPeripheralSsPin();
+  192:        
+  193:      //------------------------------------------------------
+  194:      
+  195:      //------ Check if Eeprom busy & wait until Free --------
+  196:      do
+  197:      {   
+  198:        mSPI1OTAP_AssertPeripheralSsPin();
+  199:        u8TempRxBuffer = mEepromOTAPCmdReadStatusReg_c;   
+  200:        // SPI Write the Status Register number.
+  201:        Spi4OTAP_Write (&u8TempRxBuffer, 1);
+  202:        // Read the Status Register
+  203:        Spi4OTAP_Read (&u8TempRxBuffer, 1);
+  204:        mSPI1OTAP_DeassertPeripheralSsPin();
+  205:   
+  206:      }while(!(u8TempRxBuffer & mEepromOTAPStatusBusyMask_c));
+  207:      //------------------------------------------------------
+  208:      
+  209:      //------------------ Write to buffer --------------------
+  210:        mu8EepromAddress[0] = mEepromOTAPCmdBufferWrite_c;
+  211:        mSPI1OTAP_AssertPeripheralSsPin();
+  212:        Spi4OTAP_Write (mu8EepromAddress, 4);  
+  213:        Spi4OTAP_Write (pu8Data, u8DataSize); 
+  214:        mSPI1OTAP_DeassertPeripheralSsPin();
+  215:      //------------------------------------------------------
+  216:      
+  217:      //---------- Write to Main mem from buffer -------------
+  218:      mu8EepromAddress[0] = mEepromOTAPCmdMainMemWrite_c;
+  219:      mu8EepromAddress[1] = (uint8_t)((mu16EepromPageNumber >> 8) & 0x03);
+  220:      mu8EepromAddress[2] = (uint8_t)mu16EepromPageNumber;
+  221:  
+  222:      mSPI1OTAP_AssertPeripheralSsPin();   
+  223:      Spi4OTAP_Write (mu8EepromAddress, 4);
+  224:      mSPI1OTAP_DeassertPeripheralSsPin();
+  225:      //------------------------------------------------------
+  226:      
+  227:      return gEepromOTAPNoErr_c;   
+  228:   }
+  229:  #endif 
+  230:     
+  231:                  
+  232:   
+  233:   
+  234:   /************************************************************************************
+  235:  *
+  236:  *  Eeprom4OTAP_Read
+  237:  *
+  238:  ************************************************************************************/
+  239:  
+  240:  // Eeprom_Read function for Target Board 1320xQE128EVB, which uses I2C interface with
+  241:  // the external eeprom 
+  242:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+  243:  eepromOTAPErr_t Eeprom4OTAP_Read (uint32_t EepromAddress, uint8_t* pu8Data, uint8_t u8DataSize)
+  244:   {    
+  245:      
+  246:  
+  247:      if(mEepromOTAPAt24C1024bwPageOffset_c <= EepromAddress)
+  248:      {
+  249:        mu8DeviceAddress = (mEepromOTAPAt24C1024bwI2cAddress_c | mEepromOTAPAt24C1024bwPageMask_c) ; 
+  250:        mu8EepromAddress[0] = (uint8_t)((EepromAddress - mEepromOTAPAt24C1024bwPageOffset_c) >> 8);
+  251:        mu8EepromAddress[1] = (uint8_t)(EepromAddress - mEepromOTAPAt24C1024bwPageOffset_c);
+  252:      } 
+  253:      else
+  254:      {
+  255:        if(mEepromOTAPAt24C1024bwPageOffset_c <= (EepromAddress + u8DataSize)) 
+  256:        {
+  257:           return gEepromOTAPErrAddrOverflow_c; 
+  258:        }
+  259:        
+  260:        mu8DeviceAddress = mEepromOTAPAt24C1024bwI2cAddress_c;
+  261:        mu8EepromAddress[0] = (uint8_t)((EepromAddress) >> 8);
+  262:        mu8EepromAddress[1] = (uint8_t)(EepromAddress);
+  263:      }
+  264:      
+  265:      
+  266:      (void)Iic4OTAP_Write (mu8DeviceAddress,mu8EepromAddress,2, TRUE);
+  267:  
+  268:      (void)Iic4OTAP_Read (mu8DeviceAddress, pu8Data, u8DataSize, TRUE);
+  269:      Iic4OTAP_StopTransaction();
+  270:  
+  271:      return gEepromOTAPNoErr_c; 
+  272:       
+  273:   }
+  274:  #endif
+  275:   
+  276:  // Eeprom_Read function for Target Board based on 1323xMRB, which uses SPI Interface 
+  277:  // with the external eeprom 
+  278:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+  279:  eepromOTAPErr_t Eeprom4OTAP_Read (uint32_t EepromAddress, uint8_t* pu8Data, uint8_t u8DataSize)
+  280:  {
+  281:  
+  282:      mu8EepromAddress[0] = mEepromOTAPCmdMainMemRead_c;
+  283:      mu8EepromAddress[1] = (uint8_t)((EepromAddress >> 16) & 0x03);
+  284:      mu8EepromAddress[2] = (uint8_t) (EepromAddress >> 8);
+  285:      mu8EepromAddress[3] = (uint8_t) EepromAddress;
+  286:      
+  287:      if((mEepromOTAPAT45DB021DPageSize_c - mu8EepromAddress[3]) < u8DataSize) 
+  288:      {
+  289:         return gEepromOTAPErrAddrOverflow_c;
+  290:      }
+  291:      
+  292:      mSPI1OTAP_AssertPeripheralSsPin(); 
+  293:      Spi4OTAP_Write (mu8EepromAddress, 8); 
+  294:      Spi4OTAP_Read (pu8Data, u8DataSize);
+  295:      mSPI1OTAP_DeassertPeripheralSsPin();
+  296:  
+  297:     
+  298:      return gEepromOTAPNoErr_c; 
+  299:   }
+  300:   #endif
+  301:   
+  302:  
+  303:   
+  304:   /************************************************************************************
+  305:  *
+  306:  *  Eeprom4OTAP_Erase
+  307:  *
+  308:  ************************************************************************************/
+  309:  
+  310:  // Eeprom_Erase function for Target Board 1320xQE128EVB
+  311:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+  312:  eepromOTAPErr_t  Eeprom4OTAP_Erase (void) 
+  313:   {
+  314:      /* Eeprom At24C1024bwI2c does not require to erase before writting.
+  315:         Erase procedure may be done by writting 0xFF data in the memory.
+  316:         The user may use Eeprom_Write to achieve this. */
+  317:      return gEepromOTAPErrNotSupported_c;
+  318:   }
+  319:   #endif
+  320:  
+  321:  
+  322:  // Eeprom_Erase function for Target Board based on 1323xMRB
+  323:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+  324:  eepromOTAPErr_t  Eeprom4OTAP_Erase (void) 
+  325:   {
+  326:      uint8_t au8EraseMemBuffer[] = {mEepromOTAPCmdChipEraseSeq_c};
+  327:      uint8_t u8TempRxBuffer = 0;
+  328:      
+  329:      /* After sending the erase chip sequence, the Eeprom will be busy during
+  330:         3.6 to 6 seconds. The user must have this in mind because any other Eeprom
+  331:         API will return BusBusy error while the Eeprom finishes the erase procedure.*/  
+  332:       
+  333:      mSPI1OTAP_AssertPeripheralSsPin(); 
+  334:      Spi4OTAP_Write (au8EraseMemBuffer, 4);
+  335:      mSPI1OTAP_DeassertPeripheralSsPin();
+  336:   
+  337:      //------ Check if Eeprom busy & wait until Free --------
+  338:      do
+  339:      {  
+  340:        mSPI1OTAP_AssertPeripheralSsPin();   
+  341:        u8TempRxBuffer = mEepromOTAPCmdReadStatusReg_c;
+  342:        // SPI Write the Status Register number.
+  343:        Spi4OTAP_Write (&u8TempRxBuffer, 4);
+  344:        // Read the Status Register
+  345:        Spi4OTAP_Read (&u8TempRxBuffer, 1);
+  346:        mSPI1OTAP_DeassertPeripheralSsPin();
+  347:      }while(!(u8TempRxBuffer & mEepromOTAPStatusBusyMask_c));
+  348:      //------------------------------------------------------
+  349:       
+  350:      return gEepromOTAPNoErr_c; 
+  351:      
+  352:   }
+  353:   
+  354:   #endif 
+  355:  
+  356:  /************************************************************************************
+  357:  *************************************************************************************
+  358:  * Private Functions
+  359:  *************************************************************************************
+  360:  ************************************************************************************/
+  361:  
+  362:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+  363:  
+  364:   /************************************************************************************
+  365:  *
+  366:  *  Iic4OTAP_Write
+  367:  *
+  368:  ************************************************************************************/
+  369:  
+  370:  void Iic4OTAP_Write (uint8_t u8SlaveAddress, uint8_t* pu8TxString, uint8_t u8StringLenght, bool_t fStartTx)
+  371:  {
+  372:  
+  373:  
+  374:  if(fStartTx)
+  375:    {  
+  376:      IIC1C |= (0x20|0x10);  
+  377:      IIC1D = ((u8SlaveAddress<<1) & 0xFE);                                       
+  378:      while(!(0x02 & IIC1S));             
+  379:      IIC1S |= 0x02;                       
+  380:    }
+  381:    
+  382:    while(u8StringLenght--)
+  383:    {
+  384:      //Delay4OTAP_us(20);
+  385:      //iicSendNextByte(*pu8TxString++);
+  386:      IIC1D = *pu8TxString++;                                       
+  387:      while(!(0x02 & IIC1S));             
+  388:      IIC1S |= 0x02;     
+  389:    }  
+  390:   
+  391:    
+  392:  }
+  393:  
+  394:  
+  395:   /************************************************************************************
+  396:  *
+  397:  *  Iic4OTAP_Read
+  398:  *
+  399:  ************************************************************************************/
+  400:  
+  401:  void Iic4OTAP_Read (uint8_t u8SlaveAddress, uint8_t* pu8RxString, uint8_t u8StringLenght, bool_t fStartTx)
+  402:  {
+  403:   
+  404:    if(fStartTx)
+  405:    {
+  406:      IIC1C |= (0x04);
+  407:    }
+  408:    else
+  409:    {
+  410:      IIC1C |= (0x20|0x10);
+  411:    }
+  412:  
+  413:  
+  414:    IIC1D = ((u8SlaveAddress<<1) | 0x01);                                       
+  415:    while(!(0x02 & IIC1S));             
+  416:    IIC1S |= 0x02;  
+  417:    
+  418:    if(1 == u8StringLenght) IIC1C |= 0x08;
+  419:    else IIC1C &= ~0x08;
+  420:    IIC1C &= ~0x10;
+  421:    (void)IIC1D;   /*Starts the first reception*/
+  422:    
+  423:    while(u8StringLenght)
+  424:    {
+  425:      //Delay4OTAP_us(20);
+  426:      while(!(0x02 & IIC1S));              
+  427:      IIC1S |= 0x02; 
+  428:      u8StringLenght--;                      
+  429:      if(1 == u8StringLenght) IIC1C |= 0x08;
+  430:      if(0 == u8StringLenght) IIC1C |= 0x10;
+  431:      *pu8RxString++ = IIC1D;
+  432:    }
+  433:  
+  434:  }
+  435:  
+  436:  
+  437:  
+  438:  #endif
+  439:  
+  440:  
+  441:  
+  442:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+  443:  
+  444:   /************************************************************************************
+  445:  *
+  446:  *  Spi4OTAP_Write
+  447:  *
+  448:  ************************************************************************************/
+  449:  
+  450:  void Spi4OTAP_Write (uint8_t* pu8Data, uint8_t u8Size)
+  451:  {
+  452:    uint8_t u8TempCounter; 
+  453:    
+  454:    for(u8TempCounter = 0; u8TempCounter < u8Size; u8TempCounter++)
+  455:    {
+  456:      (void)SPI1S;          
+  457:      SPI1D = *pu8Data++;
+  458:      while (!(SPI1S_SPTEF));
+  459:    }
+  460:    
+  461:  }
+  462:  
+  463:   /************************************************************************************
+  464:  *
+  465:  *  Spi4OTAP_Read
+  466:  *
+  467:  ************************************************************************************/
+  468:  
+  469:  void Spi4OTAP_Read (uint8_t* pu8Data, uint8_t u8Size)
+  470:  {
+  471:    uint8_t u8TempCounter; 
+  472:    
+  473:    for(u8TempCounter = 0; u8TempCounter < u8Size; u8TempCounter++)
+  474:    {
+  475:      (void)SPI1S;             
+  476:      SPI1D = mOTAPDummyByte_c;
+  477:      while (!(SPI1S_SPRF));
+  478:      *pu8Data++ = SPI1D;
+  479:    }
+  480:    
+  481:  }
+  482:  
+  483:   /************************************************************************************
+  484:  *
+  485:  *  Spi4OTAP_Init
+  486:  *
+  487:  ************************************************************************************/
+  488:  
+  489:  void Spi4OTAP_Init (void)
+  490:  {
+  491:    
+  492:   /*Init the SS pins in disable mode*/
+  493:    mSPI1OTAP_DeassertPeripheralSsPin();  
+  494:  
+  495:    (void)SPI1S;                // Clear any Interrupt Flag 
+  496:    SPI1BR    = 0x00;           // Baud Rate Divisor = 2
+  497:    SPI1C1       = 0b01010000; 
+  498:    SPI1C2       = 0;           // SS as GPIO,SPI use separate pins 
+  499:  
+  500:  }
+  501:  
+  502:  #endif
+  503:  
+  504:   /************************************************************************************
+  505:  *
+  506:  *  Delay4OTAP_us
+  507:  *
+  508:  ************************************************************************************/
+  509:  
+  510:  void Delay4OTAP_us
+  511:  (
+  512:    uint16_t u16us
+  513:  ) 
+  514:  {
+  515:    uint16_t u16ctr;
+  516:    uint16_t u16Temp;
+  517:                      
+  518:    u16Temp = (uint16_t)((((uint32_t)(gSystemClock_d*10)/40000000)*u16us)/10);                  
+  519:                                              
+  520:    for(u16ctr = 0; u16ctr < u16Temp; u16ctr++){
+  521:      asm NOP; 
+  522:      asm NOP;     
+  523:    }      
+  524:  }
+  525:  #pragma CODE_SEG DEFAULT
+  526:  #endif /*(TRUE == gOtapSupported_d)*/
+  527:  
+  528:  /* End of EEPROM4OTAP.c */
+  529:  

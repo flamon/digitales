@@ -1,0 +1,9 @@
+!SESSION 2012-11-10 11:28:12.823 -----------------------------------------------
+eclipse.buildId=I20070613-1755
+java.version=1.6.0_15
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86
+
+!ENTRY org.eclipse.osgi 2 1 2012-11-10 11:28:35.666
+!MESSAGE NLS unused message: // in: org.eclipse.rse.internal.core.messages

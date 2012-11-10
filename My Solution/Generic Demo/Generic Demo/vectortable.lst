@@ -1,0 +1,569 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * This module contains the Interrupt vector table
+    3:  *
+    4:  *
+    5:  * (c) Copyright 2009, Freescale, Inc. All rights reserved.
+    6:  *
+    7:  *
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  ************************************************************************************/
+   12:  
+   13:  #include "PLM_Config.h"
+   14:  #include "IRQ_Interface.h"
+   15:  
+   16:  #if (TRUE == gSpiSupported_d)
+   17:    #include "SPI_Interface.h"
+   18:  #endif
+   19:  #if (TRUE == gUartSupported_d)
+   20:    #include "UART_Interface.h"
+   21:  #endif 
+   22:  #if (TRUE == gAdcSupported_d)  //defined(gMcs08Gt60Platform_d) || defined(gMcs08qe128Platform_d)
+   23:    #include "ADC_Interface.h"
+   24:  #endif
+   25:  #if (TRUE == gIicSupported_d)
+   26:    #include "IIC_Interface.h"
+   27:  #endif
+   28:  #if (TRUE == gRtiSupported_d)
+   29:    #include "RTI_Interface.h"
+   30:  #endif
+   31:  #if (TRUE == gTimerSupported_d)
+   32:    #include "Timer_Interface.h"
+   33:  #endif
+   34:  #if (TRUE == gKbiSupported_d)
+   35:    #include "KBI_Interface.h"
+   36:  #endif
+   37:  #if (TRUE == gLvdSupported_d)
+   38:    #include "LVD_Interface.h"
+   39:  #endif
+   40:  #if (TRUE == gCmtSupported_d)
+   41:    #include "CMT_Interface.h"
+   42:  #endif
+   43:  #include "OTAP_Interface.h"
+   44:  #include "SMAC_config.h"
+   45:  
+   46:  /***********************************************************************************/
+   47:  #ifdef MEMORY_MODEL_BANKED
+   48:    typedef void __near(* __near ISR_func_t)(void);
+   49:  #else
+   50:    typedef void(* __near ISR_func_t)(void);
+   51:  #endif
+   52:  
+   53:  /***********************************************************************************/
+   54:  
+   55:  #pragma CODE_SEG ISR_SEGMENT
+   56:    INTERRUPT_KEYWORD void UnimplementedISR(void)                                             
+   57:    {                                                                              
+  0000 8b       [2]             PSHH  
+  0001          L1:     
+   58:      for(;;);
+  0001 20fe     [3]             BRA   L1 ;abs = 0001
+   59:    }
+   60:  
+   61:  #ifdef gMc1323xPlatform_d
+   62:    extern INTERRUPT_KEYWORD void PhyHandlerRx_ISR(void);
+   63:    extern INTERRUPT_KEYWORD void PhyHandlerTx_ISR(void);
+   64:    extern INTERRUPT_KEYWORD void PhyHandlerTmr_ISR(void);
+   65:    extern INTERRUPT_KEYWORD void PhyHandlerRxWtrmrk_ISR(void);
+   66:  #endif
+   67:  
+   68:  extern void _Startup (void);
+   69:  #pragma CODE_SEG DEFAULT  
+   70:  
+   71:  
+   72:  /***********************************************************************************/
+   73:  
+   74:  #ifdef gMcs08Gt60Platform_d 
+   75:    const ISR_func_t ISR_vectors[] @0xFFC0 =
+   76:    {
+   77:      UnimplementedISR,       // vector 31   - NOT A REAL VECTOR
+   78:      UnimplementedISR,       // vector 30   - NOT A REAL VECTOR
+   79:      UnimplementedISR,       // vector 29   - NOT A REAL VECTOR
+   80:      UnimplementedISR,       // vector 28   - NOT A REAL VECTOR
+   81:      UnimplementedISR,       // vector 27   - NOT A REAL VECTOR
+   82:      UnimplementedISR,       // vector 26   - NOT A REAL VECTOR
+   83:  /*------------------RTI interrupt vector------------------------*/   
+   84:  #if (TRUE == gRtiSupported_d)    
+   85:    #if (gRtiMode_d == gInterruption_c)  
+   86:        Rti_Isr,              // vector 25   - RTI
+   87:    #else    
+   88:        UnimplementedISR,     // vector 25   - RTI
+   89:    #endif
+   90:  #else
+   91:    UnimplementedISR,         // vector 25   - RTI
+   92:  #endif 
+   93:  /*------------------IIC interrupt vector------------------------*/ 
+   94:  #if (TRUE == gIicSupported_d)   
+   95:    #if (gIicMode_d == gInterruption_c) 
+   96:        IIC_Isr,              // vector 24   - IIC 
+   97:    #else    
+   98:        UnimplementedISR,     // vector 24   - IIC 
+   99:    #endif
+  100:  #else    
+  101:        UnimplementedISR,     // vector 24   - IIC 
+  102:  #endif
+  103:  /*------------------ADC interrupt vector------------------------*/  
+  104:  #if (TRUE == gAdcSupported_d)  
+  105:    #if (gAdcMode_d == gAdcInterrupt_c) 
+  106:        ADC_Isr,              // vector 23   - ADC
+  107:    #else
+  108:        UnimplementedISR,     // vector 23   - ADC
+  109:    #endif  
+  110:  #else
+  111:      UnimplementedISR,       // vector 23   - ADC
+  112:  #endif 
+  113:  /*------------------KBI interrupt vector------------------------*/  
+  114:  #if (TRUE == gKbiSupported_d) 
+  115:    #if (gKbiMode_d == gInterruption_c)  
+  116:        KBI1_ISR,             // vector 22   - KBI
+  117:    #else    
+  118:        UnimplementedISR,     // vector 22   - KBI
+  119:    #endif
+  120:  #else    
+  121:      UnimplementedISR,       // vector 22   - KBI
+  122:  #endif
+  123:  /*------------------UART2 interrupt vectors----------------------*/ 
+  124:  #if (TRUE == gUartSupported_d)
+  125:    #if (gUart2_Enabled_d) 
+  126:      #if (gInterruption_c == gUartTxMode_d)
+  127:        Uart2_TxIsr,          // vector 21   - SCI2 TX
+  128:      #else                     
+  129:        UnimplementedISR,     // vector 21   - SCI2 TX
+  130:      #endif  
+  131:        Uart2_RxIsr,          // vector 20   - SCI2 RX
+  132:        Uart2_ErrorIsr,       // vector 19   - SCI2 Error
+  133:    #else
+  134:        UnimplementedISR,     // vector 21   - SCI2 TX
+  135:        UnimplementedISR,     // vector 20   - SCI2 RX
+  136:        UnimplementedISR,     // vector 19   - SCI2 Error
+  137:    #endif
+  138:  #else    
+  139:      UnimplementedISR,       // vector 21   - SCI2 TX
+  140:      UnimplementedISR,       // vector 20   - SCI2 RX
+  141:      UnimplementedISR,       // vector 19   - SCI2 Error
+  142:  #endif  
+  143:  /*------------------UART1 interrupt vectors----------------------*/  
+  144:  #if (TRUE == gUartSupported_d) 
+  145:    #if (gUart1_Enabled_d) 
+  146:      #if (gInterruption_c == gUartTxMode_d)   
+  147:        Uart1_TxIsr,          // vector 18   - SCI1 TX
+  148:      #else
+  149:        UnimplementedISR,     // vector 18   - SCI1 TX
+  150:      #endif
+  151:        Uart1_RxIsr,          // vector 17   - SCI1 RX
+  152:        Uart1_ErrorIsr,       // vector 16   - SCI1 Error
+  153:    #else
+  154:      UnimplementedISR,       // vector 18   - SCI1 TX
+  155:      UnimplementedISR,       // vector 17   - SCI1 RX
+  156:      UnimplementedISR,       // vector 16   - SCI1 Error  
+  157:    #endif
+  158:  #else    
+  159:      UnimplementedISR,       // vector 18   - SCI1 TX
+  160:      UnimplementedISR,       // vector 17   - SCI1 RX
+  161:      UnimplementedISR,       // vector 16   - SCI1 Error 
+  162:  #endif 
+  163:  /*------------------SPI interrupt vector-----------------------*/ 
+  164:  #if (TRUE == gSpiSupported_d)
+  165:    #if (gSpiUsePort1_d && (gSpi1Mode_d == gInterruption_c))       
+  166:        SPI1_Isr,             // vector 15   - SPI
+  167:    #else
+  168:        UnimplementedISR,     // vector 15   - SPI
+  169:    #endif 
+  170:  #else
+  171:    UnimplementedISR,         // vector 15   - SPI
+  172:  #endif    
+  173:  /*------------------TMR interrupt vectors-----------------------*/
+  174:  #if (TRUE == gTimerSupported_d)  
+  175:    #if (gTimerMode_d == gInterruption_c)     
+  176:        Tmr_Tmr2Isr,          // vector 14   - TPM2 Cverflow
+  177:        Tmr_Tmr2Isr,          // vector 13   - TPM2 Channel 4
+  178:        Tmr_Tmr2Isr,          // vector 12   - TPM2 Channel 3
+  179:        Tmr_Tmr2Isr,          // vector 11   - TPM2 Channel 2
+  180:        Tmr_Tmr2Isr,          // vector 10   - TPM2 Channel 1
+  181:        Tmr_Tmr2Isr,          // vector 09   - TPM2 Channel 0
+  182:        Tmr_Tmr1Isr,          // vector 08   - TPM1 Overflow
+  183:        Tmr_Tmr1Isr,          // vector 07   - TPM1 Channel 2
+  184:        Tmr_Tmr1Isr,          // vector 06   - TPM1 Channel 1
+  185:        Tmr_Tmr1Isr,          // vector 05   - TPM1 Channel 0
+  186:    #else    
+  187:        UnimplementedISR,     // vector 14   - TPM2 Cverflow
+  188:        UnimplementedISR,     // vector 13   - TPM2 Channel 4
+  189:        UnimplementedISR,     // vector 12   - TPM2 Channel 3
+  190:        UnimplementedISR,     // vector 11   - TPM2 Channel 2
+  191:        UnimplementedISR,     // vector 10   - TPM2 Channel 1
+  192:        UnimplementedISR,     // vector 09   - TPM2 Channel 0
+  193:        UnimplementedISR,     // vector 08   - TPM1 Overflow
+  194:        UnimplementedISR,     // vector 07   - TPM1 Channel 2
+  195:        UnimplementedISR,     // vector 06   - TPM1 Channel 1
+  196:        UnimplementedISR,     // vector 05   - TPM1 Channel 0
+  197:    #endif
+  198:  #else    
+  199:      UnimplementedISR,       // vector 14   - TPM2 Cverflow
+  200:      UnimplementedISR,       // vector 13   - TPM2 Channel 4
+  201:      UnimplementedISR,       // vector 12   - TPM2 Channel 3
+  202:      UnimplementedISR,       // vector 11   - TPM2 Channel 2
+  203:      UnimplementedISR,       // vector 10   - TPM2 Channel 1
+  204:      UnimplementedISR,       // vector 09   - TPM2 Channel 0
+  205:      UnimplementedISR,       // vector 08   - TPM1 Overflow
+  206:      UnimplementedISR,       // vector 07   - TPM1 Channel 2
+  207:      UnimplementedISR,       // vector 06   - TPM1 Channel 1
+  208:      UnimplementedISR,       // vector 05   - TPM1 Channel 0
+  209:  #endif 
+  210:  /*------------------ICG interrupt vectors-----------------------*/ 
+  211:      UnimplementedISR,       // vector 04   - ICG (FLL lock of clock)
+  212:  /*------------------LVD interrupt vector-----------------------*/    
+  213:  #if (TRUE == gLvdSupported_d)    
+  214:    #if (gLvdMode_d == gInterruption_c)  
+  215:        LowVoltageDetectIsr,  // vector 03   - LVD
+  216:    #else
+  217:        UnimplementedISR,     // vector 03   - LVD
+  218:    #endif    
+  219:  #else
+  220:      UnimplementedISR,       // vector 03   - LVD
+  221:  #endif
+  222:  /*------------------IRQ interrupt vector-----------------------*/  
+  223:      IRQ_Isr,                // vector 02   - IRQ (MC1319x interrupt)
+  224:  /*------------------SWI interrupt vector-----------------------*/    
+  225:      UnimplementedISR,       // vector 01   - SWI (Software Interrupt)
+  226:  /*------------------Reset interrupt vector---------------------*/     
+  227:                              // vector 00   - Reset (Watchdog timer, LVD, external pin, illegal opcode)
+  228:  };
+  229:  #endif    
+  230:  
+  231:  /******************* ISR Vectors definition for HCs08QE128 platform *******************/
+  232:  
+  233:  #ifdef gMcs08qe128Platform_d
+  234:    const ISR_func_t ISR_vectors[] @ 0xFFC0 =
+  235:    {
+  236:  #if (TRUE == gTimerSupported_d) 
+  237:    #if (gTimerMode_d == gInterruption_c)    
+  238:        Tmr_Tmr3Isr,          // vector 31   - TPM3 Overflow
+  239:        Tmr_Tmr3Isr,          // vector 30   - TPM3 Channel 5
+  240:        Tmr_Tmr3Isr,          // vector 29   - TPM3 Channel 4
+  241:        Tmr_Tmr3Isr,          // vector 28   - TPM3 Channel 3
+  242:        Tmr_Tmr3Isr,          // vector 27   - TPM3 Channel 2
+  243:        Tmr_Tmr3Isr,          // vector 26   - TPM3 Channel 1
+  244:        Tmr_Tmr3Isr,          // vector 25   - TPM3 Channel 0
+  245:    #else
+  246:        UnimplementedISR,     // vector 31   - TPM3 Overflow
+  247:        UnimplementedISR,     // vector 30   - TPM3 Channel 5
+  248:        UnimplementedISR,     // vector 29   - TPM3 Channel 4
+  249:        UnimplementedISR,     // vector 28   - TPM3 Channel 3
+  250:        UnimplementedISR,     // vector 27   - TPM3 Channel 2
+  251:        UnimplementedISR,     // vector 26   - TPM3 Channel 1
+  252:        UnimplementedISR,     // vector 25   - TPM3 Channel 0
+  253:    #endif
+  254:  #else
+  255:      UnimplementedISR,       // vector 31   - TPM3 Overflow
+  256:      UnimplementedISR,       // vector 30   - TPM3 Channel 5
+  257:      UnimplementedISR,       // vector 29   - TPM3 Channel 4
+  258:      UnimplementedISR,       // vector 28   - TPM3 Channel 3
+  259:      UnimplementedISR,       // vector 27   - TPM3 Channel 2
+  260:      UnimplementedISR,       // vector 26   - TPM3 Channel 1
+  261:      UnimplementedISR,       // vector 25   - TPM3 Channel 0
+  262:  #endif
+  263:  /*------------------RTI interrupt vector------------------------*/
+  264:  #if (TRUE == gRtiSupported_d) 
+  265:    #if (gRtiMode_d == gInterruption_c)    
+  266:        Rti_Isr,              // vector 24   - RTI
+  267:    #else
+  268:        UnimplementedISR,     // vector 24   - RTI
+  269:    #endif
+  270:  #else
+  271:      UnimplementedISR,       // vector 24   - RTI
+  272:  #endif
+  273:  /*-----------------UART2 interrupt vector------------------------*/ 
+  274:  #if (TRUE == gUartSupported_d)
+  275:    #if (gUart2_Enabled_d) 
+  276:      #if (gInterruption_c == gUartTxMode_d)
+  277:        Uart2_TxIsr,          // vector 23   - SCI2 TX
+  278:      #else                     
+  279:        UnimplementedISR,     // vector 23   - SCI2 TX
+  280:      #endif  
+  281:        Uart2_RxIsr,          // vector 22   - SCI2 RX
+  282:        Uart2_ErrorIsr,       // vector 21   - SCI2 Error
+  283:    #else
+  284:        UnimplementedISR,     // vector 23   - SCI2 TX
+  285:        UnimplementedISR,     // vector 22   - SCI2 RX
+  286:        UnimplementedISR,     // vector 21   - SCI2 Error
+  287:    #endif
+  288:  #else
+  289:      UnimplementedISR,       // vector 23   - SCI2 TX
+  290:      UnimplementedISR,       // vector 22   - SCI2 RX
+  291:      UnimplementedISR,       // vector 21   - SCI2 Error
+  292:  #endif
+  293:  /*------------Analog Comparator interrupt vector----------------*/ 
+  294:      UnimplementedISR,       // vector 20   - Analog comparator x
+  295:  /*-----------------ADC interrupt vector-------------------------*/ 
+  296:  #if (TRUE == gAdcSupported_d)     
+  297:    #if (gAdcMode_d == gAdcInterrupt_c)   
+  298:        ADC_Isr,              // vector 19   - ADC
+  299:    #else
+  300:        UnimplementedISR,     // vector 19   - ADC
+  301:    #endif  
+  302:  #else
+  303:      UnimplementedISR,       // vector 19   - ADC
+  304:  #endif
+  305:  /*-----------------KBI interrupt vector-------------------------*/ 
+  306:  #if (TRUE == gKbiSupported_d)   
+  307:    #if (gKbiMode_d == gInterruption_c) 
+  308:         KBI1_ISR,            // vector 18   - KBI
+  309:    #else    
+  310:        UnimplementedISR,     // vector 18   - KBI
+  311:    #endif
+  312:  #else    
+  313:      UnimplementedISR,       // vector 18   - KBI
+  314:  #endif
+  315:  /*-----------------IIC interrupt vector-------------------------*/ 
+  316:  #if (TRUE == gIicSupported_d)   
+  317:    #if (gIicMode_d == gInterruption_c) 
+  318:        IIC_Isr,              // vector 17   - IIC 
+  319:    #else    
+  320:        UnimplementedISR,     // vector 17   - IIC 
+  321:    #endif
+  322:  #else    
+  323:      UnimplementedISR,       // vector 17   - IIC 
+  324:  #endif
+  325:  /*-----------------UART1 interrupt vector------------------------*/ 
+  326:  #if (TRUE == gUartSupported_d)
+  327:    #if (gUart1_Enabled_d)
+  328:      #if (gInterruption_c == gUartTxMode_d)    
+  329:        Uart1_TxIsr,          // vector 16   - SCI1 TX
+  330:      #else
+  331:        UnimplementedISR,     // vector 16   - SCI1 TX
+  332:      #endif
+  333:        Uart1_RxIsr,          // vector 15   - SCI1 RX
+  334:        Uart1_ErrorIsr,       // vector 14   - SCI1 Error
+  335:    #else
+  336:        UnimplementedISR,     // vector 16   - SCI1 TX
+  337:        UnimplementedISR,     // vector 15   - SCI1 RX
+  338:        UnimplementedISR,     // vector 14   - SCI1 Error  
+  339:    #endif
+  340:  #else
+  341:      UnimplementedISR,       // vector 16   - SCI1 TX
+  342:      UnimplementedISR,       // vector 15   - SCI1 RX
+  343:      UnimplementedISR,       // vector 14   - SCI1 Error  
+  344:  #endif
+  345:  /*-----------------SPI interrupt vectors-------------------------*/ 
+  346:  #if (TRUE == gSpiSupported_d) 
+  347:    #if (gSpiUsePort1_d && (gSpi1Mode_d == gInterruption_c))  
+  348:        SPI1_Isr,             // vector 13  - SPI1
+  349:    #else
+  350:        UnimplementedISR,     // vector 13  - SPI1
+  351:    #endif
+  352:    #if (gSpiUsePort2_d && (gSpi2Mode_d == gInterruption_c))
+  353:        SPI2_Isr,             // vector 12  - SPI2
+  354:    #else 
+  355:        UnimplementedISR,     // vector 12  - SPI2
+  356:    #endif   
+  357:  #else 
+  358:      UnimplementedISR,       // vector 13  - SPI1
+  359:      UnimplementedISR,       // vector 12  - SPI2
+  360:  #endif 
+  361:  /*-----------------TMR interrupt vectors-------------------------*/ 
+  362:  #if (TRUE == gTimerSupported_d) 
+  363:    #if (gTimerMode_d == gInterruption_c)    
+  364:        Tmr_Tmr2Isr,          // vector 11   - TPM2 Overflow
+  365:        Tmr_Tmr2Isr,          // vector 10   - TPM2 Channel 2
+  366:        Tmr_Tmr2Isr,          // vector 09   - TPM2 Channel 1
+  367:        Tmr_Tmr2Isr,          // vector 08   - TPM2 Channel 0        
+  368:        Tmr_Tmr1Isr,          // vector 07   - TPM1 Overflow
+  369:        Tmr_Tmr1Isr,          // vector 06   - TPM1 Channel 2
+  370:        Tmr_Tmr1Isr,          // vector 05   - TPM1 Channel 1
+  371:        Tmr_Tmr1Isr,          // vector 04   - TPM1 Channel 0
+  372:    #else
+  373:        UnimplementedISR,     // vector 11   - TPM2 Overflow
+  374:        UnimplementedISR,     // vector 10   - TPM2 Channel 2
+  375:        UnimplementedISR,     // vector 09   - TPM2 Channel 1
+  376:        UnimplementedISR,     // vector 08   - TPM2 Channel 0        
+  377:        UnimplementedISR,     // vector 07   - TPM1 Overflow
+  378:        UnimplementedISR,     // vector 06   - TPM1 Channel 2
+  379:        UnimplementedISR,     // vector 05   - TPM1 Channel 1
+  380:        UnimplementedISR,     // vector 04   - TPM1 Channel 0
+  381:    #endif
+  382:  #else
+  383:      UnimplementedISR,       // vector 11   - TPM2 Overflow
+  384:      UnimplementedISR,       // vector 10   - TPM2 Channel 2
+  385:      UnimplementedISR,       // vector 09   - TPM2 Channel 1
+  386:      UnimplementedISR,       // vector 08   - TPM2 Channel 0        
+  387:      UnimplementedISR,       // vector 07   - TPM1 Overflow
+  388:      UnimplementedISR,       // vector 06   - TPM1 Channel 2
+  389:      UnimplementedISR,       // vector 05   - TPM1 Channel 1
+  390:      UnimplementedISR,       // vector 04   - TPM1 Channel 0
+  391:  #endif
+  392:  /*-----------------LVD interrupt vector------------------------*/ 
+  393:  #if (TRUE == gLvdSupported_d) 
+  394:    #if (gLvdMode_d == gInterruption_c)   
+  395:        LowVoltageDetectIsr,  // vector 03   - LVD
+  396:    #else
+  397:        UnimplementedISR,     // vector 03   - LVD
+  398:    #endif  
+  399:  #else
+  400:      UnimplementedISR,       // vector 03   - LVD
+  401:  #endif  
+  402:  /*------------------IRQ interrupt vector-----------------------*/  
+  403:      IRQ_Isr,                // vector 02   - IRQ (MC1319x interrupt)
+  404:  /*------------------SWI interrupt vector-----------------------*/      
+  405:      UnimplementedISR,       // vector 01   - SWI (Software Interrupt)
+  406:  /*------------------Reset interrupt vector---------------------*/     
+  407:                              // vector 00   - Reset (Watchdog timer, LVD, external pin, illegal opcode)
+  408:    };
+  409:  #endif  
+  410:  
+  411:  /******************* ISR Vectors definition for MC1323x platform *******************/
+  412:  
+  413:  #ifdef gMc1323xPlatform_d
+  414:    const ISR_func_t ISR_vectors[] @ 0xFFC0=
+  415:    {
+  416:          
+  417:      UnimplementedISR,       // vector 31   - NOT A REAL VECTOR
+  418:      UnimplementedISR,       // vector 30   - NOT A REAL VECTOR
+  419:      UnimplementedISR,       // vector 29   - NOT A REAL VECTOR
+  420:      UnimplementedISR,       // vector 28   - NOT A REAL VECTOR
+  421:      UnimplementedISR,       // vector 27   - NOT A REAL VECTOR
+  422:      UnimplementedISR,       // vector 26   - NOT A REAL VECTOR
+  423:  /*------------------RTI interrupt vector------------------------*/    
+  424:  #if (TRUE == gRtiSupported_d)    
+  425:    #if (gRtiMode_d == gInterruption_c)       
+  426:        Rti_Isr,              // vector 25   - RTI
+  427:    #else
+  428:        UnimplementedISR,     // vector 25   - RTI
+  429:    #endif
+  430:  #else
+  431:      UnimplementedISR,       // vector 25   - RTI
+  432:  #endif
+  433:  /*-----------------KBI interrupt vector-------------------------*/ 
+  434:  #if (TRUE == gKbiSupported_d)
+  435:    #if (gKbiMode_d == gInterruption_c)    
+  436:        KBI1_ISR,             // vector 24   - KBI1 
+  437:        KBI2_ISR,             // vector 23   - KBI2 
+  438:    #else
+  439:        UnimplementedISR,     // vector 24   - KBI1 
+  440:        UnimplementedISR,     // vector 23   - KBI2
+  441:    #endif
+  442:  #else
+  443:      UnimplementedISR,       // vector 24   - KBI1 
+  444:      UnimplementedISR,       // vector 23   - KBI2
+  445:  #endif
+  446:  /*-----------------IIC interrupt vector-------------------------*/ 
+  447:  #if (TRUE == gIicSupported_d)
+  448:    #if (gIicMode_d == gInterruption_c) 
+  449:        IIC_Isr,              // vector 22   - IIC 
+  450:    #else    
+  451:        UnimplementedISR,     // vector 22   - IIC 
+  452:    #endif
+  453:  #else    
+  454:      UnimplementedISR,       // vector 22   - IIC 
+  455:  #endif
+  456:  /*-----------------CMT interrupt vector-------------------------*/
+  457:  #if (TRUE == gCmtSupported_d) 
+  458:    CMT_InterruptHandler,     // vector 21   - CMT
+  459:  #else
+  460:    UnimplementedISR,         // vector 21   - CMT
+  461:  #endif    
+  462:  /*-----------------UART1 interrupt vector-----------------------*/      
+  463:  #if (TRUE == gUartSupported_d)
+  464:    #if (gUart1_Enabled_d)
+  465:      #if (gInterruption_c == gUartTxMode_d)   
+  466:        Uart1_TxIsr,          // vector 20   - SCI TX
+  467:      #else    
+  468:        UnimplementedISR,     // vector 20   - SCI TX
+  469:      #endif
+  470:        Uart1_RxIsr,          // vector 19   - SCI RX
+  471:        Uart1_ErrorIsr,       // vector 18   - SCI Error
+  472:    #else
+  473:        UnimplementedISR,     // vector 20   - SCI TX
+  474:        UnimplementedISR,     // vector 19   - SCI RX
+  475:        UnimplementedISR,     // vector 18   - SCI Error  
+  476:    #endif
+  477:  #else
+  478:      UnimplementedISR,       // vector 20   - SCI TX
+  479:      UnimplementedISR,       // vector 19   - SCI RX
+  480:      UnimplementedISR,       // vector 18   - SCI Error  
+  481:  #endif
+  482:  /*------------------SPI interrupt vector-----------------------*/  
+  483:  #if (TRUE == gSpiSupported_d)
+  484:    #if (gSpiUsePort1_d && (gSpi1Mode_d == gInterruption_c))     
+  485:        SPI1_Isr,             // vector 17   - SPI
+  486:    #else
+  487:        UnimplementedISR,     // vector 17   - SPI
+  488:    #endif
+  489:  #else
+  490:      UnimplementedISR,       // vector 17   - SPI
+  491:  #endif  
+  492:  /*------------------TMR interrupt vector-----------------------*/    
+  493:  #if (TRUE == gTimerSupported_d)
+  494:    #if (gTimerMode_d == gInterruption_c)       
+  495:        Tmr_Tmr4Isr,          // vector 16   - TPM4 Overflow
+  496:        Tmr_Tmr4Isr,          // vector 15   - TPM4 Channel 0
+  497:        Tmr_Tmr3Isr,          // vector 14   - TPM3 Overflow
+  498:        Tmr_Tmr3Isr,          // vector 13   - TPM3 Channel 0
+  499:        Tmr_Tmr2Isr,          // vector 12   - TPM2 Overflow
+  500:        Tmr_Tmr2Isr,          // vector 11   - TPM2 Channel 0
+  501:        Tmr_Tmr1Isr,          // vector 10   - TPM1 Overflow
+  502:        Tmr_Tmr1Isr,          // vector 09   - TPM1 Channel 0
+  503:    #else
+  504:        UnimplementedISR,     // vector 16   - TPM4 Overflow  
+  505:        UnimplementedISR,     // vector 15   - TPM4 Channel 0  
+  506:        UnimplementedISR,     // vector 14   - TPM3 Overflow  
+  507:        UnimplementedISR,     // vector 13   - TPM3 Channel 0  
+  508:        UnimplementedISR,     // vector 12   - TPM2 Overflow  
+  509:        UnimplementedISR,     // vector 11   - TPM2 Channel 0  
+  510:        UnimplementedISR,     // vector 10   - TPM1 Overflow  
+  511:        UnimplementedISR,     // vector 09   - TPM1 Channel 0  
+  512:    #endif 
+  513:  #else
+  514:      UnimplementedISR,       // vector 16   - TPM4 Overflow
+  515:      UnimplementedISR,       // vector 15   - TPM4 Channel 0
+  516:      UnimplementedISR,       // vector 14   - TPM3 Overflow
+  517:      UnimplementedISR,       // vector 13   - TPM3 Channel 0
+  518:      UnimplementedISR,       // vector 12   - TPM2 Overflow
+  519:      UnimplementedISR,       // vector 11   - TPM2 Channel 0
+  520:      UnimplementedISR,       // vector 10   - TPM1 Overflow
+  521:      UnimplementedISR,       // vector 09   - TPM1 Channel 0
+  522:  #endif 
+  523:  /*------------------ASM interrupt vector-----------------------*/  
+  524:      UnimplementedISR,       // vector 08   - ASM  
+  525:  /*------------------PHY interrupt vectors----------------------*/     
+  526:      PhyHandlerRxWtrmrk_ISR, // vector 07   - PHY RX WTR MRK
+  527:      PhyHandlerTmr_ISR,      // vector 06   - PHY TIMERS
+  528:      PhyHandlerTx_ISR,       // vector 05   - PHY TX
+  529:      PhyHandlerRx_ISR,       // vector 04   - PHY RX
+  530:  /*------------------LVD interrupt vector-----------------------*/      
+  531:  #if (TRUE == gLvdSupported_d)   
+  532:    #if (gLvdMode_d == gInterruption_c)      
+  533:        LowVoltageDetectIsr,  // vector 03   - LVD
+  534:    #else
+  535:        UnimplementedISR,     // vector 03   - LVD
+  536:    #endif
+  537:  #else
+  538:      UnimplementedISR,       // vector 03   - LVD
+  539:  #endif
+  540:  /*------------------IRQ interrupt vector-----------------------*/  
+  541:      UnimplementedISR,       // vector 02   - IRQ
+  542:  /*------------------SWI interrupt vector-----------------------*/       
+  543:      UnimplementedISR,       // vector 01   - SWI (Software Interrupt)
+  544:  /*------------------Reset interrupt vector---------------------*/     
+  545:                              // vector 00   - Reset (Watchdog timer, LVD, external pin, illegal opcode)
+  546:    };
+  547:  #endif
+  548:  
+  549:  /***********************************************************************************/
+  550:  
+  551:  #pragma CONST_SEG RESET_VECTOR_SECTION
+  552:  
+  553:  #if(TRUE == gOtapSupported_d)
+  554:    const ISR_func_t Reset_vector[] = {Otap_Startup};    // Vector 0    Reset vector
+  555:  #else
+  556:    const ISR_func_t Reset_vector[] = {_Startup};    // Vector 0    Reset vector
+  557:  #endif
+  558:  
+  559:  #pragma CONST_SEG DEFAULT
+  560:  
+  561:  
+  562:  
+  563:  /***********************************************************************************/
+  564:  

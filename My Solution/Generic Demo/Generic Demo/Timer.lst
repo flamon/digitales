@@ -1,0 +1,983 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * Source file for Timer driver.
+    3:  *
+    4:  *
+    5:  * (c) Copyright 2009, Freescale, Inc.  All rights reserved.
+    6:  *
+    7:  * No part of this document must be reproduced in any form - including copied,
+    8:  * transcribed, printed or by any electronic means - without specific written
+    9:  * permission from Freescale.
+   10:  ************************************************************************************/
+   11:  
+   12:  #include "Timer.h"
+   13:  
+   14:  
+   15:    
+   16:  /************************************************************************************
+   17:  *************************************************************************************
+   18:  * Private type definitions
+   19:  *************************************************************************************
+   20:  ************************************************************************************/
+   21:  
+   22:  /************************************************************************************
+   23:  *************************************************************************************
+   24:  * Private defines and macros
+   25:  *************************************************************************************
+   26:  ************************************************************************************/
+   27:  
+   28:  /************************************************************************************
+   29:  *************************************************************************************
+   30:  * Private constants
+   31:  *************************************************************************************
+   32:  ************************************************************************************/
+   33:  
+   34:  /************************************************************************************
+   35:  *************************************************************************************
+   36:  * Private prototypes
+   37:  *************************************************************************************
+   38:  ************************************************************************************/
+   39:  
+   40:  /************************************************************************************
+   41:  *************************************************************************************
+   42:  * Public memory declarations
+   43:  *************************************************************************************
+   44:  ************************************************************************************/
+   45:  
+   46:   /************************************************************************************
+   47:  *************************************************************************************
+   48:  * Private memory declarations
+   49:  *************************************************************************************
+   50:  ************************************************************************************/
+   51:  #if TRUE == gTimerSupported_d
+   52:  
+   53:  #ifdef gMcs08Gt60Platform_d
+   54:    const uint8_t mu8TmrMaxChannel[] = {mTmr1MaxChannel_c,mTmr2MaxChannel_c};
+   55:  
+   56:    static uint8_t *mu8TmrStartRegs[]={&TPM1SC,&TPM2SC};
+   57:                    
+   58:  
+   59:    static uint8_t *mu8TmrChannStatCntlReg[gTmrMax_c][mTmr2MaxChannel_c] = 
+   60:                                    {&TPM1C0SC,&TPM1C1SC,&TPM1C2SC,NULL,NULL,
+   61:                                     &TPM2C0SC,&TPM2C1SC,&TPM2C2SC,&TPM2C3SC,&TPM2C4SC};
+   62:                                     
+   63:    static uint8_t *mu8TmrChannValueHighReg[gTmrMax_c][mTmr2MaxChannel_c] = 
+   64:                                    {&TPM1C0VH,&TPM1C1VH,&TPM1C2VH,NULL,NULL,
+   65:                                     &TPM2C0VH,&TPM2C1VH,&TPM2C2VH,&TPM2C3VH,&TPM2C4VH};
+   66:  
+   67:    static uint8_t *mu8TmrChannValueLowReg[gTmrMax_c][mTmr2MaxChannel_c] = 
+   68:                                    {&TPM1C0VL,&TPM1C1VL,&TPM1C2VL,NULL,NULL,
+   69:                                     &TPM2C0VL,&TPM2C1VL,&TPM2C2VL,&TPM2C3VL,&TPM2C4VL};
+   70:  #endif
+   71:  
+   72:  #ifdef gMcs08qe128Platform_d
+   73:    const uint8_t mu8TmrMaxChannel[] = {mTmr1MaxChannel_c,mTmr2MaxChannel_c,mTmr3MaxChannel_c};
+   74:    
+   75:    static uint8_t *mu8TmrStartRegs[]={&TPM1SC,&TPM2SC,&TPM3SC};
+   76:    
+   77:    static uint8_t *mu8TmrChannStatCntlReg[gTmrMax_c][mTmr3MaxChannel_c] = 
+   78:                                    {&TPM1C0SC,&TPM1C1SC,&TPM1C2SC,NULL,NULL,NULL,
+   79:                                     &TPM2C0SC,&TPM2C1SC,&TPM2C2SC,NULL,NULL,NULL,
+   80:                                     &TPM3C0SC,&TPM3C1SC,&TPM3C2SC,&TPM3C4SC,&TPM3C4SC,&TPM3C5SC};
+   81:                                     
+   82:    static uint8_t *mu8TmrChannValueHighReg[gTmrMax_c][mTmr3MaxChannel_c] = 
+   83:                                    {&TPM1C0VH,&TPM1C1VH,&TPM1C2VH,NULL,NULL,NULL,
+   84:                                     &TPM2C0VH,&TPM2C1VH,&TPM2C2VH,NULL,NULL,NULL,
+   85:                                     &TPM3C0VH,&TPM3C1VH,&TPM3C2VH,&TPM3C4VH,&TPM3C4VH,&TPM3C5VH};
+   86:  
+   87:    static uint8_t *mu8TmrChannValueLowReg[gTmrMax_c][mTmr3MaxChannel_c] = 
+   88:                                    {&TPM1C0VL,&TPM1C1VL,&TPM1C2VL,NULL,NULL,NULL,
+   89:                                     &TPM2C0VL,&TPM2C1VL,&TPM2C2VL,NULL,NULL,NULL,
+   90:                                     &TPM3C0VL,&TPM3C1VL,&TPM3C2VL,&TPM3C4VL,&TPM3C4VL,&TPM3C5VL};
+   91:  #endif
+   92:  
+   93:  
+   94:  #ifdef gMc1323xPlatform_d
+   95:    static uint8_t *mu8TmrStartRegs[] = {&TPM1SC,&TPM2SC,&TPM3SC,&TPM4SC};
+   96:  #endif
+   97:  
+   98:  
+   99:  static tmrCallbackFunction_t mTmrCallbackFuncEvent[gTmrMax_c][gTmrMaxEvent_c];
+  100:  
+  101:  #endif //gTimerSupported_d
+  102:  
+  103:  #ifdef MEMORY_MODEL_BANKED
+  104:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  105:  #else
+  106:  #pragma CODE_SEG DEFAULT
+  107:  #endif 
+  108:  
+  109:  /************************************************************************************
+  110:  *************************************************************************************
+  111:  * Public functions
+  112:  *************************************************************************************
+  113:  ************************************************************************************/
+  114:  
+  115:  /************************************************************************************
+  116:  * Tmr_Init
+  117:  *
+  118:  * This function initializes all timers as disabled and the callback functions as NULL.
+  119:  *
+  120:  ************************************************************************************/
+  121:  #if TRUE == gTimerSupported_d
+  122:  tmrErr_t Tmr_Init(void){
+  0000 8b       [2]             PSHH  
+  123:    uint8_t u8TmrCount;
+  124:    uint8_t u8EventCount;
+  125:    tmrModuleRegs_t *tempTmrModule;
+  126:    
+  127:   
+  128:    for(u8TmrCount = 0; u8TmrCount < gTmrMax_c; u8TmrCount++){
+  0001 95       [2]             TSX   
+  0002 7f       [4]             CLR   ,X
+  0003          L3:     
+  129:      tempTmrModule = (tmrModuleRegs_t *)(mu8TmrStartRegs[u8TmrCount]);
+  0003 fe       [3]             LDX   ,X
+  0004 58       [1]             LSLX  
+  0005 8c       [1]             CLRH  
+  0006 9ebe0000 [6]             LDHX  @mu8TmrStartRegs,X
+  130:      tempTmrModule->TPMxSC = mTmrDisabled_c;
+  000a 7f       [4]             CLR   ,X
+  131:      for(u8EventCount = 0; u8EventCount < gTmrMaxEvent_c; u8EventCount++){
+  000b 4f       [1]             CLRA  
+  000c          LC:     
+  132:        mTmrCallbackFuncEvent[u8TmrCount][u8EventCount] = NULL;
+  000c 95       [2]             TSX   
+  000d fe       [3]             LDX   ,X
+  000e 87       [2]             PSHA  
+  000f a60e     [2]             LDA   #14
+  0011 42       [5]             MUL   
+  0012 95       [2]             TSX   
+  0013 fe       [3]             LDX   ,X
+  0014 58       [1]             LSLX  
+  0015 89       [2]             PSHX  
+  0016 95       [2]             TSX   
+  0017 fb       [3]             ADD   ,X
+  0018 f7       [2]             STA   ,X
+  0019 4f       [1]             CLRA  
+  001a a900     [2]             ADC   #0
+  001c 87       [2]             PSHA  
+  001d 8a       [3]             PULH  
+  001e 88       [3]             PULX  
+  001f 4f       [1]             CLRA  
+  0020 d70001   [4]             STA   @mTmrCallbackFuncEvent:1,X
+  0023 d70000   [4]             STA   @mTmrCallbackFuncEvent,X
+  0026 86       [3]             PULA  
+  0027 4c       [1]             INCA  
+  0028 a107     [2]             CMP   #7
+  002a 25e0     [3]             BCS   LC ;abs = 000c
+  002c 95       [2]             TSX   
+  002d 7c       [4]             INC   ,X
+  002e f6       [3]             LDA   ,X
+  002f a103     [2]             CMP   #3
+  0031 25d0     [3]             BCS   L3 ;abs = 0003
+  133:      }
+  134:    }
+  135:    
+  136:    return gTmrErrNoError_c;
+  0033 4f       [1]             CLRA  
+  137:  }
+  0034 8a       [3]             PULH  
+  0035 81       [6]             RTS   
+  138:  #else
+  139:  
+  140:  tmrErr_t Tmr_Init(void)
+  141:  {
+  142:     return gTmrErrNoError_c;
+  143:  }
+  144:  
+  145:  #endif //gTimerSupported_d  
+  146:  
+  147:  /************************************************************************************
+  148:  * Tmr_SetChannelConfig
+  149:  *
+  150:  * Configure the Timer channels by setting the operation mode, the edge or level for
+  151:  * the pin associated to the channel and the compare value. Also it sets the 
+  152:  * interruption bit if the interruption mode was selected for this module.
+  153:  *
+  154:  ************************************************************************************/
+  155:  #if TRUE == gTimerSupported_d
+  156:  tmrErr_t Tmr_SetChannelConfig(
+  157:    tmrNumber_t         tmrNumber,
+  158:    tmrChannelConfig_t  *pTmrChanConfig
+  159:  ){
+  0000 87       [2]             PSHA  
+  0001 89       [2]             PSHX  
+  0002 8b       [2]             PSHH  
+  160:  
+  161:    tmrModuleRegs_t *tempTmrModule;
+  162:    tempTmrModule = (tmrModuleRegs_t *)(mu8TmrStartRegs[tmrNumber]);  
+  163:       
+  164:    if((NULL == pTmrChanConfig)){
+  0003 650000   [3]             CPHX  #0
+  0006 2605     [3]             BNE   LD ;abs = 000d
+  165:      return gTmrErrNullPointer_c;
+  0008 a601     [2]             LDA   #1
+  000a cc009f   [4]             JMP   L9F ;abs = 009f
+  000d          LD:     
+  166:    } 
+  167:    
+  168:    else{
+  169:      /*Validation for valid parameters*/
+  170:      if (gTmrMax_c > tmrNumber){
+  000d a103     [2]             CMP   #3
+  000f 2411     [3]             BCC   L22 ;abs = 0022
+  171:  #ifdef gMc1323xPlatform_d 
+  172:        if((gTmrMaxChannel_c > pTmrChanConfig->tmrChannel) && 
+  173:  #else     
+  174:        if((mu8TmrMaxChannel[tmrNumber] > pTmrChanConfig->tmrChannel) && 
+  0011 f6       [3]             LDA   ,X
+  0012 95       [2]             TSX   
+  0013 ee02     [3]             LDX   2,X
+  0015 8c       [1]             CLRH  
+  0016 d10000   [4]             CMP   @mu8TmrMaxChannel,X
+  0019 2407     [3]             BCC   L22 ;abs = 0022
+  175:  #endif
+  176:          (gTmrMaxMode_c > pTmrChanConfig->tmrChannOptMode)){
+  001b 9efe01   [5]             LDHX  1,SP
+  001e e601     [3]             LDA   1,X
+  0020 a104     [2]             CMP   #4
+  0022          L22:    
+  0022 247c     [3]             BCC   LA0 ;abs = 00a0
+  177:          
+  178:          /*Operation Mode and input edge or output level are set in TPMxCnSC*/        
+  179:          
+  180:  #ifndef gMc1323xPlatform_d        
+  181:          *mu8TmrChannStatCntlReg[tmrNumber][pTmrChanConfig->tmrChannel] =\
+  0024 e602     [3]             LDA   2,X
+  0026 48       [1]             LSLA  
+  0027 48       [1]             LSLA  
+  0028 87       [2]             PSHA  
+  0029 e601     [3]             LDA   1,X
+  002b 62       [1]             NSA   
+  002c a4f0     [2]             AND   #-16
+  002e 9eea01   [4]             ORA   1,SP
+  0031 aa40     [2]             ORA   #64
+  0033 9ee701   [4]             STA   1,SP
+  0036 a60c     [2]             LDA   #12
+  0038 89       [2]             PSHX  
+  0039 9eee05   [4]             LDX   5,SP
+  003c 42       [5]             MUL   
+  003d 88       [3]             PULX  
+  003e fe       [3]             LDX   ,X
+  003f 58       [1]             LSLX  
+  0040 89       [2]             PSHX  
+  0041 95       [2]             TSX   
+  0042 fb       [3]             ADD   ,X
+  0043 f7       [2]             STA   ,X
+  0044 4f       [1]             CLRA  
+  0045 a900     [2]             ADC   #0
+  0047 87       [2]             PSHA  
+  0048 8a       [3]             PULH  
+  0049 88       [3]             PULX  
+  004a 9ebe0000 [6]             LDHX  @mu8TmrChannStatCntlReg,X
+  004e 86       [3]             PULA  
+  004f f7       [2]             STA   ,X
+  182:                             ((pTmrChanConfig->tmrChannOptMode << mChannOptModeShiftBits_c) |\
+  183:                              (pTmrChanConfig->tmrPinConfig.tmrInCaptEdge << mPinStateShiftBits_c)
+  184:    #if gTimerMode_d == gInterruption_c
+  185:                              |(mChannelInterruptEnBit_c)
+  186:    #endif
+  187:                             );
+  188:  #endif                           
+  189:  #ifdef gMc1323xPlatform_d
+  190:          tempTmrModule->TPMxC0SC = \
+  191:                             ((pTmrChanConfig->tmrChannOptMode << mChannOptModeShiftBits_c) |\
+  192:                              (pTmrChanConfig->tmrPinConfig.tmrInCaptEdge << mPinStateShiftBits_c)
+  193:    #if gTimerMode_d == gInterruption_c
+  194:                              |(mChannelInterruptEnBit_c)
+  195:    #endif
+  196:                             );
+  197:  #endif                           
+  198:  
+  199:          /*The center Aligned Bit is enabled in TPMxSC if this mode was selected*/                       
+  200:          if(gTmrCenterAlignedPwm_c == pTmrChanConfig->tmrChannOptMode){
+  0050 9efe01   [5]             LDHX  1,SP
+  0053 e601     [3]             LDA   1,X
+  0055 a103     [2]             CMP   #3
+  0057 260d     [3]             BNE   L66 ;abs = 0066
+  201:            *mu8TmrStartRegs[tmrNumber] |= mTmrCenterAlignedPwmBit_c;
+  0059 95       [2]             TSX   
+  005a ee02     [3]             LDX   2,X
+  005c 58       [1]             LSLX  
+  005d 8c       [1]             CLRH  
+  005e 9ebe0000 [6]             LDHX  @mu8TmrStartRegs,X
+  0062 f6       [3]             LDA   ,X
+  0063 aa20     [2]             ORA   #32
+  0065 f7       [2]             STA   ,X
+  0066          L66:    
+  202:          }
+  203:           
+  204:          /*Output Compare Value is set in TPMxCnVH and TPMxCnVL*/
+  205:          
+  206:  #ifndef gMc1323xPlatform_d
+  207:          *mu8TmrChannValueHighReg[tmrNumber][pTmrChanConfig->tmrChannel] =\
+  0066 95       [2]             TSX   
+  0067 e602     [3]             LDA   2,X
+  0069 ae0c     [2]             LDX   #12
+  006b 42       [5]             MUL   
+  006c 9efe01   [5]             LDHX  1,SP
+  006f 87       [2]             PSHA  
+  0070 f6       [3]             LDA   ,X
+  0071 ad32     [5]             BSR   LA5 ;abs = 00a5
+  0073 88       [3]             PULX  
+  0074 9ebe0000 [6]             LDHX  @mu8TmrChannValueHighReg,X
+  0078 89       [2]             PSHX  
+  0079 8b       [2]             PSHH  
+  007a 9efe03   [5]             LDHX  3,SP
+  007d e603     [3]             LDA   3,X
+  007f 8a       [3]             PULH  
+  0080 88       [3]             PULX  
+  0081 f7       [2]             STA   ,X
+  208:                                            (pTmrChanConfig->tmrCompareVal >> mTmrMSBShiftBits_c); 
+  209:          *mu8TmrChannValueLowReg[tmrNumber][pTmrChanConfig->tmrChannel] =\
+  0082 95       [2]             TSX   
+  0083 e602     [3]             LDA   2,X
+  0085 ae0c     [2]             LDX   #12
+  0087 42       [5]             MUL   
+  0088 9efe01   [5]             LDHX  1,SP
+  008b 87       [2]             PSHA  
+  008c f6       [3]             LDA   ,X
+  008d ad16     [5]             BSR   LA5 ;abs = 00a5
+  008f 88       [3]             PULX  
+  0090 9ebe0000 [6]             LDHX  @mu8TmrChannValueLowReg,X
+  0094 89       [2]             PSHX  
+  0095 8b       [2]             PSHH  
+  0096 9efe03   [5]             LDHX  3,SP
+  0099 e604     [3]             LDA   4,X
+  009b 8a       [3]             PULH  
+  009c 88       [3]             PULX  
+  009d f7       [2]             STA   ,X
+  210:                                            (uint8_t)pTmrChanConfig->tmrCompareVal; 
+  211:  #endif                                       
+  212:                                            
+  213:  #ifdef gMc1323xPlatform_d
+  214:          tempTmrModule->TPMxC0VH = (pTmrChanConfig->tmrCompareVal >> mTmrMSBShiftBits_c); 
+  215:          tempTmrModule->TPMxC0VL = (uint8_t)pTmrChanConfig->tmrCompareVal; 
+  216:  #endif
+  217:                                            
+  218:          return gTmrErrNoError_c;   
+  009e 4f       [1]             CLRA  
+  009f          L9F:    
+  009f 65       [3]             SKIP2 LA2 ;abs = 00a2
+  00a0          LA0:    
+  219:        } 
+  220:        else{
+  221:          return gTmrErrInvalidParameter_c;        
+  222:        }
+  223:      }
+  224:      else{
+  225:        return gTmrErrInvalidParameter_c;
+  00a0 a602     [2]             LDA   #2
+  00a2          LA2:    
+  226:      }
+  227:    }
+  228:  } 
+  00a2 a703     [2]             AIS   #3
+  00a4 81       [6]             RTS   
+  00a5          LA5:    
+  00a5 48       [1]             LSLA  
+  00a6 87       [2]             PSHA  
+  00a7 95       [2]             TSX   
+  00a8 e603     [3]             LDA   3,X
+  00aa e703     [3]             STA   3,X
+  00ac 86       [3]             PULA  
+  00ad eb03     [3]             ADD   3,X
+  00af e703     [3]             STA   3,X
+  00b1 4f       [1]             CLRA  
+  00b2 a900     [2]             ADC   #0
+  00b4 87       [2]             PSHA  
+  00b5 8a       [3]             PULH  
+  00b6 81       [6]             RTS   
+  229:  #else
+  230:  
+  231:  tmrErr_t Tmr_SetChannelConfig(tmrNumber_t tmrNumber, tmrChannelConfig_t  *pTmrChanConfig)
+  232:  {
+  233:     (void)tmrNumber;
+  234:     (void)pTmrChanConfig;
+  235:     return gTmrErrNoError_c;
+  236:  }
+  237:  
+  238:  #endif //gTimerSupported_d 
+  239:  
+  240:  /************************************************************************************
+  241:  * Tmr_SetCallbackFunc
+  242:  *
+  243:  * This function sets the callback function for the timer events when a hardware
+  244:  * interrupt occurs or the task function detects a timer flag enabled.
+  245:  *
+  246:  ************************************************************************************/
+  247:  #if TRUE == gTimerSupported_d
+  248:  tmrErr_t Tmr_SetCallbackFunc(
+  249:    tmrNumber_t tmrNumber,
+  250:    tmrEvent_t tmrEvent,
+  251:    tmrCallbackFunction_t ptmrCallback
+  252:  ){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  253:  
+  254:    if ((gTmrMax_c > tmrNumber) && (gTmrMaxEvent_c > tmrEvent)){
+  0002 95       [2]             TSX   
+  0003 ee04     [3]             LDX   4,X
+  0005 a303     [2]             CPX   #3
+  0007 2421     [3]             BCC   L2A ;abs = 002a
+  0009 a107     [2]             CMP   #7
+  000b 241d     [3]             BCC   L2A ;abs = 002a
+  255:      mTmrCallbackFuncEvent[tmrNumber][tmrEvent] = ptmrCallback;
+  000d 87       [2]             PSHA  
+  000e a60e     [2]             LDA   #14
+  0010 42       [5]             MUL   
+  0011 88       [3]             PULX  
+  0012 58       [1]             LSLX  
+  0013 89       [2]             PSHX  
+  0014 95       [2]             TSX   
+  0015 fb       [3]             ADD   ,X
+  0016 f7       [2]             STA   ,X
+  0017 4f       [1]             CLRA  
+  0018 a900     [2]             ADC   #0
+  001a 87       [2]             PSHA  
+  001b e602     [3]             LDA   2,X
+  001d 8a       [3]             PULH  
+  001e 88       [3]             PULX  
+  001f d70001   [4]             STA   @mTmrCallbackFuncEvent:1,X
+  0022 9ee601   [4]             LDA   1,SP
+  0025 d70000   [4]             STA   @mTmrCallbackFuncEvent,X
+  256:      return gTmrErrNoError_c;
+  0028 4f       [1]             CLRA  
+  0029 65       [3]             SKIP2 L2C ;abs = 002c
+  002a          L2A:    
+  257:    }
+  258:    else{
+  259:      return gTmrErrInvalidParameter_c;
+  002a a602     [2]             LDA   #2
+  002c          L2C:    
+  260:    }
+  261:    
+  262:  } 
+  002c a702     [2]             AIS   #2
+  002e 81       [6]             RTS   
+  263:  #else
+  264:  
+  265:  tmrErr_t Tmr_SetCallbackFunc(tmrNumber_t tmrNumber, tmrEvent_t tmrEvent,tmrCallbackFunction_t ptmrCallback)
+  266:  {
+  267:     (void)tmrNumber;
+  268:     (void)tmrEvent;
+  269:     (void)ptmrCallback;
+  270:     return gTmrErrNoError_c;
+  271:  }
+  272:  
+  273:  #endif //gTimerSupported  
+  274:       
+  275:  /************************************************************************************
+  276:  * Tmr_SetClkConfig
+  277:  *
+  278:  * This function configures the clock source and clock divisor to set a specific 
+  279:  * operation frequency.  
+  280:  *
+  281:  ************************************************************************************/
+  282:  #ifndef gMc1323xPlatform_d 
+  283:  #if TRUE == gTimerSupported_d
+  284:  tmrErr_t Tmr_SetClkConfig(
+  285:    tmrNumber_t      tmrNumber,
+  286:    tmrClkSrc_t      tmrClkSrc, 
+  287:    tmrClkDivisor_t  tmrClkDivisor
+  288:  ){
+  0000 89       [2]             PSHX  
+  0001 87       [2]             PSHA  
+  289:  
+  290:    if((gTmrMax_c > tmrNumber) && (gTmrMaxClkDiv_c > tmrClkDivisor) && (gTmrMaxClkSrc_c> tmrClkSrc)){
+  0002 95       [2]             TSX   
+  0003 ee04     [3]             LDX   4,X
+  0005 a303     [2]             CPX   #3
+  0007 241b     [3]             BCC   L24 ;abs = 0024
+  0009 a108     [2]             CMP   #8
+  000b 2417     [3]             BCC   L24 ;abs = 0024
+  000d 9ee602   [4]             LDA   2,SP
+  0010 a104     [2]             CMP   #4
+  0012 2410     [3]             BCC   L24 ;abs = 0024
+  291:      
+  292:      *mu8TmrStartRegs[tmrNumber] |= ((tmrClkSrc << mClkShiftBits_c) | (tmrClkDivisor));
+  0014 58       [1]             LSLX  
+  0015 8c       [1]             CLRH  
+  0016 9ebe0000 [6]             LDHX  @mu8TmrStartRegs,X
+  001a 48       [1]             LSLA  
+  001b 48       [1]             LSLA  
+  001c 48       [1]             LSLA  
+  001d 9eea01   [4]             ORA   1,SP
+  0020 fa       [3]             ORA   ,X
+  0021 f7       [2]             STA   ,X
+  293:          
+  294:      return gTmrErrNoError_c;
+  0022 4f       [1]             CLRA  
+  0023 65       [3]             SKIP2 L26 ;abs = 0026
+  0024          L24:    
+  295:    } 
+  296:    
+  297:    else{
+  298:      return gTmrErrInvalidParameter_c;
+  0024 a602     [2]             LDA   #2
+  0026          L26:    
+  299:    } 
+  300:  }  
+  0026 a702     [2]             AIS   #2
+  0028 81       [6]             RTS   
+  301:  #else
+  302:  
+  303:  tmrErr_t Tmr_SetClkConfig(tmrNumber_t tmrNumber, tmrClkSrc_t tmrClkSrc,tmrClkDivisor_t  tmrClkDivisor)
+  304:  {
+  305:     (void)tmrNumber;
+  306:     (void)tmrClkSrc;
+  307:     (void)tmrClkDivisor;
+  308:     return gTmrErrNoError_c;
+  309:  }
+  310:  
+  311:  #endif //gTimerSupported     
+  312:  #endif
+  313:  
+  314:  /************************************************************************************
+  315:  * Tmr_Disable
+  316:  *
+  317:  * This function disables the timer module passed as parameter.  
+  318:  *
+  319:  ************************************************************************************/
+  320:  #if TRUE == gTimerSupported_d
+  321:  tmrErr_t Tmr_Disable(tmrNumber_t tmrNumber){
+  322:  
+  323:    if((gTmrMax_c > tmrNumber)){
+  0000 a103     [2]             CMP   #3
+  0002 240a     [3]             BCC   LE ;abs = 000e
+  324:      
+  325:      *mu8TmrStartRegs[tmrNumber] = mTmrDisabled_c;
+  0004 48       [1]             LSLA  
+  0005 8c       [1]             CLRH  
+  0006 97       [1]             TAX   
+  0007 9ebe0000 [6]             LDHX  @mu8TmrStartRegs,X
+  000b 7f       [4]             CLR   ,X
+  326:      return gTmrErrNoError_c;
+  000c 4f       [1]             CLRA  
+  000d 81       [6]             RTS   
+  000e          LE:     
+  327:    } 
+  328:    
+  329:    else{
+  330:      return gTmrErrInvalidParameter_c;
+  000e a602     [2]             LDA   #2
+  331:    }
+  332:  }
+  0010 81       [6]             RTS   
+  333:  #else
+  334:  
+  335:  tmrErr_t Tmr_Disable(tmrNumber_t tmrNumber)
+  336:  {
+  337:     (void)tmrNumber;
+  338:     return gTmrErrNoError_c;
+  339:  }
+  340:  
+  341:  #endif //gTimerSupported   
+  342:  
+  343:  /************************************************************************************
+  344:  * Tmr_Enable
+  345:  *
+  346:  * This function enables the timer module passed as parameter setting the bus clock as
+  347:  * source clock, the clock divisor and module value for overflow events.
+  348:  *
+  349:  ************************************************************************************/
+  350:  #if TRUE == gTimerSupported_d
+  351:  tmrErr_t Tmr_Enable(
+  352:    tmrNumber_t      tmrNumber, 
+  353:    tmrClkDivisor_t  tmrClkDivisor,
+  354:    uint16_t         tmrOverflowValue
+  355:  ){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  356:  
+  357:    tmrModuleRegs_t *tempTmrModuleReg;
+  358:    
+  359:    if((gTmrMax_c > tmrNumber) && (gTmrMaxClkDiv_c > tmrClkDivisor)){
+  0002 95       [2]             TSX   
+  0003 ee04     [3]             LDX   4,X
+  0005 a303     [2]             CPX   #3
+  0007 241a     [3]             BCC   L23 ;abs = 0023
+  0009 a108     [2]             CMP   #8
+  000b 2416     [3]             BCC   L23 ;abs = 0023
+  360:    
+  361:      tempTmrModuleReg = (tmrModuleRegs_t *)(mu8TmrStartRegs[tmrNumber]);
+  000d 58       [1]             LSLX  
+  000e 8c       [1]             CLRH  
+  000f 9ebe0000 [6]             LDHX  @mu8TmrStartRegs,X
+  362:      //tempTmrModuleReg->TPMxCNTH = 0;
+  363:      tempTmrModuleReg->TPMxSC |= ((gTmrBusRateClk_c << mClkShiftBits_c) | (tmrClkDivisor) 
+  0013 aa48     [2]             ORA   #72
+  0015 fa       [3]             ORA   ,X
+  0016 f7       [2]             STA   ,X
+  364:  #if gTimerMode_d == gInterruption_c    
+  365:                                         |(mTmrOverInterruptEnBit_c)    
+  366:  #endif   
+  367:        );
+  368:        
+  369:      tempTmrModuleReg->TPMxMODH = tmrOverflowValue >> mTmrMSBShiftBits_c; 
+  0017 9ee601   [4]             LDA   1,SP
+  001a e703     [3]             STA   3,X
+  370:      tempTmrModuleReg->TPMxMODL = (uint8_t)tmrOverflowValue;   
+  001c 9ee602   [4]             LDA   2,SP
+  001f e704     [3]             STA   4,X
+  371:      
+  372:      return gTmrErrNoError_c;
+  0021 4f       [1]             CLRA  
+  0022 65       [3]             SKIP2 L25 ;abs = 0025
+  0023          L23:    
+  373:    }
+  374:    
+  375:    else{
+  376:      return gTmrErrInvalidParameter_c;
+  0023 a602     [2]             LDA   #2
+  0025          L25:    
+  377:    }
+  378:  } 
+  0025 a702     [2]             AIS   #2
+  0027 81       [6]             RTS   
+  379:  #else
+  380:  
+  381:  tmrErr_t Tmr_Enable(tmrNumber_t tmrNumber, tmrClkDivisor_t  tmrClkDivisor, uint16_t tmrOverflowValue)
+  382:  {
+  383:     (void)tmrNumber;
+  384:     (void)tmrClkDivisor;
+  385:     (void)tmrOverflowValue;
+  386:     return gTmrErrNoError_c;
+  387:  }
+  388:  
+  389:  #endif //gTimerSupported 
+  390:   
+  391:  #pragma CODE_SEG DEFAULT
+  392:    
+  393:  /************************************************************************************
+  394:  * Tmr_Tmr1Isr or Tmr_Tmr1Task
+  395:  *
+  396:  * This function is the interrupt request routine for timer 1.
+  397:  *
+  398:  ************************************************************************************/
+  399:  #if TRUE == gTimerSupported_d
+  400:  #if gTimerMode_d == gInterruption_c 
+  401:  #pragma CODE_SEG ISR_SEGMENT
+  402:  INTERRUPT_KEYWORD void Tmr_Tmr1Isr(){
+  0000 8b       [2]             PSHH  
+  403:  #else
+  404:  void Tmr_Tmr1Task(){
+  405:  #endif
+  406:                  
+  407:    if( mTmr1StatCntlReg & mTmrOverInterruptFlag_c ){
+  0001 0f0009   [5]             BRCLR 7,_TPM1SC,LD ;abs = 000d
+  408:      mTmr1StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  0004 1f00     [5]             BCLR  7,_TPM1SC
+  409:      if(mTmrCallbackFuncEvent[gTmr1_c][gTmrOverEvent_c] != NULL){
+  0006 320000   [5]             LDHX  mTmrCallbackFuncEvent
+  0009 2624     [3]             BNE   L2F ;abs = 002f
+  410:        mTmrCallbackFuncEvent[gTmr1_c][gTmrOverEvent_c]();
+  411:      }
+  412:    } 
+  413:    
+  414:    else if( mTmr1Chan0StatCntlReg & mTmrChannInterruptFlag_c ){
+  415:      mTmr1Chan0StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  416:      if(mTmrCallbackFuncEvent[gTmr1_c][gTmrChannel0Event_c] != NULL){
+  417:        mTmrCallbackFuncEvent[gTmr1_c][gTmrChannel0Event_c]();
+  418:      }
+  419:    } 
+  420:  
+  421:  #ifndef gMc1323xPlatform_d
+  422:    else if( mTmr1Chan1StatCntlReg & mTmrChannInterruptFlag_c ){
+  423:      mTmr1Chan1StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  424:      if(mTmrCallbackFuncEvent[gTmr1_c][gTmrChannel1Event_c] != NULL){
+  425:        mTmrCallbackFuncEvent[gTmr1_c][gTmrChannel1Event_c]();
+  426:      }
+  427:    } 
+  428:    
+  429:    else if( mTmr1Chan2StatCntlReg & mTmrChannInterruptFlag_c ){
+  430:      mTmr1Chan2StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  431:      if(mTmrCallbackFuncEvent[gTmr1_c][gTmrChannel2Event_c] != NULL){
+  432:        mTmrCallbackFuncEvent[gTmr1_c][gTmrChannel2Event_c]();
+  433:      }
+  434:    } 
+  435:  #endif
+  436:  }          
+  000b 8a       [3]             PULH  
+  000c 80       [9]             RTI   
+  000d          LD:     
+  000d 0f0009   [5]             BRCLR 7,_TPM1C0SC,L19 ;abs = 0019
+  0010 1f00     [5]             BCLR  7,_TPM1C0SC
+  0012 320002   [5]             LDHX  mTmrCallbackFuncEvent:2
+  0015 2618     [3]             BNE   L2F ;abs = 002f
+  0017 8a       [3]             PULH  
+  0018 80       [9]             RTI   
+  0019          L19:    
+  0019 0f0009   [5]             BRCLR 7,_TPM1C1SC,L25 ;abs = 0025
+  001c 1f00     [5]             BCLR  7,_TPM1C1SC
+  001e 320004   [5]             LDHX  mTmrCallbackFuncEvent:4
+  0021 260c     [3]             BNE   L2F ;abs = 002f
+  0023 8a       [3]             PULH  
+  0024 80       [9]             RTI   
+  0025          L25:    
+  0025 0f0008   [5]             BRCLR 7,_TPM1C2SC,L30 ;abs = 0030
+  0028 1f00     [5]             BCLR  7,_TPM1C2SC
+  002a 320006   [5]             LDHX  mTmrCallbackFuncEvent:6
+  002d 2701     [3]             BEQ   L30 ;abs = 0030
+  002f          L2F:    
+  002f fd       [5]             JSR   ,X
+  0030          L30:    
+  0030 8a       [3]             PULH  
+  0031 80       [9]             RTI   
+  437:  #pragma CODE_SEG DEFAULT
+  438:   
+  439:  /************************************************************************************
+  440:  * Tmr_Tmr2Isr or Tmr_Tmr2Task
+  441:  *
+  442:  * This function is the interrupt request routine for timer 2.
+  443:  *
+  444:  ************************************************************************************/
+  445:  
+  446:  #if gTimerMode_d == gInterruption_c
+  447:  #pragma CODE_SEG ISR_SEGMENT 
+  448:  INTERRUPT_KEYWORD void Tmr_Tmr2Isr(){
+  0000 8b       [2]             PSHH  
+  449:  #else
+  450:  void Tmr_Tmr2Task(){
+  451:  #endif
+  452:  
+  453:    if( mTmr2StatCntlReg & mTmrOverInterruptFlag_c ){
+  0001 0f0009   [5]             BRCLR 7,_TPM2SC,LD ;abs = 000d
+  454:      mTmr2StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  0004 1f00     [5]             BCLR  7,_TPM2SC
+  455:      if(mTmrCallbackFuncEvent[gTmr2_c][gTmrOverEvent_c] != NULL){    
+  0006 32000e   [5]             LDHX  mTmrCallbackFuncEvent:14
+  0009 2624     [3]             BNE   L2F ;abs = 002f
+  456:        mTmrCallbackFuncEvent[gTmr2_c][gTmrOverEvent_c]();
+  457:      }
+  458:    } 
+  459:    
+  460:    else if( mTmr2Chan0StatCntlReg & mTmrChannInterruptFlag_c ){
+  461:      mTmr2Chan0StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  462:      if(mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel0Event_c] != NULL){    
+  463:        mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel0Event_c]();
+  464:      }
+  465:    } 
+  466:  
+  467:  #ifndef gMc1323xPlatform_d
+  468:    else if( mTmr2Chan1StatCntlReg & mTmrChannInterruptFlag_c ){
+  469:      mTmr2Chan1StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  470:      if(mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel1Event_c] != NULL){    
+  471:        mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel1Event_c]();
+  472:      }
+  473:    } 
+  474:    
+  475:    else if( mTmr2Chan2StatCntlReg & mTmrChannInterruptFlag_c ){
+  476:      mTmr2Chan2StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  477:      if(mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel2Event_c] != NULL){
+  478:        mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel2Event_c]();
+  479:      }
+  480:    } 
+  481:  #endif
+  482:  
+  483:  #ifdef gMcs08Gt60Platform_c
+  484:    else if( mTmr2Chan3StatCntlReg & mTmrChannInterruptFlag_c ){
+  485:      mTmr2Chan3StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  486:      if(mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel3Event_c] != NULL){
+  487:        mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel3Event_c]();
+  488:      }
+  489:    } 
+  490:    
+  491:    else if( mTmr2Chan4StatCntlReg & mTmrChannInterruptFlag_c ){
+  492:      mTmr2Chan4StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  493:      if(mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel4Event_c] != NULL){    
+  494:        mTmrCallbackFuncEvent[gTmr2_c][gTmrChannel4Event_c]();
+  495:      }
+  496:    }
+  497:  #endif    
+  498:  }
+  000b 8a       [3]             PULH  
+  000c 80       [9]             RTI   
+  000d          LD:     
+  000d 0f0009   [5]             BRCLR 7,_TPM2C0SC,L19 ;abs = 0019
+  0010 1f00     [5]             BCLR  7,_TPM2C0SC
+  0012 320010   [5]             LDHX  mTmrCallbackFuncEvent:16
+  0015 2618     [3]             BNE   L2F ;abs = 002f
+  0017 8a       [3]             PULH  
+  0018 80       [9]             RTI   
+  0019          L19:    
+  0019 0f0009   [5]             BRCLR 7,_TPM2C1SC,L25 ;abs = 0025
+  001c 1f00     [5]             BCLR  7,_TPM2C1SC
+  001e 320012   [5]             LDHX  mTmrCallbackFuncEvent:18
+  0021 260c     [3]             BNE   L2F ;abs = 002f
+  0023 8a       [3]             PULH  
+  0024 80       [9]             RTI   
+  0025          L25:    
+  0025 0f0008   [5]             BRCLR 7,_TPM2C2SC,L30 ;abs = 0030
+  0028 1f00     [5]             BCLR  7,_TPM2C2SC
+  002a 320014   [5]             LDHX  mTmrCallbackFuncEvent:20
+  002d 2701     [3]             BEQ   L30 ;abs = 0030
+  002f          L2F:    
+  002f fd       [5]             JSR   ,X
+  0030          L30:    
+  0030 8a       [3]             PULH  
+  0031 80       [9]             RTI   
+  499:  #pragma CODE_SEG DEFAULT                  
+  500:  
+  501:  /************************************************************************************
+  502:  * Tmr_Tmr3Isr or Tmr_Tmr3Task
+  503:  *
+  504:  * This function is the interrupt request routine for timer 3.
+  505:  *
+  506:  ************************************************************************************/
+  507:  
+  508:  #ifndef  gMcs08Gt60Platform_d 
+  509:   
+  510:  #if gTimerMode_d == gInterruption_c
+  511:  #pragma CODE_SEG ISR_SEGMENT 
+  512:  INTERRUPT_KEYWORD void Tmr_Tmr3Isr(){
+  0000 8b       [2]             PSHH  
+  513:  #else
+  514:  void Tmr_Tmr3Task(){
+  515:  #endif
+  516:  
+  517:    if( mTmr3StatCntlReg & mTmrOverInterruptFlag_c ){
+  0001 0f0009   [5]             BRCLR 7,_TPM3SC,LD ;abs = 000d
+  518:      mTmr3StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  0004 1f00     [5]             BCLR  7,_TPM3SC
+  519:      if(mTmrCallbackFuncEvent[gTmr3_c][gTmrOverEvent_c] != NULL){
+  0006 32001c   [5]             LDHX  mTmrCallbackFuncEvent:28
+  0009 2648     [3]             BNE   L53 ;abs = 0053
+  520:        mTmrCallbackFuncEvent[gTmr3_c][gTmrOverEvent_c]();
+  521:      }
+  522:    } 
+  523:    
+  524:    else if( mTmr3Chan0StatCntlReg & mTmrChannInterruptFlag_c ){
+  525:      mTmr3Chan0StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  526:      if(mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel0Event_c] != NULL){
+  527:        mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel0Event_c]();
+  528:      }
+  529:    } 
+  530:  
+  531:  #ifndef  gMc1323xPlatform_d
+  532:    else if( mTmr3Chan1StatCntlReg & mTmrChannInterruptFlag_c ){
+  533:      mTmr3Chan1StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  534:      if(mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel1Event_c] != NULL){
+  535:        mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel1Event_c]();
+  536:      }
+  537:    } 
+  538:    
+  539:    else if( mTmr3Chan2StatCntlReg & mTmrChannInterruptFlag_c ){
+  540:      mTmr3Chan2StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  541:      if(mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel2Event_c] != NULL){
+  542:        mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel2Event_c]();
+  543:      }
+  544:    } 
+  545:    
+  546:    else if( mTmr3Chan3StatCntlReg & mTmrChannInterruptFlag_c ){
+  547:      mTmr3Chan3StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  548:      if(mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel3Event_c] != NULL){    
+  549:        mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel3Event_c]();
+  550:      }
+  551:      
+  552:    } 
+  553:    
+  554:    else if( mTmr3Chan4StatCntlReg & mTmrChannInterruptFlag_c ){
+  555:      mTmr3Chan4StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  556:      if(mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel4Event_c] != NULL){
+  557:        mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel4Event_c]();
+  558:      }
+  559:    } 
+  560:    
+  561:    else if( mTmr3Chan5StatCntlReg & mTmrChannInterruptFlag_c ){
+  562:      mTmr3Chan5StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  563:      if(mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel4Event_c] != NULL){
+  564:        mTmrCallbackFuncEvent[gTmr3_c][gTmrChannel4Event_c]();
+  565:      }
+  566:    } 
+  567:  #endif
+  568:  
+  569:  }
+  000b 8a       [3]             PULH  
+  000c 80       [9]             RTI   
+  000d          LD:     
+  000d 0f0009   [5]             BRCLR 7,_TPM3C0SC,L19 ;abs = 0019
+  0010 1f00     [5]             BCLR  7,_TPM3C0SC
+  0012 32001e   [5]             LDHX  mTmrCallbackFuncEvent:30
+  0015 263c     [3]             BNE   L53 ;abs = 0053
+  0017 8a       [3]             PULH  
+  0018 80       [9]             RTI   
+  0019          L19:    
+  0019 0f0009   [5]             BRCLR 7,_TPM3C1SC,L25 ;abs = 0025
+  001c 1f00     [5]             BCLR  7,_TPM3C1SC
+  001e 320020   [5]             LDHX  mTmrCallbackFuncEvent:32
+  0021 2630     [3]             BNE   L53 ;abs = 0053
+  0023 8a       [3]             PULH  
+  0024 80       [9]             RTI   
+  0025          L25:    
+  0025 0f0009   [5]             BRCLR 7,_TPM3C2SC,L31 ;abs = 0031
+  0028 1f00     [5]             BCLR  7,_TPM3C2SC
+  002a 320022   [5]             LDHX  mTmrCallbackFuncEvent:34
+  002d 2624     [3]             BNE   L53 ;abs = 0053
+  002f 8a       [3]             PULH  
+  0030 80       [9]             RTI   
+  0031          L31:    
+  0031 0f0009   [5]             BRCLR 7,_TPM3C3SC,L3D ;abs = 003d
+  0034 1f00     [5]             BCLR  7,_TPM3C3SC
+  0036 320024   [5]             LDHX  mTmrCallbackFuncEvent:36
+  0039 2618     [3]             BNE   L53 ;abs = 0053
+  003b 8a       [3]             PULH  
+  003c 80       [9]             RTI   
+  003d          L3D:    
+  003d 0f0009   [5]             BRCLR 7,_TPM3C4SC,L49 ;abs = 0049
+  0040 1f00     [5]             BCLR  7,_TPM3C4SC
+  0042 320026   [5]             LDHX  mTmrCallbackFuncEvent:38
+  0045 260c     [3]             BNE   L53 ;abs = 0053
+  0047 8a       [3]             PULH  
+  0048 80       [9]             RTI   
+  0049          L49:    
+  0049 0f0008   [5]             BRCLR 7,_TPM3C5SC,L54 ;abs = 0054
+  004c 1f00     [5]             BCLR  7,_TPM3C5SC
+  004e 320026   [5]             LDHX  mTmrCallbackFuncEvent:38
+  0051 2701     [3]             BEQ   L54 ;abs = 0054
+  0053          L53:    
+  0053 fd       [5]             JSR   ,X
+  0054          L54:    
+  0054 8a       [3]             PULH  
+  0055 80       [9]             RTI   
+  570:  #pragma CODE_SEG DEFAULT   
+  571:  #endif  
+  572:  
+  573:  /************************************************************************************
+  574:  * Tmr_Tmr4Isr or Tmr_Tmr4Task
+  575:  *
+  576:  * This function is the interrupt request routine for timer 4.
+  577:  *
+  578:  ************************************************************************************/
+  579:  
+  580:  #ifdef gMc1323xPlatform_d
+  581:  
+  582:  #if gTimerMode_d == gInterruption_c 
+  583:  #pragma CODE_SEG ISR_SEGMENT
+  584:  INTERRUPT_KEYWORD void Tmr_Tmr4Isr(){
+  585:  #else
+  586:  void Tmr_Tmr4Task(){
+  587:  #endif
+  588:  
+  589:    if( mTmr4StatCntlReg & mTmrOverInterruptFlag_c ){
+  590:      mTmr4StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  591:      if(mTmrCallbackFuncEvent[gTmr4_c][gTmrOverEvent_c] != NULL){
+  592:        mTmrCallbackFuncEvent[gTmr4_c][gTmrOverEvent_c]();
+  593:      }
+  594:    } 
+  595:    else if( mTmr4Chan0StatCntlReg & mTmrChannInterruptFlag_c ){
+  596:      mTmr4Chan0StatCntlReg &= mTmrClearInterruptFlagMask_c;
+  597:      if(mTmrCallbackFuncEvent[gTmr4_c][gTmrChannel0Event_c] != NULL){
+  598:        mTmrCallbackFuncEvent[gTmr4_c][gTmrChannel0Event_c]();
+  599:      }
+  600:    } 
+  601:     
+  602:  } 
+  603:  #pragma CODE_SEG DEFAULT
+  604:  #endif 
+  605:  #endif //gTimerSupported
+  606:  /************************************************************************************/
+  607:  
+  608:  

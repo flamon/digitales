@@ -76,28 +76,7 @@ void MCPSDataIndication(rxPacket_t *gsRxPacket);
 *************************************************************************************
 ************************************************************************************/
 
-
-static uint8_t gau8RxDataBuffer[130]; /* 123 bytes is the SDU max size in non
-                                         promiscuous mode. 
-                                         125 bytes is the SDU max size in 
-                                         promiscuous mode. 
-                                         You have to consider the SDU plus 5 more 
-                                         bytes for SMAC header and that the buffer 
-                                         can not be bigger than 130 */
-static uint8_t gau8TxDataBuffer[128]; /* This buffer can be as big as the biggest
-                                         packet to transmit in the app plus 3 
-                                         bytes reserved for SMAC packet header.
-                                         The buffer can not be bigger than 128 */
-        
-        
-static txPacket_t * AppTxPacket;
-static rxPacket_t * AppRxPacket;
-            
-bool_t           bTxDone;
-bool_t           bRxDone;
-bool_t           bScanDone;
 bool_t           KeyPressed;
-channels_t       bestChannel;
 
 bool_t bUartDataInFlag;
 bool_t bUartTxDone;  
@@ -217,22 +196,6 @@ void InitProject(void)
 * InitSmac
 *
 ************************************************************************************/
-void InitSmac(void)
-{
-    AppTxPacket = (txPacket_t*)gau8TxDataBuffer;
-    AppRxPacket = (rxPacket_t*)gau8RxDataBuffer; 
-    AppRxPacket->u8MaxDataLength = gMaxSmacSDULenght_c;
-    
-    (void)MLMERadioInit();
-    (void)MLMESetClockRate(gClko16MHz_c);
-    MCU_UseExternalClock();
-    
-    (void)MLMESetTmrPrescale(gTimeBase250kHz_c);
-    while (gErrorNoError_c != MLMESetChannelRequest(gDefaultChannelNumber_c));
-    (void)MLMEPAOutputAdjust(gDefaultOutputPower_c);
-    (void)MLMEFEGainAdjust(gGainOffset_c);
- }
-
 
 /* Place it in NON_BANKED memory */
 #ifdef MEMORY_MODEL_BANKED
@@ -564,11 +527,6 @@ void LCDCallback(lcdErrors_t lcdError)
 *
 *
 ************************************************************************************/
-void MCPSDataComfirm(txStatus_t TransmissionResult)
-{  
-    Otap_OpcMCPSDataComfirm(&TransmissionResult);
-    bTxDone = TRUE;
-}
  
 
 /************************************************************************************
@@ -577,11 +535,7 @@ void MCPSDataComfirm(txStatus_t TransmissionResult)
 *
 *
 ************************************************************************************/
-void MCPSDataIndication(rxPacket_t *gsRxPacket)
-{  
-  Otap_OpcMCPSDataIndication(gsRxPacket);
-  bRxDone = TRUE;
-}
+
 
 
 /************************************************************************************
@@ -590,11 +544,7 @@ void MCPSDataIndication(rxPacket_t *gsRxPacket)
 *
 *
 ************************************************************************************/
-void MLMEScanComfirm(channels_t ClearestChann)
-{
-  bestChannel = ClearestChann; 
-  bScanDone = TRUE;
-}
+
 
 /************************************************************************************
 * MLMEResetIndication
@@ -602,10 +552,7 @@ void MLMEScanComfirm(channels_t ClearestChann)
 *
 *
 ************************************************************************************/
-void MLMEResetIndication(void)
-{
-  
-}
+
 
 /************************************************************************************
 * MLMEWakeComfirm
@@ -613,10 +560,7 @@ void MLMEResetIndication(void)
 *
 *
 ************************************************************************************/
-void MLMEWakeComfirm(void)
-{
-  
-}
+
 
 
 

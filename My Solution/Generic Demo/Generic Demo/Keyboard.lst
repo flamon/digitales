@@ -1,0 +1,579 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*****************************************************************************                   
+    2:  * Keyboard driver implementation.
+    3:  * Driver to manage the RCM and REM keyboard for MC1323x platform.
+    4:  * 
+    5:  * Copyright (c) 2010, Freescale, Inc. All rights reserved.
+    6:  *
+    7:  * 
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  *****************************************************************************/
+   13:  
+   14:  
+   15:  #include "Keyboard.h"
+   16:  #include "KBI_Interface.h"
+   17:  #include "derivative.h"
+   18:  #include "PortConfig.h" 
+   19:  #include "app_config.h"
+   20:  #include "Timer_Interface.h"
+   21:  #include "board_config.h"
+   22:  #include "GPIO_Interface.h"
+   23:  
+   24:  #if gKeyboardSupported_d == TRUE
+   25:  
+   26:  /************************************************************************************
+   27:  *************************************************************************************
+   28:  * Private prototypes
+   29:  *************************************************************************************
+   30:  ************************************************************************************/
+   31:  
+   32:  #ifdef MEMORY_MODEL_BANKED
+   33:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+   34:  #else
+   35:  #pragma CODE_SEG DEFAULT
+   36:  #endif 
+   37:  
+   38:  void Keyboard_WhichKeyWasPressed(void);
+   39:  void Keyboard_TimerEvent(void);  
+   40:  void Keyboard_Listening(void);  
+   41:  void Keyboard_KbiEvent(kbiPressed_t PressedKey); 
+   42:  void Keyboard_WhichKeyWasPressed(void); 
+   43:  
+   44:  #pragma CODE_SEG DEFAULT
+   45:  
+   46:  keyboardErr_t Keyboard_InitKeyboard(keyboardCallbackFunc_t pCallback);
+   47:  
+   48:  
+   49:  /************************************************************************************
+   50:  *************************************************************************************
+   51:  * Private memory declarations
+   52:  *************************************************************************************
+   53:  ************************************************************************************/
+   54:    
+   55:  static uint16_t mDebouncingTimeMs;                         
+   56:  static uint16_t mKeyboardSweepTimeMs;             
+   57:  static keyboardButton_t mActiveButton;
+   58:  static keyboardCallbackFunc_t mpKeyboardCallback;
+   59:  static mSweepingState_t mSweepKmd;      
+   60:  static kbiPressed_t mKbiPressed;
+   61:  static bool_t mSweeping;
+   62:  static tmrChannelConfig_t mTimerConfig;   
+   63:  
+   64:               
+   65:  
+   66:  /************************************************************************************
+   67:  *************************************************************************************
+   68:  * Interface functions
+   69:  *************************************************************************************
+   70:  ************************************************************************************/
+   71:  
+   72:  /************************************************************************************
+   73:  *
+   74:  *  Keyboard_InitKeyboard
+   75:  *
+   76:  ************************************************************************************/
+   77:  
+   78:  
+   79:  keyboardErr_t Keyboard_InitKeyboard(keyboardCallbackFunc_t pCallback)    /* Please run Tmr_Init() function outside the driver before this function */
+   80:  {
+   81:    if(NULL == pCallback)
+   82:    {
+   83:      return gKeyboardErrNullPointer_c;
+   84:    }
+   85:    else
+   86:    {
+   87:      /*Variables initialization*/
+   88:      mDebouncingTimeMs = mDebouncingTime_c;
+   89:      mKeyboardSweepTimeMs = mSweepTime_c;
+   90:      mActiveButton = ButtonMaxButton_c;
+   91:      mSweepKmd = KMD0_c; 
+   92:      mSweeping =  TRUE;
+   93:      
+   94:      mpKeyboardCallback = pCallback;                
+   95:       
+   96:      /*Timer configuration*/                            
+   97:      mTimerConfig.tmrChannel = gTmrChannel0_c;
+   98:      mTimerConfig.tmrChannOptMode= gTmrOutputCompare_c;
+   99:      mTimerConfig.tmrPinConfig.tmrOutCompState = gTmrPinNotUsedForOutComp_c;
+  100:      mTimerConfig.tmrCompareVal = mDebouncingTimeMs;
+  101:      (void)Tmr_SetCallbackFunc(gTmr1_c, gTmrChannel0Event_c, (tmrCallbackFunction_t)Keyboard_TimerEvent);
+  102:      (void)Tmr_SetChannelConfig(gTmr1_c, &mTimerConfig);
+  103:      mSweepKmd = KMD0_c;
+  104:      EnableSweepingTime();     
+  105:  
+  106:      return gKeyboardErrNoError_c;
+  107:    }
+  108:  }
+  109:  
+  110:  
+  111:  
+  112:  #ifdef MEMORY_MODEL_BANKED
+  113:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  114:  #else
+  115:  #pragma CODE_SEG DEFAULT
+  116:  #endif 
+  117:  
+  118:  /************************************************************************************
+  119:  *************************************************************************************
+  120:  * Module functions
+  121:  *************************************************************************************
+  122:  ************************************************************************************/
+  123:  
+  124:  /************************************************************************************
+  125:  *
+  126:  *  Keyboard_Listening
+  127:  *
+  128:  ************************************************************************************/
+  129:  
+  130:  void Keyboard_Listening(void)
+  131:  {
+  132:      #if gTargetBoard_c == gMc1323xRcm_c 
+  133:      
+  134:        switch (mSweepKmd)
+  135:        {
+  136:          case KMD0_c:
+  137:            Gpio_PinClear(gGpioPortD_c, gGpioPin3Mask_c);
+  138:            Gpio_PinClear(gGpioPortD_c, gGpioPin7Mask_c);
+  139:            Gpio_PortWrite(gGpioPortC_c, ((mRows1Port_c | mKbiRows1Mask_c) & 0xF1));
+  140:            break;
+  141:          
+  142:          case KMD1_c:
+  143:            Gpio_PinClear(gGpioPortD_c, gGpioPin3Mask_c);
+  144:            Gpio_PinClear(gGpioPortD_c, gGpioPin7Mask_c);
+  145:            Gpio_PortWrite(gGpioPortC_c, ((mRows1Port_c | mKbiRows1Mask_c) & 0xF2));          
+  146:            break;
+  147:            
+  148:          case KMD2_c:
+  149:            Gpio_PinClear(gGpioPortD_c, gGpioPin3Mask_c);
+  150:            Gpio_PinClear(gGpioPortD_c, gGpioPin7Mask_c);
+  151:            Gpio_PortWrite(gGpioPortC_c, ((mRows1Port_c | mKbiRows1Mask_c) & 0xF4));          
+  152:            break;
+  153:            
+  154:          case KMD3_c:
+  155:            Gpio_PinClear(gGpioPortD_c, gGpioPin3Mask_c);
+  156:            Gpio_PinClear(gGpioPortD_c, gGpioPin7Mask_c);
+  157:            Gpio_PortWrite(gGpioPortC_c, ((mRows1Port_c | mKbiRows1Mask_c) & 0xF8));   
+  158:            break;
+  159:            
+  160:          case KMD4_c: 
+  161:              Gpio_PortWrite(gGpioPortC_c, (mRows1Port_c & 0xF0)); 
+  162:              Gpio_PinSet(gGpioPortD_c, gGpioPin3Mask_c); 
+  163:              Gpio_PinClear(gGpioPortD_c, gGpioPin7Mask_c); 
+  164:              break; 
+  165:              
+  166:          case KMD5_c: 
+  167:              Gpio_PortWrite(gGpioPortC_c, (mRows1Port_c & 0xF0)); 
+  168:              Gpio_PinClear(gGpioPortD_c, gGpioPin3Mask_c); 
+  169:              Gpio_PinSet(gGpioPortD_c, gGpioPin7Mask_c); 
+  170:              break;   
+  171:        }
+  172:        
+  173:      #endif
+  174:       
+  175:      #if gTargetBoard_c == gMc1323xRem_c 
+  176:       
+  177:        switch (mSweepKmd)
+  178:        {
+  179:          case KMD0_c:
+  180:            Gpio_PinSet(gGpioPortC_c, gGpioPin0Mask_c);
+  181:            Gpio_PinClear(gGpioPortC_c, gGpioPin1Mask_c);
+  182:            break;
+  183:          
+  184:          case KMD1_c:
+  185:            Gpio_PinClear(gGpioPortC_c, gGpioPin0Mask_c);
+  186:            Gpio_PinSet(gGpioPortC_c, gGpioPin1Mask_c);
+  187:            break;
+  188:        }
+  189:      #endif
+  190:      
+  191:      EnableSweepingTime();
+  192:        
+  193:    
+  194:  }
+  195:  
+  196:  /************************************************************************************
+  197:  *
+  198:  *  Keyboard_KbiEvent
+  199:  *
+  200:  ************************************************************************************/
+  201:  
+  202:  
+  203:  
+  204:  void Keyboard_KbiEvent(kbiPressed_t PressedKey)       /*This is the keyboard callback*/
+  205:  {  
+  206:    KBI1SC_KBIE = 0;                                   //Disable KBI interruptions 
+  207:    mKbiPressed = PressedKey;
+  208:    EnableDebouncingTime();
+  209:     
+  210:  } 
+  211:  
+  212:  /************************************************************************************
+  213:  *
+  214:  *  Keyboard_WhichKeyWasPressed
+  215:  *
+  216:  ************************************************************************************/ 
+  217:  
+  218:  
+  219:  #if gTargetBoard_c == gMc1323xRcm_c 
+  220:  void Keyboard_WhichKeyWasPressed(void)
+  221:  {
+  222:    switch(mKbiPressed)
+  223:     {
+  224:      case (gKbiPressedKey0_c):
+  225:        switch(mSweepKmd)
+  226:        {
+  227:          case(KMD0_c):
+  228:            mActiveButton = gSw1_c;
+  229:            break;
+  230:            
+  231:          case(KMD1_c):
+  232:            mActiveButton = gSw7_c;
+  233:            break;
+  234:            
+  235:          case(KMD2_c):
+  236:            mActiveButton = gSw13_c;
+  237:            break;
+  238:            
+  239:          case(KMD3_c):
+  240:            mActiveButton = gSw19_c;
+  241:            break;
+  242:            
+  243:          case(KMD4_c):
+  244:            mActiveButton = gSw25_c;
+  245:            break;
+  246:          
+  247:          case(KMD5_c):
+  248:            mActiveButton = gSk1_c;
+  249:            break;
+  250:        }
+  251:        
+  252:      break;
+  253:      
+  254:      case(gKbiPressedKey1_c):
+  255:        switch(mSweepKmd)
+  256:        {
+  257:          case(KMD0_c):
+  258:            mActiveButton = gSw2_c;
+  259:            break;
+  260:            
+  261:          case(KMD1_c):
+  262:            mActiveButton = gSw8_c;
+  263:            break;
+  264:            
+  265:          case(KMD2_c):
+  266:            mActiveButton = gSw14_c;
+  267:            break;
+  268:            
+  269:          case(KMD3_c):
+  270:            mActiveButton = gSw20_c;
+  271:            break;
+  272:            
+  273:          case(KMD4_c):
+  274:            mActiveButton = gSw26_c;
+  275:            break;
+  276:          
+  277:          case(KMD5_c):
+  278:            mActiveButton = gSk2_c;
+  279:            break;
+  280:        }
+  281:        
+  282:      break;  
+  283:      
+  284:      case(gKbiPressedKey2_c):
+  285:        switch(mSweepKmd)
+  286:        {
+  287:          case(KMD0_c):
+  288:            mActiveButton = gSw3_c;
+  289:            break;
+  290:            
+  291:          case(KMD1_c):
+  292:            mActiveButton = gSw9_c;
+  293:            break;
+  294:            
+  295:          case(KMD2_c):
+  296:            mActiveButton = gSw15_c;
+  297:            break;
+  298:            
+  299:          case(KMD3_c):
+  300:            mActiveButton = gSw21_c;
+  301:            break;
+  302:            
+  303:          case(KMD4_c):
+  304:            mActiveButton = gSw27_c;
+  305:            break;
+  306:          
+  307:          case(KMD5_c):
+  308:            mActiveButton = gSk3_c;
+  309:            break;
+  310:        }
+  311:        
+  312:      break;  
+  313:      
+  314:      case(gKbiPressedKey3_c):
+  315:        switch(mSweepKmd)
+  316:        {
+  317:          case(KMD0_c):
+  318:            mActiveButton = gSw4_c;
+  319:            break;
+  320:            
+  321:          case(KMD1_c):
+  322:            mActiveButton = gSw10_c;
+  323:            break;
+  324:            
+  325:          case(KMD2_c):
+  326:            mActiveButton = gSw16_c;
+  327:            break;
+  328:            
+  329:          case(KMD3_c):
+  330:            mActiveButton = gSw22_c;
+  331:            break;
+  332:            
+  333:          case(KMD4_c):
+  334:            mActiveButton = gSw28_c;
+  335:            break;
+  336:          
+  337:          case(KMD5_c):
+  338:            mActiveButton = gSk4_c;
+  339:            break;
+  340:        }
+  341:        
+  342:      break;  
+  343:      
+  344:      case(gKbiPressedKey4_c):
+  345:        switch(mSweepKmd)
+  346:        {
+  347:          case(KMD0_c):
+  348:            mActiveButton = gSw5_c;
+  349:            break;
+  350:            
+  351:          case(KMD1_c):
+  352:            mActiveButton = gSw11_c;
+  353:            break;
+  354:            
+  355:          case(KMD2_c):
+  356:            mActiveButton = gSw17_c;
+  357:            break;
+  358:            
+  359:          case(KMD3_c):
+  360:            mActiveButton = gSw23_c;
+  361:            break;
+  362:            
+  363:          case(KMD4_c):
+  364:            mActiveButton = gSw29_c;
+  365:            break;
+  366:        }
+  367:        
+  368:      break;  
+  369:      
+  370:      case(gKbiPressedKey5_c):
+  371:        switch(mSweepKmd)
+  372:        {
+  373:          case(KMD0_c):
+  374:            mActiveButton = gSw6_c;
+  375:            break;
+  376:            
+  377:          case(KMD1_c):
+  378:            mActiveButton = gSw12_c;
+  379:            break;
+  380:            
+  381:          case(KMD2_c):
+  382:            mActiveButton = gSw18_c;
+  383:            break;
+  384:            
+  385:          case(KMD3_c):
+  386:            mActiveButton = gSw24_c;
+  387:            break;
+  388:        
+  389:        }
+  390:        
+  391:      break;  
+  392:      
+  393:      default:
+  394:        asm nop; 
+  395:        break;    
+  396:        
+  397:     }
+  398:      
+  399:      mpKeyboardCallback(mActiveButton);
+  400:      KBI1SC_KBIE = 1;
+  401:  
+  402:  }
+  403:  #endif
+  404:  
+  405:  #if gTargetBoard_c == gMc1323xRem_c 
+  406:  
+  407:  void Keyboard_WhichKeyWasPressed(void)
+  408:  {
+  409:  
+  410:    switch(mKbiPressed)
+  411:     {
+  412:      case (gKbiPressedKey0_c):
+  413:        switch(mSweepKmd)
+  414:        {
+  415:          case(KMD0_c):
+  416:            mActiveButton = gSw1_c;
+  417:            break;
+  418:            
+  419:          case(KMD1_c):
+  420:            mActiveButton = gSw5_c;
+  421:            break;
+  422:        }
+  423:        
+  424:      break;
+  425:      
+  426:      case(gKbiPressedKey1_c):
+  427:        switch(mSweepKmd)
+  428:        {
+  429:          case(KMD0_c):
+  430:            mActiveButton = gSw2_c;
+  431:            break;
+  432:            
+  433:          case(KMD1_c):
+  434:            mActiveButton = gSw6_c;
+  435:            break;
+  436:        }
+  437:        
+  438:      break;  
+  439:      
+  440:      case(gKbiPressedKey2_c):
+  441:        switch(mSweepKmd)
+  442:        {
+  443:          case(KMD0_c):
+  444:            mActiveButton = gSw3_c;
+  445:            break;
+  446:            
+  447:          case(KMD1_c):
+  448:            mActiveButton = gSw7_c;
+  449:            break;
+  450:        }
+  451:        
+  452:      break;  
+  453:      
+  454:      case(gKbiPressedKey3_c):
+  455:        switch(mSweepKmd)
+  456:        {
+  457:          case(KMD0_c):
+  458:            mActiveButton = gSw4_c;
+  459:            break;
+  460:            
+  461:          case(KMD1_c):
+  462:            mActiveButton = gSw8_c;
+  463:            break;
+  464:        }
+  465:        
+  466:      break;  
+  467:     
+  468:      
+  469:      default:
+  470:        asm nop;     
+  471:        break;    
+  472:  
+  473:     }   
+  474:     
+  475:      mpKeyboardCallback(mActiveButton);
+  476:      KBI1SC_KBIE = 1;
+  477:  
+  478:  }
+  479:  
+  480:  #endif
+  481:  
+  482:  /************************************************************************************
+  483:  *
+  484:  *  Keyboard_TimerEvent
+  485:  *
+  486:  ************************************************************************************/     
+  487:  
+  488:  void Keyboard_TimerEvent(void)       /*This is the timer callback*/
+  489:  {
+  490:    if(mSweeping)
+  491:    {
+  492:       #if gTargetBoard_c == gMc1323xRcm_c  
+  493:       if (mSweepKmd == KMD5_c)
+  494:       {
+  495:          mSweepKmd = KMD0_c;
+  496:       }
+  497:       else
+  498:       {
+  499:          mSweepKmd = (mSweepingState_t)(mSweepKmd + 1);
+  500:       }
+  501:       #endif
+  502:       
+  503:       #if gTargetBoard_c == gMc1323xRem_c 
+  504:       if (mSweepKmd == KMD1_c)
+  505:       {
+  506:          mSweepKmd = KMD0_c;
+  507:       }
+  508:       else
+  509:       {
+  510:          mSweepKmd = KMD1_c; 
+  511:       }
+  512:       #endif
+  513:       
+  514:       Keyboard_Listening();         
+  515:    }
+  516:    else
+  517:    {
+  518:       if (mKbiPressed == (PTBD & mKbiPressed)) 
+  519:       {
+  520:          Keyboard_WhichKeyWasPressed();
+  521:          
+  522:       }
+  523:       KBI1SC_KBIE = 1;
+  524:       #if gTargetBoard_c == gMc1323xRcm_c  
+  525:       if (mSweepKmd == KMD5_c)
+  526:       {
+  527:          mSweepKmd = KMD0_c;
+  528:       }
+  529:       else
+  530:       {
+  531:          mSweepKmd = (mSweepingState_t)(mSweepKmd + 1);
+  532:       }
+  533:       #endif
+  534:       
+  535:       #if gTargetBoard_c == gMc1323xRem_c 
+  536:       if (mSweepKmd == KMD1_c)
+  537:       {
+  538:          mSweepKmd = KMD0_c;
+  539:       }
+  540:       else
+  541:       {
+  542:          mSweepKmd = KMD1_c; 
+  543:       }
+  544:       #endif
+  545:       
+  546:       EnableSweepingTime();
+  547:    }
+  548:    
+  549:    
+  550:  }      
+  551:  
+  552:  #pragma CODE_SEG DEFAULT
+  553:  
+  554:  #else
+  555:  
+  556:  /************************************************************************************
+  557:  *
+  558:  *  Keyboard_InitKeyboard
+  559:  *
+  560:  ************************************************************************************/
+  561:  
+  562:  
+  563:  keyboardErr_t Keyboard_InitKeyboard(keyboardCallbackFunc_t pCallback)
+  564:  {
+  565:    (void)pCallback;
+  566:    return gKeyboardErrNoError_c;
+  0000 4f       [1]             CLRA  
+  567:  }
+  0001 8d       [7]             RTC   
+  568:  
+  569:  #endif
+  570:  
+  571:  
+  572:  
+  573:  
+  574:     
+  575:  

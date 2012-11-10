@@ -1,0 +1,776 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /******************************************************************************
+    2:  * Source file for OTAP module.
+    3:  *
+    4:  * (c) Copyright 2009, Freescale, Inc.  All rights reserved.
+    5:  *
+    6:  * No part of this document must be reproduced in any form - including copied,
+    7:  * transcribed, printed or by any electronic means - without specific written
+    8:  * permission from Freescale.
+    9:  *   
+   10:  *******************************************************************************/
+   11:  
+   12:  /*Include files secction*/
+   13:  #include "OTAP.h"
+   14:  
+   15:  /******************************************************************************
+   16:  *******************************************************************************
+   17:  * Private constants
+   18:  *******************************************************************************
+   19:  *******************************************************************************/
+   20:  #if(TRUE == gOtapSupported_d)
+   21:  const uint8_t au8OtapVersion[4] = 
+   22:  {
+   23:    mMajorOtapV_c, 
+   24:    mMiddleOtapV_c, 
+   25:    mMinorOtapV_c, 
+   26:    mConsOtapV_c
+   27:  };
+   28:  #endif /*(TRUE == gOtapSupported_d)*/
+   29:  
+   30:  /******************************************************************************
+   31:  *******************************************************************************
+   32:  * Private memory declarations
+   33:  *******************************************************************************
+   34:  *******************************************************************************/
+   35:  #if(TRUE == gOtapSupported_d)
+   36:  /**OPC Global data ************************************************************/
+   37:  static otapStates_t        smOpcState = mOtapStateNoInit_c;
+   38:  static bool_t              bOtapTimeoutFlag;
+   39:  static bool_t              bOtapPacketReceivedFlag;
+   40:  static bool_t              bOtapPacketTransmittedFlag;
+   41:  static bool_t              bOtapTimerFlag;
+   42:  static bool_t              bOtapWriteFinishedFlag;
+   43:  static uint8_t             u8OtapTxSequenceNumber;
+   44:  static uint8_t             au8OtapProgrammerAddress[2];
+   45:  static uint8_t             u8OtapTimerCount;
+   46:  static uint16_t            su16OtapDataMessagesToReceive;
+   47:  static uint16_t            su16OtapDataMessagesCount;
+   48:  static eepromDataPackage_t otapEepromDataPackage;
+   49:  static otapCodeLine_t      mCodeLinesFifo[mCodeLinesFifoQueueSize_c];
+   50:  static uint8_t             mu8CodeLinesFifoInputIndex;
+   51:  static uint8_t             mu8CodeLinesFifoOutputIndex;
+   52:  static uint8_t             sau8CodeCheckSum[4];
+   53:  static rxPacket_t          * OtapRxPacket;
+   54:  static txPacket_t          * OtapTxPacket;
+   55:  
+   56:  /**OFLC Global data ***********************************************************/
+   57:  #pragma DATA_SEG NOT_INIT_RAM
+   58:  
+   59:  #if defined(gMc1321xPlatform_d) || defined(gMcs08Gt60Platform_d)
+   60:   volatile uint8_t           Illegal_OP[2];
+   61:  #endif
+   62:   static uint8_t             au8OflcDataArray[32];
+   63:   static uint32_t            su32EepromCheckSum;
+   64:  
+   65:  #pragma DATA_SEG DEFAULT
+   66:  
+   67:  #endif /*(TRUE == gOtapSupported_d)*/
+   68:  
+   69:  
+   70:  /******************************************************************************
+   71:  *******************************************************************************
+   72:  * Public functions
+   73:  *******************************************************************************
+   74:  *******************************************************************************/
+   75:  #if(TRUE == gOtapSupported_d)
+   76:  
+   77:  #pragma CODE_SEG OFLC_ROUTINES
+   78:  
+   79:  /*Otap Firlware Loader (OFLC) Routines they are placed in reserved Flash ******/
+   80:  
+   81:  /******************************************************************************
+   82:  * Otap_Startup
+   83:  *
+   84:  *******************************************************************************/
+   85:  void __near Otap_Startup(void)
+   86:  {
+   87:    INIT_SP_FROM_STARTUP_DESC();
+   88:  /* with a C style main(); we would push the return 
+   89:     address on the stack wasting 2 RAM bytes */
+   90:  #ifndef MEMORY_MODEL_BANKED
+   91:    __asm JMP Otap_OflcMain; 
+   92:  #else
+   93:    __asm CALL Otap_OflcMain;
+   94:  #endif
+   95:  }
+   96:  
+   97:  /******************************************************************************
+   98:  * Otap_OflcMain
+   99:  *
+  100:  *******************************************************************************/
+  101:  void __near Otap_OflcMain(void)
+  102:  {
+  103:  
+  104:    OtapInitOflcHardware();
+  105:    
+  106:    if(OtapIsThereANewCodeFileOnEEPROM()){
+  107:      if(OtapValidateCheckSumOnEEPROM()){
+  108:        OtapMoveTheNewCodeFileToFlash();
+  109:        OtapWriteMarkOnEEPROM(mOtapEepromDoneMark_c);
+  110:        OtapCallOFLC();
+  111:      }else{
+  112:        OtapWriteMarkOnEEPROM(mOtapEepromFailMark_c);
+  113:      }
+  114:    }
+  115:    OtapJumpToApp();
+  116:  }
+  117:  #pragma CODE_SEG DEFAULT
+  118:  
+  119:  #endif /*(TRUE == gOtapSupported_d)*/
+  120:  
+  121:  #if(TRUE == gOtapSupported_d)
+  122:  /*Otap Protocol Component (OPC) Routines they are placed in Application Flash */
+  123:  
+  124:  /* Place it in NON_BANKED memory */
+  125:  #ifdef MEMORY_MODEL_BANKED
+  126:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  127:  #else
+  128:  #pragma CODE_SEG DEFAULT
+  129:  #endif /* MEMORY_MODEL_BANKED */
+  130:  
+  131:  /******************************************************************************
+  132:  * Otap_OpcMCPSDataComfirm
+  133:  *
+  134:  *******************************************************************************/
+  135:  void Otap_OpcMCPSDataComfirm(txStatus_t *pTxResult)
+  136:  {
+  137:    (void)pTxResult;
+  138:     if(mOtapStateAppMode_c != smOpcState){
+  139:       bOtapPacketTransmittedFlag = TRUE;
+  140:     }
+  141:  }
+  142:  
+  143:  /******************************************************************************
+  144:  * Otap_OpcMCPSDataIndication
+  145:  *
+  146:  *******************************************************************************/
+  147:  void Otap_OpcMCPSDataIndication(rxPacket_t *pRxPacket)
+  148:  {
+  149:    if(rxSuccessStatus_c == pRxPacket->rxStatus){
+  150:      bOtapTimeoutFlag = FALSE;
+  151:      if(mOtapStateAppMode_c == smOpcState){
+  152:        if(OtapIsOtapRequestFrame(pRxPacket)){
+  153:          if(OtapIsOtapRequestDestAddress(pRxPacket, gOtapId_c)){
+  154:            smOpcState = mOtapStateOtapRequestReceived_c; 
+  155:            bOtapPacketReceivedFlag = TRUE;
+  156:          }else if(OtapIsOtapRequestDestAddress(pRxPacket, mOtapBroadcastAddress_c)){
+  157:            OtapGetProgrammerAddress(pRxPacket);
+  158:            if(!IsMyAddressInTheIdentifiedList(pRxPacket)){
+  159:               OtapGetOtapRxFrame(pRxPacket);
+  160:               smOpcState = mOtapStateBroadcastOtapRequestReceived_c; 
+  161:               bOtapPacketReceivedFlag = TRUE;
+  162:            }
+  163:          }
+  164:        }
+  165:      }else{
+  166:        OtapGetOtapRxFrame(pRxPacket);
+  167:        bOtapPacketReceivedFlag = TRUE;
+  168:      }
+  169:    }else if(rxTimeOutStatus_c == pRxPacket->rxStatus){
+  170:      if(mOtapStateAppMode_c != smOpcState){
+  171:        bOtapTimeoutFlag = TRUE;
+  172:      }
+  173:    }
+  174:    
+  175:    if(mOtapStateAppMode_c != smOpcState){
+  176:      pRxPacket->rxStatus = rxAbortedStatus_c; //Avoids the App to manage Otap frames.
+  177:    }
+  178:  }
+  179:  
+  180:  #pragma CODE_SEG DEFAULT
+  181:  
+  182:  /******************************************************************************
+  183:  * Otap_OpcMain
+  184:  *
+  185:  *******************************************************************************/
+  186:  void Otap_OpcMain(void)
+  187:  {
+  188:    while(mOtapStateAppMode_c != smOpcState)
+  189:    {
+  190:      if(bOtapTimeoutFlag){
+  191:        bOtapTimeoutFlag = FALSE;
+  192:        smOpcState = mOtapStateAppMode_c;
+  193:      }else if(bOtapPacketReceivedFlag){
+  194:        bOtapPacketReceivedFlag = FALSE;
+  195:        OtapOpcManageRxEvents();
+  196:      }else if(bOtapPacketTransmittedFlag){
+  197:        bOtapPacketTransmittedFlag = FALSE;
+  198:        OtapOpcManageTxEvents();
+  199:      }else if(bOtapTimerFlag){
+  200:        bOtapTimerFlag = FALSE;
+  201:        OtapOpcManageTimerEvents();
+  202:      }
+  203:      
+  204:      if(mOtapStateWaitSaveData_c == smOpcState){
+  205:        if(IsFifoEmpty(mu8CodeLinesFifoInputIndex, mu8CodeLinesFifoOutputIndex)){
+  206:          OtapEndOpcProccess();
+  207:        }
+  208:      }
+  209:      OtapSaveData();
+  210:    }
+  211:  }
+  212:  
+  213:  /******************************************************************************
+  214:  * Otap_OpcInit
+  215:  *
+  216:  *******************************************************************************/
+  217:  void Otap_OpcInit(void)
+  218:  {
+  219:    static tmrChannelConfig_t timerConfig;   
+  220:  
+  221:    smOpcState                    = mOtapStateAppMode_c;
+  222:    bOtapTimeoutFlag              = FALSE;
+  223:    bOtapPacketReceivedFlag       = FALSE;
+  224:    bOtapPacketTransmittedFlag    = FALSE;
+  225:    bOtapTimerFlag                = FALSE;
+  226:    bOtapWriteFinishedFlag        = TRUE;
+  227:    u8OtapTxSequenceNumber        = 0;
+  228:    su16OtapDataMessagesToReceive = 0;
+  229:    au8OtapProgrammerAddress[0]   = 0;
+  230:    au8OtapProgrammerAddress[1]   = 0;
+  231:    mu8CodeLinesFifoInputIndex    = 0;
+  232:    mu8CodeLinesFifoOutputIndex   = 0;
+  233:  
+  234:    /*Otap OPC timer initialization*/
+  235:    timerConfig.tmrChannel                   = gOtapTimerChannel_c;
+  236:    timerConfig.tmrChannOptMode              = gTmrOutputCompare_c;
+  237:    timerConfig.tmrPinConfig.tmrOutCompState = gTmrPinNotUsedForOutComp_c;
+  238:    (void)Tmr_SetCallbackFunc(gOtapTimer_c, gOtapTimerInterruptSource_c, (tmrCallbackFunction_t)OtapTimerEvent);
+  239:    (void)Tmr_SetChannelConfig(gOtapTimer_c, &timerConfig);
+  240:  
+  241:  }
+  242:  #else /*(TRUE == gOtapSupported_d)*/
+  243:  
+  244:  /*Otap Protocol Component (OPC) Routines they are placed in Application Flash */
+  245:  
+  246:  /* Place it in NON_BANKED memory */
+  247:  #ifdef MEMORY_MODEL_BANKED
+  248:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  249:  #else
+  250:  #pragma CODE_SEG DEFAULT
+  251:  #endif /* MEMORY_MODEL_BANKED */
+  252:  
+  253:  /******************************************************************************
+  254:  * Otap_OpcMCPSDataComfirm
+  255:  *
+  256:  *******************************************************************************/
+  257:  void Otap_OpcMCPSDataComfirm(txStatus_t *pTxResult)
+  258:  {(void)pTxResult;}
+  0000 81       [6]             RTS   
+  259:  
+  260:  /******************************************************************************
+  261:  * Otap_OpcMCPSDataIndication
+  262:  *
+  263:  *******************************************************************************/
+  264:  void Otap_OpcMCPSDataIndication(rxPacket_t *pRxPacket)
+  265:  {(void)pRxPacket;}
+  0000 81       [6]             RTS   
+  266:  
+  267:  #pragma CODE_SEG DEFAULT
+  268:  
+  269:  /******************************************************************************
+  270:  * Otap_OpcMain
+  271:  *
+  272:  *******************************************************************************/
+  273:  void Otap_OpcMain(void)
+  274:  {}
+  0000 8d       [7]             RTC   
+  275:  
+  276:  /******************************************************************************
+  277:  * Otap_OpcInit
+  278:  *
+  279:  *******************************************************************************/
+  280:  void Otap_OpcInit(void)
+  281:  {}
+  0000 8d       [7]             RTC   
+  282:  
+  283:  #endif /*(TRUE == gOtapSupported_d)*/
+  284:  
+  285:  
+  286:  /******************************************************************************
+  287:  *******************************************************************************
+  288:  * Private functions
+  289:  *******************************************************************************
+  290:  *******************************************************************************/
+  291:  #if(TRUE == gOtapSupported_d)
+  292:  
+  293:  #pragma CODE_SEG OFLC_ROUTINES
+  294:  //******************************************************************************
+  295:  bool_t __near OtapIsThereANewCodeFileOnEEPROM(void)
+  296:  {
+  297:    /*Read the Mark and check sum from eeprom*/
+  298:    (void)Eeprom4OTAP_Read(mOtapEepromMarkAddress_c,au8OflcDataArray,mOtapEepromMarkSize_c + mOtapChekSumSize_c);
+  299:  
+  300:    /*Looks for the "new code" mark in the loaded data*/
+  301:    if(OtapOflcStringComp(au8OflcDataArray, mOtapEepromMark_c,4)){
+  302:      StringCopy(au8OflcDataArray, (uint8_t*)&su32EepromCheckSum, 4);
+  303:      return TRUE;
+  304:    }else{
+  305:      return FALSE;
+  306:    }
+  307:  }
+  308:  
+  309:  //******************************************************************************
+  310:  bool_t __near OtapValidateCheckSumOnEEPROM(void)
+  311:  {
+  312:    uint32_t eepromAddress;
+  313:    uint32_t CheckSum;
+  314:    uint8_t u8i;
+  315:    
+  316:    CheckSum = 0;
+  317:    
+  318:    /*Cycle to read all the code bytes in EEPROM and calculate the CheckSum*/
+  319:    for(eepromAddress = mOtapEepromCodeStartAddress_c; 
+  320:        eepromAddress < mOtapEepromCodeEndAddress_c+1;   
+  321:        eepromAddress+=32)
+  322:    {
+  323:      /*Read the next code segment from eeprom*/
+  324:      (void)Eeprom4OTAP_Read(eepromAddress,au8OflcDataArray,32);
+  325:      
+  326:      for(u8i = 0;u8i < 32;u8i++)
+  327:      {
+  328:        CheckSum += ((uint32_t)au8OflcDataArray[u8i]) & 0x000000FF; 
+  329:      }
+  330:    }
+  331:  
+  332:    if(CheckSum == su32EepromCheckSum){
+  333:      return TRUE;
+  334:    }else{
+  335:      return FALSE;  
+  336:    }
+  337:  }
+  338:  
+  339:  //******************************************************************************
+  340:  void __near OtapMoveTheNewCodeFileToFlash(void)
+  341:  {
+  342:    uint32_t eepromAddress = mOtapEepromCodeStartAddress_c;
+  343:  
+  344:    
+  345:    (void)Flash4OTAP_ErasePage(eepromAddress);
+  346:    
+  347:    /*Cycle to copy all the code bytes in EEPROM to flash*/
+  348:    for(eepromAddress = mOtapEepromCodeStartAddress_c; 
+  349:        eepromAddress < mOtapEepromCodeEndAddress_c+1;   
+  350:        eepromAddress+=32)
+  351:    {
+  352:      /*Read the next code segment from eeprom*/
+  353:      (void)Eeprom4OTAP_Read(eepromAddress,au8OflcDataArray,32);
+  354:      /*Write the next code segment on flash*/
+  355:      (void)Flash4OTAP_WriteString(eepromAddress, au8OflcDataArray, 32);
+  356:      eepromAddress+=32;
+  357:      if(!(eepromAddress%512)){
+  358:        (void)Flash4OTAP_ErasePage(eepromAddress);
+  359:      } 
+  360:    }
+  361:  }
+  362:  
+  363:  //******************************************************************************
+  364:  void __near OtapWriteMarkOnEEPROM(uint8_t * pu8Mark)
+  365:  {
+  366:    StringCopy(pu8Mark, au8OflcDataArray,4);
+  367:    (void)Eeprom4OTAP_Write(mOtapEepromMarkAddress_c, au8OflcDataArray, mOtapEepromMarkSize_c);
+  368:  }
+  369:  
+  370:  
+  371:  //******************************************************************************
+  372:  void __near OtapInitOflcHardware(void)
+  373:  { 
+  374:    DisableInterrupts; 
+  375:    (void)Eeprom4OTAP_Init();
+  376:    (void)Flash4OTAP_Init(gFlashClk4MHz_c);
+  377:  }
+  378:  
+  379:  //******************************************************************************
+  380:  bool_t __near OtapOflcStringComp(uint8_t * au8leftString, uint8_t * au8RightString, uint8_t bytesToCompare)
+  381:  {
+  382:    do
+  383:    {
+  384:    }while((*au8leftString++ == *au8RightString++) && --bytesToCompare);
+  385:    return(0 == bytesToCompare);
+  386:  }
+  387:  
+  388:  #pragma CODE_SEG DEFAULT
+  389:  
+  390:  
+  391:  /* Place it in NON_BANKED memory */
+  392:  #ifdef MEMORY_MODEL_BANKED
+  393:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  394:  #else
+  395:  #pragma CODE_SEG DEFAULT
+  396:  #endif /* MEMORY_MODEL_BANKED */
+  397:  
+  398:  //******************************************************************************
+  399:  void OtapOpcEepromCallBack(eepromErr_t eeproWriteResult)
+  400:  {
+  401:    if(gEepromNoErr_c == eeproWriteResult){
+  402:      FifoMoveIndexForward(mu8CodeLinesFifoOutputIndex);
+  403:    }
+  404:    bOtapWriteFinishedFlag = TRUE;
+  405:  }
+  406:  
+  407:  //******************************************************************************
+  408:  void OtapTimerEvent(void) 
+  409:  {
+  410:    if(!(--u8OtapTimerCount)){
+  411:      bOtapTimerFlag = TRUE; 
+  412:      (void)Tmr_Disable(gOtapTimer_c); 
+  413:    }
+  414:  }
+  415:  
+  416:  
+  417:  //******************************************************************************
+  418:  bool_t OtapIsOtapRequestFrame(rxPacket_t *pRxPacket)
+  419:  {
+  420:    return(((uint8_t)((gOtapRequestCode_c>>24)&0x000000FF) == pRxPacket->smacPdu.u8Data[0]) &&\
+  421:           ((uint8_t)((gOtapRequestCode_c>>16)&0x000000FF) == pRxPacket->smacPdu.u8Data[1]) &&\
+  422:           ((uint8_t)((gOtapRequestCode_c>>8)&0x000000FF)  == pRxPacket->smacPdu.u8Data[2]) &&\
+  423:           ((uint8_t)((gOtapRequestCode_c)&0x000000FF)     == pRxPacket->smacPdu.u8Data[3]));
+  424:  }
+  425:  
+  426:  //******************************************************************************
+  427:  bool_t OtapIsOtapRequestDestAddress(rxPacket_t *pRxPacket, uint16_t u16OtapDestAddress)
+  428:  {
+  429:    return(((uint8_t)((u16OtapDestAddress>>8)&0x00FF)  == pRxPacket->smacPdu.u8Data[6]) &&\
+  430:           ((uint8_t)((u16OtapDestAddress)&0x00FF)     == pRxPacket->smacPdu.u8Data[7]));
+  431:  }
+  432:  
+  433:  //******************************************************************************
+  434:  bool_t IsMyAddressInTheIdentifiedList(rxPacket_t *pRxPacket)
+  435:  {
+  436:    uint8_t u8i;
+  437:    
+  438:    for(u8i = mAddressOfDevIdentifiedStart_c;u8i< mAddressOfDevIdentifiedEnd_c; u8i+=2)
+  439:    {
+  440:      if(((uint8_t)((gOtapId_c>>8)&0x00FF)  == pRxPacket->smacPdu.u8Data[u8i]) &&\
+  441:         ((uint8_t)((gOtapId_c)&0x00FF)     == pRxPacket->smacPdu.u8Data[u8i+1])){
+  442:        return TRUE;
+  443:      }
+  444:    }
+  445:    return FALSE;
+  446:  }
+  447:  
+  448:  //******************************************************************************
+  449:  void OtapGetProgrammerAddress(rxPacket_t *pRxPacket)
+  450:  {
+  451:    au8OtapProgrammerAddress[0] = pRxPacket->smacPdu.u8Data[4];
+  452:    au8OtapProgrammerAddress[1] = pRxPacket->smacPdu.u8Data[5];
+  453:  }
+  454:  
+  455:  
+  456:  
+  457:  #pragma CODE_SEG DEFAULT
+  458:  
+  459:  
+  460:  //******************************************************************************
+  461:  void OtapOpcManageRxEvents(void)
+  462:  {
+  463:    switch(smOpcState) 
+  464:    {
+  465:      case mOtapStateOtapRequestReceived_c:
+  466:           (void)MLMERXEnableRequest(OtapRxPacket, mOtapComfirmTimeoutTime_c);
+  467:           smOpcState = mOtapStateWaitComfirm_c;
+  468:           break;
+  469:      case mOtapStateBroadcastOtapRequestReceived_c:
+  470:           (void)MLMERXEnableRequest(OtapRxPacket, mOtapComfirmTimeoutTime_c);
+  471:           smOpcState = mOtapStateWaitBroadcastComfirm_c;
+  472:           break;
+  473:      case mOtapStateWaitComfirm_c:
+  474:           if(OtapIsFrame(OtapRxPacket, mOtapConfirmFrameId_c) 
+  475:              && OtapIsFrameDestAddress(OtapRxPacket, gOtapId_c)){
+  476:             OtapTxPacket = (txPacket_t *)(&OtapRxPacket->u8DataLength);
+  477:             OtapCreateDescriptorFrame(OtapTxPacket);
+  478:             (void)MCPSDataRequest(OtapTxPacket);
+  479:             smOpcState = mOtapStateSendDescriptor_c; 
+  480:           }
+  481:           break;
+  482:      case mOtapStateWaitBroadcastComfirm_c:
+  483:           if(OtapIsFrame(OtapRxPacket, mOtapConfirmFrameId_c) 
+  484:              && OtapIsFrameDestAddress(OtapRxPacket, mOtapBroadcastAddress_c)){
+  485:             smOpcState = mOtapStateStartIdentificationProcess_c; 
+  486:             OtapStarBackOffTime();
+  487:           }
+  488:           break;
+  489:      case mOtapStateWaitIdentificationProcessAck_c:
+  490:           if(OtapIsMyAckFrame(OtapRxPacket)){
+  491:             smOpcState = mOtapStateAppMode_c;   
+  492:           }
+  493:           break;
+  494:      case mOtapStateWaitDescriptorAck_c:
+  495:           if(OtapIsMyAckFrame(OtapRxPacket)){
+  496:             (void)MLMERXEnableRequest(OtapRxPacket, mOtapStartOfTxTimeoutTime_c);
+  497:             smOpcState = mOtapStateWaitStartOfTransmission_c;   
+  498:           }
+  499:           break;
+  500:      case mOtapStateWaitStartOfTransmission_c:
+  501:           if(OtapIsFrame(OtapRxPacket, mStartOfTransmissionFrameId_c) 
+  502:              && OtapIsFrameDestAddress(OtapRxPacket, gOtapId_c)){
+  503:             OtapGetNumberOfMessagesToReceive(OtapRxPacket);
+  504:             OtapCreateAckFrame(OtapTxPacket);
+  505:             (void)MCPSDataRequest(OtapTxPacket);
+  506:             (void)Eeprom_Erase();
+  507:             smOpcState = mOtapStateAckStartOfTransmission_c; 
+  508:           }
+  509:           break;     
+  510:      case mOtapStateWaitForData_c:
+  511:           if(OtapIsFrame(OtapRxPacket, mDataFrameId_c) 
+  512:              && OtapIsFrameDestAddress(OtapRxPacket, gOtapId_c)){
+  513:             uint8_t u8Res;
+  514:             u8Res = OtapGetNextDataMessage(OtapRxPacket);
+  515:             if(mDataOk_c == u8Res)
+  516:             {
+  517:               OtapCreateAckFrame(OtapTxPacket);                
+  518:               smOpcState = mOtapAckData_c; 
+  519:             }else if(mLastDataOk_c == u8Res){
+  520:               OtapCreateErrorFrame(OtapTxPacket);                                  
+  521:               smOpcState = mOtapAckLastData_c; 
+  522:             }else if(mDataSequenceError_c == u8Res){
+  523:               OtapCreateErrorFrame(OtapTxPacket);                                  
+  524:               smOpcState = mOtapStateSendError_c; 
+  525:             }else if(mDataQueueFullWait_c == u8Res){
+  526:               OtapCreateWaitFrame(OtapTxPacket);     
+  527:               smOpcState = mOtapStateSendWait_c; 
+  528:             }
+  529:             (void)MCPSDataRequest(OtapTxPacket);
+  530:           }
+  531:           break;
+  532:      case mOtapStateWaitEndOfTransmission_c:
+  533:           if(OtapIsFrame(OtapRxPacket, mEndOfTransmissionFrameId_c)
+  534:              && OtapIsFrameDestAddress(OtapRxPacket, gOtapId_c)){
+  535:             OtapCreateAckFrame(OtapTxPacket);
+  536:             (void)MCPSDataRequest(OtapTxPacket);
+  537:             smOpcState = mOtapStateAckEndOfTransmission_c; 
+  538:           }
+  539:           break;
+  540:      default:
+  541:        smOpcState = mOtapStateAppMode_c;   
+  542:        break;
+  543:    }
+  544:  }
+  545:  //******************************************************************************
+  546:  void OtapOpcManageTxEvents(void)
+  547:  {
+  548:    switch(smOpcState) 
+  549:    {
+  550:      case mOtapStateSendDescriptor_c:
+  551:           (void)MLMERXEnableRequest(OtapRxPacket, mOtapAckTimeoutTime_c);
+  552:           smOpcState = mOtapStateWaitDescriptorAck_c;
+  553:           break;
+  554:      case mOtapStateIdentificationProcessSendDescriptor_c:
+  555:           (void)MLMERXEnableRequest(OtapRxPacket, mOtapAckTimeoutTime_c);
+  556:           smOpcState = mOtapStateWaitIdentificationProcessAck_c;
+  557:           break;
+  558:      case mOtapStateAckStartOfTransmission_c:
+  559:      case mOtapAckData_c:
+  560:      case mOtapStateSendWait_c:
+  561:      case mOtapStateSendError_c:        
+  562:           (void)MLMERXEnableRequest(OtapRxPacket, mOtapDataTimeoutTime_c);
+  563:           smOpcState = mOtapStateWaitForData_c;
+  564:           break;
+  565:      case mOtapAckLastData_c:
+  566:           (void)MLMERXEnableRequest(OtapRxPacket, mOtapDataTimeoutTime_c);
+  567:           smOpcState = mOtapStateWaitEndOfTransmission_c;
+  568:           break;
+  569:      case mOtapStateAckEndOfTransmission_c:
+  570:           smOpcState = mOtapStateWaitSaveData_c;
+  571:           break;
+  572:    }
+  573:  }
+  574:  //******************************************************************************
+  575:  void OtapOpcManageTimerEvents(void)
+  576:  {
+  577:    if(mOtapStateStartIdentificationProcess_c == smOpcState){
+  578:      OtapTxPacket = (txPacket_t *)(&OtapRxPacket->u8DataLength);
+  579:      OtapCreateDescriptorFrame(OtapTxPacket);
+  580:      (void)MCPSDataRequest(OtapTxPacket);
+  581:      smOpcState = mOtapStateIdentificationProcessSendDescriptor_c; 
+  582:    }
+  583:  }
+  584:  //******************************************************************************
+  585:  void OtapStarBackOffTime(void)
+  586:  {
+  587:    u8OtapTimerCount = (uint8_t)((gOtapId_c)&0x00FF); 
+  588:    (void)Tmr_Enable(gOtapTimer_c, mOtapClockDivisor_c, m10msTimerCounts_c);  
+  589:  }
+  590:  //******************************************************************************
+  591:  
+  592:  void OtapCreateAckFrame(txPacket_t *pTxPacket)
+  593:  {
+  594:    /*Frame Header*/
+  595:    pTxPacket->u8DataLength      = mOtapAckFrameLenght_c;
+  596:    pTxPacket->smacPdu.u8Data[0] = mAckFrameId_c;
+  597:    pTxPacket->smacPdu.u8Data[1] = au8OtapProgrammerAddress[0];
+  598:    pTxPacket->smacPdu.u8Data[2] = au8OtapProgrammerAddress[1];
+  599:    pTxPacket->smacPdu.u8Data[3] = (uint8_t)((gOtapId_c>>8)&0x00FF);
+  600:    pTxPacket->smacPdu.u8Data[4] = (uint8_t)((gOtapId_c)&0x00FF);
+  601:  }
+  602:  
+  603:  //******************************************************************************
+  604:  
+  605:  void OtapCreateErrorFrame(txPacket_t *pTxPacket)
+  606:  {
+  607:    /*Frame Header*/
+  608:    OtapCreateFrameHeader(pTxPacket, mErrorFrameId_c, mOtapErrorFrameLenght_c);
+  609:    /*Frame Content*/
+  610:    pTxPacket->smacPdu.u8Data[6] = mErrTypeTransferError_c;
+  611:  }
+  612:  
+  613:  //******************************************************************************
+  614:  
+  615:  void OtapCreateWaitFrame(txPacket_t *pTxPacket)
+  616:  {
+  617:    /*Frame Header*/
+  618:    OtapCreateFrameHeader(pTxPacket, mWaitFrameId_c, mOtapWaitFrameLenght_c);
+  619:    /*Frame Content*/  
+  620:    pTxPacket->smacPdu.u8Data[6] = (uint8_t)((mOtapWaitTimeMs_c>>8)&0x00FF);
+  621:    pTxPacket->smacPdu.u8Data[7] = (uint8_t)((mOtapWaitTimeMs_c)&0x00FF);
+  622:  }
+  623:  
+  624:  //******************************************************************************
+  625:  void OtapCreateDescriptorFrame(txPacket_t *pTxPacket)
+  626:  {
+  627:    uint8_t au8SmacVer[7];
+  628:    
+  629:    /*Frame Header*/
+  630:    OtapCreateFrameHeader(pTxPacket, mDescriptorFrameId_c, mOtapDescriptorFrameLenght_c);
+  631:    
+  632:    (void)MLMEGetRficVersion(gSwSmacVersion_c, au8SmacVer);
+  633:    /*Frame Content*/
+  634:  
+  635:    OtapOpcStringCopy(au8SmacVer,&(pTxPacket->smacPdu.u8Data[6]), 4);
+  636:    OtapOpcStringCopy((uint8_t*)au8OtapVersion,&(pTxPacket->smacPdu.u8Data[10]), 4);
+  637:    pTxPacket->smacPdu.u8Data[14] = mOtapHcs08DeviceType_c;
+  638:    StringCopy(gOtapDeviceDescription_c, &(pTxPacket->smacPdu.u8Data[15]), 16);
+  639:    
+  640:  }
+  641:  
+  642:  //******************************************************************************
+  643:  void OtapCreateFrameHeader(txPacket_t *pTxPacket, uint8_t u8FrameId, 
+  644:                             uint8_t u8FrameLength)
+  645:  {
+  646:    /*Frame Header*/
+  647:    pTxPacket->u8DataLength      = u8FrameLength;
+  648:    pTxPacket->smacPdu.u8Data[0] = u8FrameId;
+  649:    pTxPacket->smacPdu.u8Data[1] = au8OtapProgrammerAddress[0];
+  650:    pTxPacket->smacPdu.u8Data[2] = au8OtapProgrammerAddress[1];
+  651:    pTxPacket->smacPdu.u8Data[3] = (uint8_t)((gOtapId_c>>8)&0x00FF);
+  652:    pTxPacket->smacPdu.u8Data[4] = (uint8_t)((gOtapId_c)&0x00FF);
+  653:    pTxPacket->smacPdu.u8Data[5] = u8OtapTxSequenceNumber++;
+  654:  }
+  655:  
+  656:  //******************************************************************************
+  657:  bool_t OtapIsFrame(rxPacket_t *pRxPacket, uint8_t u8FrameId)
+  658:  {
+  659:    return((u8FrameId                   == pRxPacket->smacPdu.u8Data[0]) && \
+  660:           (au8OtapProgrammerAddress[0] == pRxPacket->smacPdu.u8Data[1]) && \
+  661:           (au8OtapProgrammerAddress[1] == pRxPacket->smacPdu.u8Data[2]));
+  662:  }
+  663:  
+  664:  //******************************************************************************
+  665:  bool_t OtapIsMyAckFrame(rxPacket_t *pRxPacket)
+  666:  {
+  667:    return((OtapIsFrameDestAddress(pRxPacket, gOtapId_c)          ) && \
+  668:           (OtapIsFrame(pRxPacket, mAckFrameId_c)                 ) && \
+  669:           (u8OtapTxSequenceNumber == pRxPacket->smacPdu.u8Data[5]));
+  670:  }
+  671:  
+  672:  //******************************************************************************
+  673:  bool_t OtapIsFrameDestAddress(rxPacket_t *pRxPacket, uint16_t u16OtapDestAddress)
+  674:  {
+  675:    return(((uint8_t)((u16OtapDestAddress>>8)&0x00FF)  == pRxPacket->smacPdu.u8Data[3]) &&\
+  676:           ((uint8_t)((u16OtapDestAddress)&0x00FF)     == pRxPacket->smacPdu.u8Data[4]));
+  677:  }
+  678:  
+  679:  
+  680:  //******************************************************************************
+  681:  void OtapGetNumberOfMessagesToReceive(rxPacket_t *pRxPacket)
+  682:  {
+  683:    su16OtapDataMessagesToReceive =  (((uint16_t)pRxPacket->smacPdu.u8Data[7]) << 8) & 0xFF00;
+  684:    su16OtapDataMessagesToReceive += ((uint16_t)pRxPacket->smacPdu.u8Data[8]) & 0x00FF;
+  685:    
+  686:    su16OtapDataMessagesCount = 0;
+  687:  }
+  688:  
+  689:  //******************************************************************************
+  690:  uint8_t OtapGetNextDataMessage(rxPacket_t *pRxPacket)
+  691:  {
+  692:    uint16_t u16FrameMessagesCount;
+  693:   
+  694:    u16FrameMessagesCount =  (((uint16_t)pRxPacket->smacPdu.u8Data[6]) << 8) & 0xFF00;
+  695:    u16FrameMessagesCount += ((uint16_t)pRxPacket->smacPdu.u8Data[7]) & 0x00FF;
+  696:    su16OtapDataMessagesCount++;
+  697:   
+  698:    if(u16FrameMessagesCount != su16OtapDataMessagesCount){
+  699:      return mDataSequenceError_c;        
+  700:    }else if(IsFifoFull(mu8CodeLinesFifoInputIndex, mu8CodeLinesFifoOutputIndex)){
+  701:      return mDataQueueFullWait_c;    
+  702:    }else{
+  703:      if(su16OtapDataMessagesToReceive == su16OtapDataMessagesCount){
+  704:        OtapOpcStringCopy(&(pRxPacket->smacPdu.u8Data[8]), sau8CodeCheckSum, 4);
+  705:        return mLastDataOk_c;        
+  706:      }else{
+  707:        mCodeLinesFifo[mu8CodeLinesFifoInputIndex].ByteCount     = pRxPacket->smacPdu.u8Data[8];
+  708:        OtapOpcStringCopy(&(pRxPacket->smacPdu.u8Data[9]), 
+  709:                          (mCodeLinesFifo[mu8CodeLinesFifoInputIndex].Address.u8), 4);
+  710:        OtapOpcStringCopy(&(pRxPacket->smacPdu.u8Data[13]), 
+  711:                          (mCodeLinesFifo[mu8CodeLinesFifoInputIndex].Data),  
+  712:                          mCodeLinesFifo[mu8CodeLinesFifoInputIndex].ByteCount);
+  713:       
+  714:        FifoMoveIndexForward(mu8CodeLinesFifoInputIndex);
+  715:        return mDataOk_c;        
+  716:      }
+  717:    }
+  718:  }
+  719:  
+  720:  //******************************************************************************
+  721:  void OtapSaveData(void)
+  722:  {
+  723:    eepromErr_t res;
+  724:    if(!IsFifoEmpty(mu8CodeLinesFifoInputIndex, mu8CodeLinesFifoOutputIndex) && bOtapWriteFinishedFlag)
+  725:    {
+  726:      otapEepromDataPackage.EepromAddress.u32Address = mCodeLinesFifo[mu8CodeLinesFifoOutputIndex].Address.u32;
+  727:      otapEepromDataPackage.u8DataSize = mCodeLinesFifo[mu8CodeLinesFifoOutputIndex].ByteCount;
+  728:      otapEepromDataPackage.pu8Data = mCodeLinesFifo[mu8CodeLinesFifoOutputIndex].Data;
+  729:      otapEepromDataPackage.pfEepromCallback = OtapOpcEepromCallBack;
+  730:      bOtapWriteFinishedFlag = FALSE;
+  731:      res = Eeprom_Write(&otapEepromDataPackage);
+  732:      if(res){
+  733:        bOtapWriteFinishedFlag = TRUE;/*It forces it to try it again*/
+  734:      }
+  735:    }
+  736:  }
+  737:  
+  738:  //******************************************************************************
+  739:  void OtapEndOpcProccess(void)
+  740:  {
+  741:    eepromErr_t res;
+  742:    uint8_t au8MarkAndCheckSum[mOtapEepromMarkSize_c + mOtapChekSumSize_c];
+  743:  
+  744:    OtapOpcStringCopy(mOtapEepromMark_c, &au8MarkAndCheckSum[0], 4);
+  745:    OtapOpcStringCopy(sau8CodeCheckSum, &au8MarkAndCheckSum[4], 4);
+  746:  
+  747:    otapEepromDataPackage.EepromAddress.u32Address = mOtapEepromMarkAddress_c;
+  748:    otapEepromDataPackage.u8DataSize = mOtapEepromMarkSize_c + mOtapChekSumSize_c;
+  749:    otapEepromDataPackage.pu8Data = au8MarkAndCheckSum;
+  750:    otapEepromDataPackage.pfEepromCallback = OtapOpcEepromCallBack;
+  751:    bOtapWriteFinishedFlag = FALSE;
+  752:    res = Eeprom_Write(&otapEepromDataPackage);
+  753:    do
+  754:    {
+  755:      bOtapWriteFinishedFlag = TRUE;/*It forces it to try it again*/
+  756:    }while(res);
+  757:    while(bOtapWriteFinishedFlag);
+  758:    OtapCallOFLC();
+  759:  }
+  760:  
+  761:  //******************************************************************************
+  762:  void OtapOpcStringCopy(uint8_t * pu8Srce, uint8_t * pu8Dest, uint8_t u8StrSize)
+  763:  {
+  764:    uint8_t u8f;
+  765:    for(u8f = 0; u8f < u8StrSize;u8f++) *(pu8Dest+u8f) = *(pu8Srce+u8f);
+  766:  }
+  767:  
+  768:  #endif /*(TRUE == gOtapSupported_d)*/
+  769:  
+  770:  

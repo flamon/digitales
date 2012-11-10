@@ -2,7 +2,6 @@
  * uMac.c
  *
  *  Created on: Nov 1, 2012
- *      Author: Jesús
  */
 
 
@@ -53,13 +52,13 @@ bool_t			bTxDone;
 bool_t			bRxDone;		
 
 //Prototipos
-void MLMEScanComfirm(channels_t ClearestChann); //Poner tambien
+//void MLMEScanComfirm(channels_t ClearestChann); //Poner tambien
 void InitSmac(void); //Poner en memoria bankeada******
 
 void Init_uMac(uMac_nodeType NodeType,uMac_txCallBack TxCallBack,uMac_rxCallBack RxCallBack){
 	uMac_On = TRUE;
-	uMac_RxPacket = (uMac_Packet)&AppRxPacket->smacPdu.u8Data[0];
-	uMac_TxPacket = (uMac_Packet)&AppTxPacket->smacPdu.u8Data[0];
+	uMac_RxPacket = (uMac_Packet *)AppRxPacket->smacPdu.u8Data;
+	uMac_TxPacket = (uMac_Packet *)AppTxPacket->smacPdu.u8Data;
 	//guardar tipo de nodo y callbacks
 }
 
@@ -184,5 +183,17 @@ void MCPSDataComfirm(txStatus_t TransmissionResult)
     //Otap_OpcMCPSDataComfirm(&TransmissionResult);
     bTxDone = TRUE;
 }
+
+void MLMEResetIndication(void)
+{
+  
+}
+
+
+void MLMEWakeComfirm(void)
+{
+  
+}
+
 
 #pragma CODE_SEG DEFAULT

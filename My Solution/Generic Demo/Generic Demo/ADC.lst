@@ -1,0 +1,374 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*****************************************************************************
+    2:  * ADC driver implementation.
+    3:  * Driver to perform Analog to Digital Conversions
+    4:  * 
+    5:  * Copyright (c) 2010, Freescale, Inc. All rights reserved.
+    6:  *
+    7:  * 
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  *****************************************************************************/
+   13:  
+   14:  #include "ADC.h"
+   15:  
+   16:  #if gAdcSupported_d == TRUE
+   17:  
+   18:  /************************************************************************************
+   19:  *************************************************************************************
+   20:  * Private memory declarations
+   21:  *************************************************************************************
+   22:  ************************************************************************************/
+   23:  
+   24:  adcStatus_t    adcState = mAdcNotInit_c;
+   25:  adcCallback_t  mConvCallBack = NULL;
+   26:  
+   27:  
+   28:  /************************************************************************************
+   29:  *************************************************************************************
+   30:  * Interface functions
+   31:  *************************************************************************************
+   32:  ************************************************************************************/
+   33:  /************************************************************************************
+   34:  *
+   35:  * ADC_Init
+   36:  *
+   37:  ************************************************************************************/
+   38:  adcErrors_t ADC_Init
+   39:  ( 
+   40:    adcConversionRateDivisor_t adcRateDivisor,
+   41:    adcConversionModes_t       adcMode,
+   42:    uint32_t                   u32AdcPinSelect
+   43:  )
+   44:  {
+   45:  #if (TRUE == gAdcParamAndInitValidation_d)
+   46:    if((gAdcRateMaxDivisor_c <= adcRateDivisor) || (gAdcModeMax_c<= adcMode) || (!u32AdcPinSelect))
+   47:    {
+   48:      return gAdcErrInvalidParam_c; 
+   49:    }
+   50:  #endif  
+   51:  
+   52:    adcState = mAdcIdle_c;
+   53:    InitAdcModule(adcRateDivisor, adcMode, u32AdcPinSelect);
+   54:  
+   55:    return gAdcErrNoError_c;  
+   56:  }
+   57:  
+   58:  /************************************************************************************
+   59:  *
+   60:  * ADC_SetSingleConversion
+   61:  *
+   62:  ************************************************************************************/
+   63:  adcErrors_t ADC_SetSingleConversion
+   64:  (
+   65:   adcChannel_t    adcChannel, 
+   66:   adcCallback_t   convCallBack   
+   67:  )
+   68:  {
+   69:  #if (TRUE == gAdcParamAndInitValidation_d)
+   70:    if((gAdcMaxChannel_c <= adcChannel) || (NULL  == convCallBack))
+   71:    {
+   72:      return gAdcErrInvalidParam_c; 
+   73:    }
+   74:  #endif  
+   75:    if(mAdcIdle_c != adcState)
+   76:    {
+   77:      return gAdcErrModuleBusy_c;
+   78:    }
+   79:    adcState = mAdcSingleConversionStarted_c;
+   80:    mConvCallBack = convCallBack;
+   81:    
+   82:  #if defined(gMcs08Gt60Platform_d) 
+   83:    ATD1C |= mPowerUpMask_c; 
+   84:    ATD1SC = mIntEnableMask_c|((uint8_t)(adcChannel & 0x1F));
+   85:  #elif defined(gMcs08qe128Platform_d)
+   86:    ADCSC1 = mIntEnableMask_c|((uint8_t)(adcChannel & 0x1F));
+   87:  #endif
+   88:     
+   89:    return gAdcErrNoError_c;  
+   90:  }
+   91:  
+   92:  /************************************************************************************
+   93:  *
+   94:  * ADC_SetSingleConversionBlocking
+   95:  *
+   96:  ************************************************************************************/
+   97:  adcErrors_t ADC_SetSingleConversionBlocking
+   98:  (
+   99:   adcChannel_t    adcChannel, 
+  100:   uint16_t *      pu16ConvResult   
+  101:  )
+  102:  {
+  103:  #if (TRUE == gAdcParamAndInitValidation_d)
+  104:    if((gAdcMaxChannel_c <= adcChannel) || (NULL  == pu16ConvResult))
+  105:    {
+  106:      return gAdcErrInvalidParam_c; 
+  107:    }
+  108:  #endif  
+  109:    
+  110:    if(mAdcIdle_c != adcState)
+  111:    {
+  112:      return gAdcErrModuleBusy_c;
+  113:    }
+  114:  
+  115:  #if defined(gMcs08Gt60Platform_d) 
+  116:    ATD1C |= mPowerUpMask_c; 
+  117:    ATD1SC = 0x00|((uint8_t)(adcChannel & 0x1F));
+  118:    while(!(ATD1SC & mConvCompFlagMask_c));
+  119:    if(mAdc8BitsModeSelected_c)
+  120:    {
+  121:      *pu16ConvResult = (0x00FF & (uint16_t)ATD1RH);
+  122:    }
+  123:    else
+  124:    {
+  125:      *pu16ConvResult = ATD1R;
+  126:    }
+  127:  #elif defined(gMcs08qe128Platform_d)
+  128:    ADCSC1 = 0x00|((uint8_t)(adcChannel & 0x1F));
+  129:    while(!(ADCSC1 & mConvCompFlagMask_c));
+  130:    *pu16ConvResult = ADCR;
+  131:  #endif
+  132:     
+  133:    return gAdcErrNoError_c;  
+  134:  }
+  135:  
+  136:  /************************************************************************************
+  137:  *
+  138:  * ADC_SetContinuousConversions
+  139:  *
+  140:  ************************************************************************************/
+  141:  adcErrors_t ADC_SetContinuousConversions
+  142:  (
+  143:   adcChannel_t    adcChannel, 
+  144:   adcCallback_t   convCallBack   
+  145:  )
+  146:  {
+  147:  #if (TRUE == gAdcParamAndInitValidation_d)
+  148:    if((gAdcMaxChannel_c <= adcChannel) || (NULL  == convCallBack))
+  149:    {
+  150:      return gAdcErrInvalidParam_c; 
+  151:    }
+  152:  #endif  
+  153:    if(mAdcIdle_c != adcState)
+  154:    {
+  155:      return gAdcErrModuleBusy_c;
+  156:    }
+  157:    adcState = mAdcContinuousConversionRunning_c;
+  158:    mConvCallBack = convCallBack;
+  159:    
+  160:  #if defined(gMcs08Gt60Platform_d) 
+  161:    ATD1C |= mPowerUpMask_c; 
+  162:    ATD1SC = mContConversionMask_c|mIntEnableMask_c|((uint8_t)(adcChannel & 0x1F));
+  163:  #elif defined(gMcs08qe128Platform_d)
+  164:    ADCSC1 = mContConversionMask_c|mIntEnableMask_c|((uint8_t)(adcChannel & 0x1F));
+  165:  #endif
+  166:     
+  167:    return gAdcErrNoError_c;  
+  168:  }
+  169:  
+  170:  /************************************************************************************
+  171:  *
+  172:  * ADC_StopConversion
+  173:  *
+  174:  ************************************************************************************/
+  175:  void ADC_StopConversion
+  176:  (
+  177:  void
+  178:  )
+  179:  {
+  180:    adcState = mAdcIdle_c;
+  181:  
+  182:  #if defined(gMcs08Gt60Platform_d) 
+  183:    ATD1SC = mStopConversion_c;
+  184:    ATD1C &= ~mPowerUpMask_c; 
+  185:  #elif defined(gMcs08qe128Platform_d)
+  186:    ADCSC1 = mStopConversion_c;
+  187:  #endif
+  188:  }
+  189:  /************************************************************************************
+  190:  *
+  191:  * ADC Interrupr service function
+  192:  *
+  193:  ************************************************************************************/
+  194:  #if gAdcMode_d == gAdcInterrupt_c   
+  195:  
+  196:  /* Place it in NON_BANKED memory */
+  197:  #pragma CODE_SEG ISR_SEGMENT
+  198:  
+  199:  INTERRUPT_KEYWORD void ADC_Isr(void)
+  200:  {
+  201:  #else
+  202:  void ADC_Task(void)
+  203:  {
+  204:   #if defined(gMcs08Gt60Platform_d) 
+  205:    if(ATD1SC & mConvCompFlagMask_c)
+  206:   #elif defined(gMcs08qe128Platform_d)
+  207:    if(ADCSC1 & mConvCompFlagMask_c)
+  208:   #endif
+  209:  #endif
+  210:    {
+  211:      uint16_t u16ConvResult = 0;
+  212:    #if defined(gMcs08Gt60Platform_d) 
+  213:      if(mAdc8BitsModeSelected_c)
+  214:      {
+  215:        u16ConvResult = (0x00FF & (uint16_t)ATD1RH);
+  216:      }
+  217:      else
+  218:      {
+  219:        u16ConvResult = ATD1R;
+  220:      }
+  221:      
+  222:    #elif defined(gMcs08qe128Platform_d)
+  223:      u16ConvResult = ADCR;
+  224:    #endif
+  225:      if(mAdcSingleConversionStarted_c == adcState)
+  226:      {
+  227:        adcState = mAdcIdle_c;
+  228:      #if defined(gMcs08Gt60Platform_d) 
+  229:        ATD1SC = mStopConversion_c;
+  230:        ATD1C &= ~mPowerUpMask_c; 
+  231:      #elif defined(gMcs08qe128Platform_d)
+  232:        ADCSC1 = mStopConversion_c;
+  233:      #endif
+  234:      }
+  235:      mConvCallBack(u16ConvResult);
+  236:    }
+  237:  }
+  238:  
+  239:  #pragma CODE_SEG DEFAULT
+  240:  
+  241:  /************************************************************************************
+  242:  *************************************************************************************
+  243:  * private functions
+  244:  *************************************************************************************
+  245:  ************************************************************************************/
+  246:  
+  247:  
+  248:  
+  249:  #else                    /* gAdcSupported_d == FALSE */
+  250:  
+  251:  /************************************************************************************
+  252:  *************************************************************************************
+  253:  * Interface functions
+  254:  *************************************************************************************
+  255:  ************************************************************************************/
+  256:  /************************************************************************************
+  257:  *
+  258:  * ADC_Init
+  259:  *
+  260:  ************************************************************************************/
+  261:  adcErrors_t ADC_Init
+  262:  ( 
+  263:    adcConversionRateDivisor_t adcRateDivisor,
+  264:    adcConversionModes_t       adcMode,
+  265:    uint32_t                   u32AdcPinSelect
+  266:  )
+  267:  {
+  268:      (void)adcRateDivisor;
+  269:      (void)adcMode;
+  270:      (void)u32AdcPinSelect;
+  271:      return gAdcErrNoError_c;  
+  0000 4f       [1]             CLRA  
+  272:  }
+  0001 8d       [7]             RTC   
+  273:  
+  274:  /************************************************************************************
+  275:  *
+  276:  * ADC_SetSingleConversion
+  277:  *
+  278:  ************************************************************************************/
+  279:  adcErrors_t ADC_SetSingleConversion
+  280:  (
+  281:   adcChannel_t    adcChannel, 
+  282:   adcCallback_t   convCallBack   
+  283:  )
+  284:  {
+  285:      (void)adcChannel;
+  286:      (void)convCallBack;
+  287:      return gAdcErrNoError_c;  
+  0000 4f       [1]             CLRA  
+  288:  }
+  0001 8d       [7]             RTC   
+  289:  
+  290:  /************************************************************************************
+  291:  *
+  292:  * ADC_SetSingleConversionBlocking
+  293:  *
+  294:  ************************************************************************************/
+  295:  adcErrors_t ADC_SetSingleConversionBlocking
+  296:  (
+  297:   adcChannel_t    adcChannel, 
+  298:   uint16_t *      pu16ConvResult   
+  299:  )
+  300:  {
+  301:      (void)adcChannel;
+  302:      (void)pu16ConvResult;
+  303:      return gAdcErrNoError_c;  
+  0000 4f       [1]             CLRA  
+  304:  }
+  0001 8d       [7]             RTC   
+  305:  
+  306:  /************************************************************************************
+  307:  *
+  308:  * ADC_SetContinuousConversions
+  309:  *
+  310:  ************************************************************************************/
+  311:  adcErrors_t ADC_SetContinuousConversions
+  312:  (
+  313:   adcChannel_t    adcChannel, 
+  314:   adcCallback_t   convCallBack   
+  315:  )
+  316:  {
+  317:      (void)adcChannel;
+  318:      (void)convCallBack;
+  319:      return gAdcErrNoError_c;  
+  0000 4f       [1]             CLRA  
+  320:  }
+  0001 8d       [7]             RTC   
+  321:  
+  322:  /************************************************************************************
+  323:  *
+  324:  * ADC_StopConversion
+  325:  *
+  326:  ************************************************************************************/
+  327:  void ADC_StopConversion
+  328:  (
+  329:  void
+  330:  )
+  331:  {
+  332:    
+  333:  }
+  0000 8d       [7]             RTC   
+  334:  /************************************************************************************
+  335:  *
+  336:  * ADC Interrupr service function
+  337:  *
+  338:  ************************************************************************************/
+  339:  #if gAdcMode_d == gAdcInterrupt_c   
+  340:  
+  341:  /* Place it in NON_BANKED memory */
+  342:  #pragma CODE_SEG ISR_SEGMENT
+  343:  
+  344:  INTERRUPT_KEYWORD void ADC_Isr(void)
+  345:  {
+  346:  #else
+  347:  void ADC_Task(void)
+  348:  {
+  349:   #if defined(gMcs08Gt60Platform_d) 
+  350:    if(ATD1SC & mConvCompFlagMask_c)
+  351:   #elif defined(gMcs08qe128Platform_d)
+  352:    if(ADCSC1 & mConvCompFlagMask_c)
+  353:   #endif
+  354:  #endif
+  355:    {
+  356:    
+  357:    }
+  358:  }
+  0000 80       [9]             RTI   
+  359:  
+  360:  #pragma CODE_SEG DEFAULT
+  361:  
+  362:  #endif

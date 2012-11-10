@@ -1,0 +1,318 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*****************************************************************************
+    2:  * TouchPad driver implementation.
+    3:  * 
+    4:  * 
+    5:  * Copyright (c) 2010, Freescale, Inc. All rights reserved.
+    6:  *
+    7:  * 
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  *****************************************************************************/
+   13:  #include "TouchPad.h"
+   14:  
+   15:  #if TRUE == gTouchpadSupported_d
+   16:  
+   17:  /************************************************************************************
+   18:  *************************************************************************************
+   19:  * Private memory declarations
+   20:  *************************************************************************************
+   21:  ************************************************************************************/
+   22:  static touchpadCallback_t tpEventCallback;
+   23:  static uint8_t touchData[19] = {0};
+   24:  static uint8_t tpRegAddress;
+   25:  static touchpadEventStates_t eventState = mTpEvStateNoInit_c;
+   26:  static touchpadEvent_t eventData;
+   27:  
+   28:  /************************************************************************************
+   29:  *************************************************************************************
+   30:  * Interface functions
+   31:  *************************************************************************************
+   32:  ************************************************************************************/
+   33:  /************************************************************************************
+   34:  *
+   35:  * Touchpad_DriverInit
+   36:  *
+   37:  ************************************************************************************/
+   38:  touchpadErrors_t Touchpad_DriverInit
+   39:  (
+   40:   touchpadCallback_t userCallBack, 
+   41:   gpioPort_t AttnPort, 
+   42:   gpioPin_t AttnPin
+   43:  )
+   44:  {
+   45:   #if (TRUE == gTouchpadParametersValidation_d)  
+   46:    if(NULL == userCallBack)
+   47:    {
+   48:      return gErrInvalidParameter_c;
+   49:    }
+   50:   #endif 
+   51:    tpEventCallback = userCallBack;
+   52:    eventState = mTpEvStateIdle_c;
+   53:    if(gGpioPinStateActive_c == Gpio_PinValue(AttnPort,AttnPin)) 
+   54:    {
+   55:      tpRegAddress = mTpIntStatusRegAdd_c;
+   56:      (void)IIC_WriteBlocking(mTouchpadIicSlaveAddress_c, &tpRegAddress, 1);
+   57:      (void)IIC_ReadBlocking(mTouchpadIicSlaveAddress_c, &tpRegAddress, 1);
+   58:      (void)IIC_StopTransaction(mTouchpadIicSlaveAddress_c);
+   59:    }
+   60:    
+   61:    return gErrNoError_c;
+   62:  }
+   63:  
+   64:  
+   65:  /* Place it in NON_BANKED memory */
+   66:  #ifdef MEMORY_MODEL_BANKED
+   67:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+   68:  #else
+   69:  #pragma CODE_SEG DEFAULT
+   70:  #endif /* MEMORY_MODEL_BANKED */
+   71:  /************************************************************************************
+   72:  *
+   73:  * Touchpad_EventHandler
+   74:  *
+   75:  ************************************************************************************/
+   76:  void Touchpad_EventHandler(void)
+   77:  {
+   78:    if(mTpEvStateIdle_c == eventState)
+   79:    {
+   80:      tpRegAddress = mTpIntStatusRegAdd_c;
+   81:      eventState = mTpEvStateWrittingInterruptStatusRegisterAddress_c;
+   82:      (void)IIC_Write(mTouchpadIicSlaveAddress_c, &tpRegAddress,1, tpEventPollCallBack);
+   83:    }
+   84:  }
+   85:  #pragma CODE_SEG DEFAULT
+   86:  
+   87:  /************************************************************************************
+   88:  *************************************************************************************
+   89:  * private functions
+   90:  *************************************************************************************
+   91:  ************************************************************************************/
+   92:  /* Place it in NON_BANKED memory */
+   93:  #ifdef MEMORY_MODEL_BANKED
+   94:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+   95:  #else
+   96:  #pragma CODE_SEG DEFAULT
+   97:  #endif /* MEMORY_MODEL_BANKED */
+   98:  
+   99:  /***********************************************************************************/
+  100:  void tpEventPollCallBack(iicResult_t IicResult)
+  101:  {
+  102:    iicCallback_t handlingEvent;
+  103:    (void)IicResult;
+  104:    
+  105:    if(mTpEvStateWrittingInterruptStatusRegisterAddress_c == eventState)
+  106:    {
+  107:      eventState = mTpEvStateReadingInterruptStatusRegisterData_c;
+  108:      (void)IIC_Read(mTouchpadIicSlaveAddress_c, touchData,1, tpEventPollCallBack);
+  109:    }
+  110:    else if(mTpEvStateReadingInterruptStatusRegisterData_c == eventState)
+  111:    {
+  112:      eventState = mTpEvStateWrittingEventDataAddress_c;
+  113:      if(touchData[0] & mIntStatusGpioMask_c)
+  114:      {
+  115:        tpRegAddress = mTpGpioDataAddress_c;
+  116:        handlingEvent = tpHandlingGpioEvent;  
+  117:      }
+  118:      else if(touchData[0] & mIntStatusAbs0Mask_c)
+  119:      {
+  120:        tpRegAddress = mTpAbs0DataAddress_c; 
+  121:        handlingEvent = tpHandlingAbs0Event;  
+  122:      }
+  123:      else if(touchData[0] & mIntStatusDevStatusMask_c)
+  124:      {
+  125:        tpRegAddress = mTpDevStatusDataAddress_c; 
+  126:        handlingEvent = tpHandlingDevStatusEvent;  
+  127:      }
+  128:    #if(TRUE == mTouchpadFlashSupportEnable_d)
+  129:      else if(touchData[0] & mIntStatusFlashMask_c)
+  130:      {
+  131:        tpRegAddress = mTpFlashDataAddress_c; 
+  132:        handlingEvent = tpHandlingFlashEvent;  
+  133:      }
+  134:    #endif    
+  135:      else /*There are not events to handle*/
+  136:      {
+  137:        (void)IIC_StopTransaction(mTouchpadIicSlaveAddress_c);
+  138:        eventState = mTpEvStateIdle_c;
+  139:        return;
+  140:      }
+  141:      (void)IIC_Write(mTouchpadIicSlaveAddress_c, &tpRegAddress,1, handlingEvent);
+  142:    }
+  143:  }
+  144:  
+  145:  /***********************************************************************************/
+  146:  void tpHandlingGpioEvent(iicResult_t IicResult)
+  147:  {
+  148:    (void)IicResult;
+  149:    if(mTpEvStateWrittingEventDataAddress_c == eventState)
+  150:    {
+  151:      eventState = mTpEvStateReadingEventData_c;
+  152:      (void)IIC_Read(mTouchpadIicSlaveAddress_c, touchData,mTpGpioDataSize_c, tpHandlingGpioEvent);
+  153:    }
+  154:    else if(mTpEvStateReadingEventData_c == eventState)
+  155:    {
+  156:      eventData.EventType = gTouchpadGpioEvent_c; 
+  157:      eventData.EventDataReport.gpioReport.u8Byte = touchData[0];
+  158:      (void)IIC_StopTransaction(mTouchpadIicSlaveAddress_c);
+  159:      eventState = mTpEvStateIdle_c;
+  160:      tpEventCallback(&eventData);
+  161:    }
+  162:  }
+  163:  
+  164:  /***********************************************************************************/
+  165:  void tpHandlingAbs0Event(iicResult_t IicResult)
+  166:  {
+  167:    (void)IicResult;
+  168:    if(mTpEvStateWrittingEventDataAddress_c == eventState)
+  169:    {
+  170:      eventState = mTpEvStateReadingEventData_c;
+  171:      (void)IIC_Read(mTouchpadIicSlaveAddress_c, touchData,mTpAbs0DataSize_c, tpHandlingAbs0Event);
+  172:    }
+  173:    else if(mTpEvStateReadingEventData_c == eventState)
+  174:    {
+  175:      if(mPinchMask_c & touchData[11])
+  176:      {
+  177:        eventData.EventType = gTouchpadPinchGestureEvent_c; 
+  178:        eventData.EventDataReport.pinchReport = touchData[13];
+  179:      }
+  180:      else if(mFlickMask_c & touchData[11])
+  181:      {
+  182:        eventData.EventType = gTouchpadFlickGestureEvent_c; 
+  183:        eventData.EventDataReport.flickReport.i8XFlickDistance = touchData[13];
+  184:        eventData.EventDataReport.flickReport.i8YFlickDistance = touchData[14];
+  185:        eventData.EventDataReport.flickReport.uFlickTime =       touchData[15];
+  186:      }
+  187:      else if(mEarlyTapMask_c & touchData[11])
+  188:      {
+  189:        eventData.EventType = gTouchpadEarlyTapGestureEvent_c; 
+  190:      }
+  191:      else if(mDoubleTapMask_c & touchData[11])
+  192:      {
+  193:        eventData.EventType = gTouchpadDoubleTapGestureEvent_c; 
+  194:      }
+  195:      else if(mTapAndHoldMask_c & touchData[11])
+  196:      {
+  197:        eventData.EventType = gTouchpadTapAndHoldGestureEvent_c; 
+  198:      }
+  199:      else if(mSingleTapMask_c & touchData[11])
+  200:      {
+  201:        eventData.EventType = gTouchpadSingleTapGestureEvent_c; 
+  202:      }
+  203:      else
+  204:      {
+  205:        eventData.EventType = gTouchpadFingerPositionEvent_c; 
+  206:        eventData.EventDataReport.fingerPosReport.FingersState.u8Byte = touchData[0];
+  207:        eventData.EventDataReport.fingerPosReport.u16Finger0XPosition = ((uint16_t)touchData[1])<<4;
+  208:        eventData.EventDataReport.fingerPosReport.u16Finger0XPosition += (uint16_t)(touchData[3]&0x0F);
+  209:        eventData.EventDataReport.fingerPosReport.u16Finger0YPosition = ((uint16_t)touchData[2])<<4;
+  210:        eventData.EventDataReport.fingerPosReport.u16Finger0YPosition += (uint16_t)(touchData[3]>>4);
+  211:        eventData.EventDataReport.fingerPosReport.Finger0Wide.u8Byte = touchData[4];
+  212:        eventData.EventDataReport.fingerPosReport.u8Finger0ZPosition = touchData[5];
+  213:  
+  214:        eventData.EventDataReport.fingerPosReport.u16Finger1XPosition = ((uint16_t)touchData[6])<<4;
+  215:        eventData.EventDataReport.fingerPosReport.u16Finger1XPosition += (uint16_t)(touchData[8]&0x0F);
+  216:        eventData.EventDataReport.fingerPosReport.u16Finger1YPosition = ((uint16_t)touchData[7])<<4;
+  217:        eventData.EventDataReport.fingerPosReport.u16Finger1YPosition += (uint16_t)(touchData[8]>>4);
+  218:        eventData.EventDataReport.fingerPosReport.Finger1Wide.u8Byte = touchData[9];
+  219:        eventData.EventDataReport.fingerPosReport.u8Finger1ZPosition = touchData[10];
+  220:      }
+  221:      (void)IIC_StopTransaction(mTouchpadIicSlaveAddress_c);
+  222:      eventState = mTpEvStateIdle_c;
+  223:      tpEventCallback(&eventData);
+  224:    }
+  225:  }
+  226:  
+  227:  /***********************************************************************************/
+  228:  void tpHandlingDevStatusEvent(iicResult_t IicResult)
+  229:  {
+  230:    (void)IicResult;
+  231:    if(mTpEvStateWrittingEventDataAddress_c == eventState)
+  232:    {
+  233:      eventState = mTpEvStateReadingEventData_c;
+  234:      (void)IIC_Read(mTouchpadIicSlaveAddress_c, touchData,mTpDevStatusDataSize_c, tpHandlingDevStatusEvent);
+  235:    }
+  236:    else if(mTpEvStateReadingEventData_c == eventState)
+  237:    {
+  238:      eventData.EventType = gTouchpadDevStatusEvent_c;
+  239:      eventData.EventDataReport.devStatusReport.u8DeviceStatus = touchData[0];
+  240:      eventData.EventDataReport.devStatusReport.u8InterruptStatus = touchData[1];
+  241:      (void)IIC_StopTransaction(mTouchpadIicSlaveAddress_c);
+  242:      eventState = mTpEvStateIdle_c;
+  243:      tpEventCallback(&eventData);
+  244:    }
+  245:  }
+  246:  
+  247:  /***********************************************************************************/
+  248:  #if(TRUE == mTouchpadFlashSupportEnable_d)
+  249:  void tpHandlingFlashEvent(iicResult_t IicResult)
+  250:  {
+  251:    (void)IicResult;
+  252:    if(mTpEvStateWrittingEventDataAddress_c == eventState)
+  253:    {
+  254:      eventState = mTpEvStateReadingEventData_c;
+  255:      (void)IIC_Read(mTouchpadIicSlaveAddress_c, touchData,mTpFlashDataSize_c, tpHandlingFlashEvent);
+  256:    }
+  257:    else if(mTpEvStateReadingEventData_c == eventState)
+  258:    {
+  259:      eventData.EventType = gTouchpadFlashEvent_c; 
+  260:      (void)IIC_StopTransaction(mTouchpadIicSlaveAddress_c);
+  261:      eventState = mTpEvStateIdle_c;
+  262:      tpEventCallback(&eventData);
+  263:    }
+  264:  }
+  265:  #endif
+  266:  #pragma CODE_SEG DEFAULT
+  267:  
+  268:  #else                  /* FALSE == gTouchpadSupported */         
+  269:  
+  270:  
+  271:  /************************************************************************************
+  272:  *************************************************************************************
+  273:  * Interface functions
+  274:  *************************************************************************************
+  275:  ************************************************************************************/
+  276:  /************************************************************************************
+  277:  *
+  278:  * Touchpad_DriverInit
+  279:  *
+  280:  ************************************************************************************/
+  281:  touchpadErrors_t Touchpad_DriverInit
+  282:  (
+  283:   touchpadCallback_t userCallBack, 
+  284:   gpioPort_t AttnPort, 
+  285:   gpioPin_t AttnPin
+  286:  )
+  287:  {
+  288:    (void)userCallBack;
+  289:    (void)AttnPort;
+  290:    (void)AttnPin;
+  291:    return gErrNoError_c;
+  0000 4f       [1]             CLRA  
+  292:  }
+  0001 8d       [7]             RTC   
+  293:  
+  294:  
+  295:  /* Place it in NON_BANKED memory */
+  296:  #ifdef MEMORY_MODEL_BANKED
+  297:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  298:  #else
+  299:  #pragma CODE_SEG DEFAULT
+  300:  #endif /* MEMORY_MODEL_BANKED */
+  301:  /************************************************************************************
+  302:  *
+  303:  * Touchpad_EventHandler
+  304:  *
+  305:  ************************************************************************************/
+  306:  void Touchpad_EventHandler(void)
+  307:  {
+  308:    
+  309:  }
+  0000 81       [6]             RTS   
+  310:  #pragma CODE_SEG DEFAULT
+  311:  
+  312:  #endif                        /* gTouchpadSupported_d */
+  313:  

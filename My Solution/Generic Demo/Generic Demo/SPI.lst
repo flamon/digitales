@@ -1,0 +1,1315 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*****************************************************************************
+    2:  * SPI driver implementation.
+    3:  * Driver to transmit and receive strings via SPI
+    4:  * 
+    5:  * Copyright (c) 2009, Freescale, Inc. All rights reserved.
+    6:  *
+    7:  * 
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  *****************************************************************************/
+   13:  
+   14:  #include "SPI.h"
+   15:  
+   16:  
+   17:  /************************************************************************************
+   18:  *************************************************************************************
+   19:  * Private memory declarations
+   20:  *************************************************************************************
+   21:  ************************************************************************************/
+   22:  
+   23:  #if TRUE == gSpiSupported_d 
+   24:  
+   25:  /* SPI 1 Globals */
+   26:  #if gSpiUsePort1_d
+   27:  
+   28:  static uint8_t         *mpu8SPI1Ptr;        // Transmit/Receive Data Pointer 
+   29:  static uint8_t         mu8SPI1Counter;      // Module data counter 
+   30:  static spiStatus_t     mSPI1Status;         // SPI Driver Status 
+   31:  spiCallback_t          gpfSpi1CallBack;     // SPI callback
+   32:  
+   33:  #endif //gSpiUsePort1_d
+   34:  
+   35:  /* SPI 2 Globals */
+   36:  #if gSpiUsePort2_d
+   37:  
+   38:  static uint8_t         *mpu8SPI2Ptr;        // Transmit/Receive Data Pointer 
+   39:  static uint8_t         mu8SPI2Counter;      // Module data counter 
+   40:  static spiStatus_t     mSPI2Status;         // SPI Driver Status 
+   41:  spiCallback_t          gpfSpi2CallBack;     // SPI callback
+   42:  
+   43:  #endif //gSpiUsePort2_d
+   44:  
+   45:  #endif
+   46:  
+   47:  /************************************************************************************
+   48:  *************************************************************************************
+   49:  * Interface functions
+   50:  *************************************************************************************
+   51:  ************************************************************************************/
+   52:  
+   53:  /* Place it in NON_BANKED memory */
+   54:  #ifdef MEMORY_MODEL_BANKED
+   55:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+   56:  #else
+   57:  #pragma CODE_SEG DEFAULT
+   58:  #endif /* MEMORY_MODEL_BANKED */
+   59:  
+   60:  /* SPI 1 Functions */
+   61:  
+   62:  #if TRUE == gSpiSupported_d 
+   63:  
+   64:  #if gSpiUsePort1_d
+   65:  /***********************************************************************************/
+   66:  
+   67:  
+   68:  void SPI1_Init
+   69:  ( 
+   70:    spiBaudRateDivisor_t SpiBaud            //IN, Desired baudrate on the SPI bus
+   71:  )
+   72:  {
+   73:    
+   74:   /*Init the SS pins in disable mode*/
+   75:   #if gSpi1UsePeripheral1_d    
+   76:    (void)Gpio_PinClear(gSpi1Peripheral1SsPort_c, gSpi1Peripheral1SsPinMask_c);
+  0000 ae01     [2]             LDX   #1
+  0002 87       [2]             PSHA  
+  0003 a620     [2]             LDA   #32
+  0005 ac000000 [8]             CALL  Gpio_PinClear
+   77:   #endif
+   78:  
+   79:   #if gSpi1UsePeripheral2_d   
+   80:    (void)Gpio_PinClear(gSpi1Peripheral2SsPort_c, gSpi1Peripheral2SsPinMask_c);
+   81:   #endif   
+   82:  
+   83:    (void)mSpi1StatusReg;                   // Clear any Interrupt Flag 
+  0009 b600     [3]             LDA   _SPI1S
+   84:    mSpi1BaudReg    = (uint8_t)SpiBaud;     // Baud Rate Divisor = SpiBaud 
+  000b 86       [3]             PULA  
+  000c b700     [3]             STA   _SPI1BR
+   85:    mSpi1Ctr1       = mSpi1Ctrl1RegVal_c; 
+  000e 6e5000   [4]             MOV   #80,_SPI1C1
+   86:    mSpi1Ctr2       = mSpi1Ctrl2RegVal_c;   // SS as GPIO,SPI use separate pins 
+  0011 3f00     [5]             CLR   _SPI1C2
+   87:    gpfSpi1CallBack = NULL;                 //Sets the SPI calback*/
+  0013 5f       [1]             CLRX  
+  0014 8c       [1]             CLRH  
+  0015 960000   [5]             STHX  gpfSpi1CallBack
+   88:    mSPI1Status     = mSpiIdle_c;           //Sets the SPI state machine in IDLE
+  0018 4f       [1]             CLRA  
+  0019 c70000   [4]             STA   mSPI1Status
+   89:    mpu8SPI1Ptr     = NULL;                 //Initializes the data pinter
+  001c 960000   [5]             STHX  mpu8SPI1Ptr
+   90:  
+   91:  }
+  001f 81       [6]             RTS   
+   92:  #endif //gSpiUsePort1_d
+   93:  #else //FALSE == gSpiSupported_d 
+   94:  
+   95:  void SPI1_Init(spiBaudRateDivisor_t SpiBaud)
+   96:  {
+   97:    (void)SpiBaud;
+   98:  }
+   99:  
+  100:  #endif
+  101:  
+  102:  /***********************************************************************************/
+  103:  
+  104:  #if TRUE == gSpiSupported_d 
+  105:  #if gSpiUsePort1_d
+  106:  spiErr_t SPI1_AssertPeripheralSsPin
+  107:  (
+  108:   uint8_t       u8PeripheralNum,           //IN, which of the peripherals on the list will be used
+  109:   spiCallback_t pfUserCallBack             //IN, Pointer to the callback function called when a frame 
+  110:                                            //is completely received or transmitted 
+  111:  ) 
+  112:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  113:  
+  114:    if(mSpiIdle_c == mSPI1Status){
+  0002 ce0000   [4]             LDX   mSPI1Status
+  0005 261f     [3]             BNE   L26 ;abs = 0026
+  115:  
+  116:      if(gSpi1PeripheralsOnTheBus_c >= u8PeripheralNum){
+  0007 a102     [2]             CMP   #2
+  0009 2218     [3]             BHI   L23 ;abs = 0023
+  117:  
+  118:        /*Asserts the peripheral pin*/ 
+  119:        if(1 == u8PeripheralNum){
+  000b 4b08     [4]             DBNZA L15 ;abs = 0015
+  120:  
+  121:         #if gSpi1UsePeripheral1_d   
+  122:          (void)Gpio_PinSet(gSpi1Peripheral1SsPort_c, gSpi1Peripheral1SsPinMask_c);
+  000d ae01     [2]             LDX   #1
+  000f a620     [2]             LDA   #32
+  0011 ac000000 [8]             CALL  Gpio_PinSet
+  0015          L15:    
+  123:         #endif
+  124:  
+  125:        }
+  126:        else{
+  127:  
+  128:         #if gSpi1UsePeripheral2_d 
+  129:          (void)Gpio_PinSet(gSpi1Peripheral2SsPort_c, gSpi1Peripheral2SsPinMask_c);
+  130:         #endif
+  131:  
+  132:        }
+  133:         gpfSpi1CallBack = pfUserCallBack;  //Sets the SPI calback
+  0015 9efe01   [5]             LDHX  1,SP
+  0018 960000   [5]             STHX  gpfSpi1CallBack
+  134:         mSPI1Status     = mSpiPeripheralAsserted_c;
+  001b a601     [2]             LDA   #1
+  001d c70000   [4]             STA   mSPI1Status
+  135:         return gSpiErrNoError_c;
+  0020 4f       [1]             CLRA  
+  0021 2005     [3]             BRA   L28 ;abs = 0028
+  0023          L23:    
+  136:  
+  137:      }
+  138:      else {
+  139:        return gSpiErrInvalidParameter_c;
+  0023 a603     [2]             LDA   #3
+  0025 65       [3]             SKIP2 L28 ;abs = 0028
+  0026          L26:    
+  140:      }
+  141:    }
+  142:    else {
+  143:      return gSpiErrModuleBusy_c;
+  0026 a605     [2]             LDA   #5
+  0028          L28:    
+  144:    }
+  145:  
+  146:  }
+  0028 a702     [2]             AIS   #2
+  002a 81       [6]             RTS   
+  147:  #endif
+  148:  #else //FALSE == gSpiSupported_d 
+  149:  
+  150:  spiErr_t SPI1_AssertPeripheralSsPin(uint8_t u8PeripheralNum, spiCallback_t pfUserCallBack)
+  151:  {
+  152:    (void)u8PeripheralNum;
+  153:    (void)pfUserCallBack;
+  154:    return gSpiErrNoError_c;
+  155:  }
+  156:  
+  157:  #endif
+  158:  
+  159:  /***********************************************************************************/
+  160:  
+  161:  #if TRUE == gSpiSupported_d 
+  162:  #if gSpiUsePort1_d
+  163:  spiErr_t SPI1_DeassertPeripheralSsPin
+  164:  (
+  165:  void
+  166:  )
+  167:  {
+  168:  
+  169:    if(mSpiPeripheralAsserted_c == mSPI1Status){
+  0000 c60000   [4]             LDA   mSPI1Status
+  0003 a101     [2]             CMP   #1
+  0005 260d     [3]             BNE   L14 ;abs = 0014
+  170:  
+  171:      /*sets all te SS pins to disable*/
+  172:     #if gSpi1UsePeripheral1_d   
+  173:      (void)Gpio_PinClear(gSpi1Peripheral1SsPort_c, gSpi1Peripheral1SsPinMask_c);
+  0007 ae01     [2]             LDX   #1
+  0009 a620     [2]             LDA   #32
+  000b ac000000 [8]             CALL  Gpio_PinClear
+  174:     #endif
+  175:      
+  176:     #if gSpi1UsePeripheral2_d   
+  177:      (void)Gpio_PinClear(gSpi1Peripheral2SsPort_c, gSpi1Peripheral2SsPinMask_c);
+  178:     #endif   
+  179:   
+  180:      mSPI1Status = mSpiIdle_c;
+  000f 4f       [1]             CLRA  
+  0010 c70000   [4]             STA   mSPI1Status
+  181:      return gSpiErrNoError_c;
+  0013 81       [6]             RTS   
+  0014          L14:    
+  182:  
+  183:    }
+  184:    else{
+  185:  
+  186:      if(mSpiIdle_c == mSPI1Status){
+  0014 4d       [1]             TSTA  
+  0015 2603     [3]             BNE   L1A ;abs = 001a
+  187:        return gSpiErrNoPinAsserted_c;
+  0017 a606     [2]             LDA   #6
+  0019 81       [6]             RTS   
+  001a          L1A:    
+  188:      }
+  189:      else{
+  190:        return gSpiErrTransferInProgress_c;
+  001a a604     [2]             LDA   #4
+  191:      }
+  192:  
+  193:    }
+  194:    
+  195:  }
+  001c 81       [6]             RTS   
+  196:  #endif
+  197:  #else //FALSE == gSpiSupported_d 
+  198:  
+  199:  spiErr_t SPI1_DeassertPeripheralSsPin(void)
+  200:  {
+  201:    return gSpiErrNoError_c;
+  202:  }
+  203:  
+  204:  #endif
+  205:  
+  206:  
+  207:  /***********************************************************************************/
+  208:  #if TRUE == gSpiSupported_d 
+  209:  #if gSpiUsePort1_d
+  210:  spiErr_t SPI1_WriteString
+  211:  (
+  212:  uint8_t *pu8TxString,                      //IN, Pointer to the buffer to be transmitted
+  213:  uint8_t  u8StringLenght                    //IN, Bufferr data length
+  214:  )
+  215:  {
+  0000 87       [2]             PSHA  
+  216:    if(mSpiPeripheralAsserted_c == mSPI1Status){
+  0001 c60000   [4]             LDA   mSPI1Status
+  0004 a101     [2]             CMP   #1
+  0006 2621     [3]             BNE   L29 ;abs = 0029
+  217:  
+  218:      (void)mSpi1StatusReg;                  //Clear any unattended Interrupt Flag 
+  0008 b600     [3]             LDA   _SPI1S
+  219:      mu8SPI1Counter = u8StringLenght - 1;   //Sets the amount of bytes to send
+  000a 9ee601   [4]             LDA   1,SP
+  000d 4a       [1]             DECA  
+  000e c70000   [4]             STA   mu8SPI1Counter
+  220:      mpu8SPI1Ptr    = pu8TxString;          //Sets the buffer to transmit
+  0011 960000   [5]             STHX  mpu8SPI1Ptr
+  221:      mSPI1Status    = mSpiTransmittingData_c;
+  0014 a602     [2]             LDA   #2
+  0016 c70000   [4]             STA   mSPI1Status
+  222:      mSpi1DataReg   = *mpu8SPI1Ptr++;       //Put the first byte in the SPI data register
+  0019 f6       [3]             LDA   ,X
+  001a b700     [3]             STA   _SPI1D
+  001c 450000   [3]             LDHX  @mpu8SPI1Ptr
+  001f 6c01     [5]             INC   1,X
+  0021 2601     [3]             BNE   L24 ;abs = 0024
+  0023 7c       [4]             INC   ,X
+  0024          L24:    
+  223:  
+  224:     #if gSpi1Mode_d == gSpiInterrupt_d   
+  225:      mSpi1EnableTxInterrupt();              //Enables de SPI interrupt
+  0024 1a00     [5]             BSET  5,_SPI1C1
+  226:     #endif
+  227:  
+  228:      return gSpiErrNoError_c;
+  0026 4f       [1]             CLRA  
+  229:  
+  230:    }
+  231:    else{
+  232:    
+  233:      if(mSpiIdle_c == mSPI1Status){
+  234:        return gSpiErrNoPinAsserted_c;
+  235:      }
+  236:      else{
+  237:        return gSpiErrTransferInProgress_c;
+  238:      }
+  239:  
+  240:    }
+  241:  
+  242:  }
+  0027 8a       [3]             PULH  
+  0028 81       [6]             RTS   
+  0029          L29:    
+  0029 4d       [1]             TSTA  
+  002a 2604     [3]             BNE   L30 ;abs = 0030
+  002c a606     [2]             LDA   #6
+  002e 8a       [3]             PULH  
+  002f 81       [6]             RTS   
+  0030          L30:    
+  0030 a604     [2]             LDA   #4
+  0032 8a       [3]             PULH  
+  0033 81       [6]             RTS   
+  243:  #endif
+  244:  #else //FALSE == gSpiSupported_d 
+  245:  
+  246:  spiErr_t SPI1_WriteString (uint8_t *pu8TxString, uint8_t  u8StringLenght)
+  247:  {
+  248:    (void)pu8TxString;
+  249:    (void)u8StringLenght;
+  250:    return gSpiErrNoError_c;
+  251:  }
+  252:  
+  253:  #endif
+  254:  
+  255:  /***********************************************************************************/
+  256:  #if TRUE == gSpiSupported_d 
+  257:  #if gSpiUsePort1_d
+  258:  spiErr_t SPI1_WriteStringBlocking
+  259:  (
+  260:  uint8_t *pu8TxString,                      //IN, Pointer to the buffer to be transmitted
+  261:  uint8_t  u8StringLenght                    //IN, Bufferr data length
+  262:  )
+  263:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  264:    if(mSpiPeripheralAsserted_c == mSPI1Status){
+  0002 ce0000   [4]             LDX   mSPI1Status
+  0005 a301     [2]             CPX   #1
+  0007 2621     [3]             BNE   L2A ;abs = 002a
+  265:      mSPI1Status    = mSpiTransmittingData_c;
+  0009 ae02     [2]             LDX   #2
+  000b cf0000   [4]             STX   mSPI1Status
+  266:      for(u8StringLenght; u8StringLenght > 0; u8StringLenght--){
+  000e 200f     [3]             BRA   L1F ;abs = 001f
+  0010          L10:    
+  267:         SPI1_WriteByteBlocking(*pu8TxString++);
+  0010 9efe01   [5]             LDHX  1,SP
+  0013 87       [2]             PSHA  
+  0014 f6       [3]             LDA   ,X
+  0015 af01     [2]             AIX   #1
+  0017 9eff02   [5]             STHX  2,SP
+  001a cd0000   [6]             JSR   SPI1_WriteByteBlocking
+  001d 86       [3]             PULA  
+  001e 4a       [1]             DECA  
+  001f          L1F:    
+  001f 4d       [1]             TSTA  
+  0020 26ee     [3]             BNE   L10 ;abs = 0010
+  268:      }
+  269:      mSPI1Status    = mSpiPeripheralAsserted_c;
+  0022 a601     [2]             LDA   #1
+  0024 c70000   [4]             STA   mSPI1Status
+  270:      return gSpiErrNoError_c;
+  0027 4f       [1]             CLRA  
+  0028 2008     [3]             BRA   L32 ;abs = 0032
+  002a          L2A:    
+  271:    }
+  272:    else{
+  273:      if(mSpiIdle_c == mSPI1Status){
+  002a 5d       [1]             TSTX  
+  002b 2603     [3]             BNE   L30 ;abs = 0030
+  274:        return gSpiErrNoPinAsserted_c;
+  002d a606     [2]             LDA   #6
+  002f 65       [3]             SKIP2 L32 ;abs = 0032
+  0030          L30:    
+  275:      }
+  276:      else{
+  277:        return gSpiErrTransferInProgress_c;
+  0030 a604     [2]             LDA   #4
+  0032          L32:    
+  278:      }
+  279:    }
+  280:  }
+  0032 a702     [2]             AIS   #2
+  0034 81       [6]             RTS   
+  281:  #endif
+  282:  #else //FALSE == gSpiSupported_d 
+  283:  
+  284:  spiErr_t SPI1_WriteStringBlocking (uint8_t *pu8TxString, uint8_t  u8StringLenght)
+  285:  {
+  286:    (void)pu8TxString;
+  287:    (void)u8StringLenght;
+  288:    return gSpiErrNoError_c;
+  289:  }
+  290:  
+  291:  #endif
+  292:  
+  293:  /***********************************************************************************/
+  294:  #if TRUE == gSpiSupported_d 
+  295:  #if gSpiUsePort1_d
+  296:  spiErr_t SPI1_ReadString
+  297:  (
+  298:  uint8_t *pu8RxString,                      //IN, Pointer to the buffer to write the received data
+  299:  uint8_t  u8StringLenght                    //IN, Bufferr data length
+  300:  ) 
+  301:  {
+  0000 87       [2]             PSHA  
+  302:  
+  303:    if(mSpiPeripheralAsserted_c == mSPI1Status){
+  0001 c60000   [4]             LDA   mSPI1Status
+  0004 a101     [2]             CMP   #1
+  0006 2618     [3]             BNE   L20 ;abs = 0020
+  304:  
+  305:      (void)mSpi1StatusReg;                  // Clear any unattended Interrupt Flag 
+  0008 b600     [3]             LDA   _SPI1S
+  306:      mu8SPI1Counter = u8StringLenght - 1;   //Sets the amount of bytes to send
+  000a 9ee601   [4]             LDA   1,SP
+  000d 4a       [1]             DECA  
+  000e c70000   [4]             STA   mu8SPI1Counter
+  307:      mpu8SPI1Ptr    = pu8RxString;          //Sets the buffer to transmit
+  0011 960000   [5]             STHX  mpu8SPI1Ptr
+  308:      mSPI1Status    = mSpiReceivingData_c;
+  0014 a603     [2]             LDA   #3
+  0016 c70000   [4]             STA   mSPI1Status
+  309:      mSpi1DataReg   = mDummyByte_c;         //Puts a dummy byte in the SPI data register
+  0019 3f00     [5]             CLR   _SPI1D
+  310:  
+  311:     #if gSpi1Mode_d == gSpiInterrupt_d   
+  312:      mSpi1EnableRxInterrupt();              //Enables de SPI interrupt
+  001b 1e00     [5]             BSET  7,_SPI1C1
+  313:     #endif
+  314:  
+  315:      return gSpiErrNoError_c;
+  001d 4f       [1]             CLRA  
+  316:  
+  317:    }
+  318:    else{
+  319:  
+  320:      if(mSpiIdle_c == mSPI1Status){
+  321:        return gSpiErrNoPinAsserted_c;
+  322:      }
+  323:      else{
+  324:        return gSpiErrTransferInProgress_c;
+  325:      }
+  326:  
+  327:    }  
+  328:  
+  329:  }
+  001e 8a       [3]             PULH  
+  001f 81       [6]             RTS   
+  0020          L20:    
+  0020 4d       [1]             TSTA  
+  0021 2604     [3]             BNE   L27 ;abs = 0027
+  0023 a606     [2]             LDA   #6
+  0025 8a       [3]             PULH  
+  0026 81       [6]             RTS   
+  0027          L27:    
+  0027 a604     [2]             LDA   #4
+  0029 8a       [3]             PULH  
+  002a 81       [6]             RTS   
+  330:  #endif
+  331:  #else //FALSE == gSpiSupported_d 
+  332:  
+  333:  spiErr_t SPI1_ReadString (uint8_t *pu8RxString, uint8_t  u8StringLenght)
+  334:  {
+  335:    (void)pu8RxString;
+  336:    (void)u8StringLenght;
+  337:    return gSpiErrNoError_c;
+  338:  }
+  339:  
+  340:  #endif
+  341:  
+  342:  /***********************************************************************************/
+  343:  #if TRUE == gSpiSupported_d 
+  344:  #if gSpiUsePort1_d
+  345:  spiErr_t SPI1_ReadStringBlocking
+  346:  (
+  347:  uint8_t *pu8RxString,                      //IN, Pointer to the buffer to write the received data
+  348:  uint8_t  u8StringLenght                    //IN, Bufferr data length
+  349:  ) 
+  350:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  351:  
+  352:    if(mSpiPeripheralAsserted_c == mSPI1Status){
+  0003 c60000   [4]             LDA   mSPI1Status
+  0006 a101     [2]             CMP   #1
+  0008 2622     [3]             BNE   L2C ;abs = 002c
+  353:  
+  354:      mSPI1Status    = mSpiReceivingData_c;
+  000a a603     [2]             LDA   #3
+  000c c70000   [4]             STA   mSPI1Status
+  355:      for(u8StringLenght; u8StringLenght > 0; u8StringLenght--){
+  000f 200f     [3]             BRA   L20 ;abs = 0020
+  0011          L11:    
+  356:         *pu8RxString++ = SPI1_ReadByteBlocking();
+  0011 cd0000   [6]             JSR   SPI1_ReadByteBlocking
+  0014 9efe02   [5]             LDHX  2,SP
+  0017 f7       [2]             STA   ,X
+  0018 95       [2]             TSX   
+  0019 6c02     [5]             INC   2,X
+  001b 2602     [3]             BNE   L1F ;abs = 001f
+  001d 6c01     [5]             INC   1,X
+  001f          L1F:    
+  001f 7a       [4]             DEC   ,X
+  0020          L20:    
+  0020 95       [2]             TSX   
+  0021 7d       [3]             TST   ,X
+  0022 26ed     [3]             BNE   L11 ;abs = 0011
+  357:      }
+  358:      mSPI1Status    = mSpiPeripheralAsserted_c;
+  0024 a601     [2]             LDA   #1
+  0026 c70000   [4]             STA   mSPI1Status
+  359:      return gSpiErrNoError_c;
+  0029 4f       [1]             CLRA  
+  002a 2008     [3]             BRA   L34 ;abs = 0034
+  002c          L2C:    
+  360:    }
+  361:    else{
+  362:  
+  363:      if(mSpiIdle_c == mSPI1Status){
+  002c 4d       [1]             TSTA  
+  002d 2603     [3]             BNE   L32 ;abs = 0032
+  364:        return gSpiErrNoPinAsserted_c;
+  002f a606     [2]             LDA   #6
+  0031 65       [3]             SKIP2 L34 ;abs = 0034
+  0032          L32:    
+  365:      }
+  366:      else{
+  367:        return gSpiErrTransferInProgress_c;
+  0032 a604     [2]             LDA   #4
+  0034          L34:    
+  368:      }
+  369:  
+  370:    }  
+  371:  
+  372:  }
+  0034 a703     [2]             AIS   #3
+  0036 81       [6]             RTS   
+  373:  #endif
+  374:  #else //FALSE == gSpiSupported_d 
+  375:  
+  376:  spiErr_t SPI1_ReadStringBlocking (uint8_t *pu8RxString, uint8_t  u8StringLenght)
+  377:  {
+  378:    (void)pu8RxString;
+  379:    (void)u8StringLenght;
+  380:    return gSpiErrNoError_c;
+  381:  }
+  382:  
+  383:  #endif
+  384:  
+  385:  /***********************************************************************************/
+  386:  #if TRUE == gSpiSupported_d 
+  387:  #if gSpiUsePort1_d
+  388:  spiErr_t SPI1_WriteByte
+  389:  (
+  390:  uint8_t u8TxData                           //IN, Byte to be transmitted
+  391:  )
+  392:  {
+  0000 87       [2]             PSHA  
+  393:    return SPI1_WriteString(&u8TxData, 1);
+  0001 95       [2]             TSX   
+  0002 a601     [2]             LDA   #1
+  0004 cd0000   [6]             JSR   SPI1_WriteString
+  394:  }
+  0007 8a       [3]             PULH  
+  0008 81       [6]             RTS   
+  395:  #endif
+  396:  #else //FALSE == gSpiSupported_d 
+  397:  
+  398:  spiErr_t SPI1_WriteByte (uint8_t  u8TxData)
+  399:  {
+  400:    (void)u8TxData;
+  401:    return gSpiErrNoError_c;
+  402:  }
+  403:  
+  404:  #endif
+  405:  
+  406:  /***********************************************************************************/
+  407:  #if TRUE == gSpiSupported_d
+  408:  #if gSpiUsePort1_d
+  409:  void SPI1_WriteByteBlocking
+  410:  (
+  411:  uint8_t u8TxData                           //IN, Byte to be transmitted
+  412:  )
+  413:  {
+  414:    (void)mSpi1StatusReg;                  // Clear any unattended Interrupt Flag 
+  0000 be00     [3]             LDX   _SPI1S
+  415:    mSpi1DataReg = u8TxData;
+  0002 b700     [3]             STA   _SPI1D
+  0004          L4:     
+  416:    while (!(mSpi1TxFlag));
+  0004 0b00fd   [5]             BRCLR 5,_SPI1S,L4 ;abs = 0004
+  417:  }
+  0007 81       [6]             RTS   
+  418:  #endif
+  419:  #else //FALSE == gSpiSupported_d 
+  420:  
+  421:  void SPI1_WriteByteBlocking (uint8_t  u8TxData)
+  422:  {
+  423:    (void)u8TxData;
+  424:  }
+  425:  
+  426:  #endif
+  427:  
+  428:  /***********************************************************************************/
+  429:  #if TRUE == gSpiSupported_d
+  430:  #if gSpiUsePort1_d
+  431:  spiErr_t SPI1_ReadByte
+  432:  (
+  433:  uint8_t * pu8RxData                        //IN, Address to put the readed byte
+  434:  )
+  435:  {
+  436:    return SPI1_ReadString(pu8RxData, 1);
+  0000 a601     [2]             LDA   #1
+  0002 cc0000   [4]             JMP   SPI1_ReadString
+  437:  }
+  438:  #endif
+  439:  #else //FALSE == gSpiSupported_d 
+  440:  
+  441:  spiErr_t SPI1_ReadByte (uint8_t  * pu8RxData )
+  442:  {
+  443:    (void)pu8RxData;
+  444:    return gSpiErrNoError_c;
+  445:  }
+  446:  
+  447:  #endif
+  448:  
+  449:  /***********************************************************************************/
+  450:  #if TRUE == gSpiSupported_d
+  451:  #if gSpiUsePort1_d
+  452:  uint8_t SPI1_ReadByteBlocking
+  453:  (
+  454:  void                        //IN, Address to put the readed byte
+  455:  )
+  456:  {
+  457:   (void)mSpi1StatusReg;                  // Clear any unattended Interrupt Flag 
+  0000 b600     [3]             LDA   _SPI1S
+  458:    mSpi1DataReg = mDummyByte_c;
+  0002 3f00     [5]             CLR   _SPI1D
+  0004          L4:     
+  459:    while (!(mSpi1RxFlag));
+  0004 0f00fd   [5]             BRCLR 7,_SPI1S,L4 ;abs = 0004
+  460:    return mSpi1DataReg;
+  0007 b600     [3]             LDA   _SPI1D
+  461:  }
+  0009 81       [6]             RTS   
+  462:  #endif
+  463:  #else //FALSE == gSpiSupported_d 
+  464:  
+  465:  uint8_t SPI1_ReadByteBlocking (void)
+  466:  {
+  467:    return 0;
+  468:  }
+  469:  
+  470:  #endif
+  471:  
+  472:  #pragma CODE_SEG DEFAULT
+  473:  
+  474:  /************************************************************************************/
+  475:  #if TRUE == gSpiSupported_d
+  476:  #if gSpiUsePort1_d
+  477:  #if gSpi1Mode_d == gSpiInterrupt_d
+  478:  
+  479:  /* Place it in NON_BANKED memory */
+  480:  #pragma CODE_SEG ISR_SEGMENT
+  481:  
+  482:  INTERRUPT_KEYWORD void SPI1_Isr(void)
+  483:  {
+  0000 8b       [2]             PSHH  
+  484:  #else
+  485:  void SPI1_Task(void)
+  486:  {
+  487:  
+  488:    if(mSpi1RxFlag || mSpi1TxFlag)
+  489:  #endif 
+  490:    {
+  491:  
+  492:      uint8_t u8ReceivedByte;
+  493:      (void)mSpi1StatusReg;                   // First step to erase the Interrupt flags 
+  0001 b600     [3]             LDA   _SPI1S
+  494:      u8ReceivedByte = mSpi1DataReg;          // Second step to erase the Interrupt flags
+  0003 b600     [3]             LDA   _SPI1D
+  495:      if (mSpiTransmittingData_c == mSPI1Status){
+  0005 ce0000   [4]             LDX   mSPI1Status
+  0008 a302     [2]             CPX   #2
+  000a 2627     [3]             BNE   L33 ;abs = 0033
+  496:  
+  497:        if (0 == mu8SPI1Counter){
+  000c c60000   [4]             LDA   mu8SPI1Counter
+  000f 260e     [3]             BNE   L1F ;abs = 001f
+  498:  
+  499:          mSPI1Status = mSpiPeripheralAsserted_c; 
+  0011 a601     [2]             LDA   #1
+  0013 c70000   [4]             STA   mSPI1Status
+  500:  
+  501:         #if gSpi1Mode_d == gSpiInterrupt_d   
+  502:          mSpi1DisableTxInterrupt();          //Disables SPI interrupt
+  0016 1b00     [5]             BCLR  5,_SPI1C1
+  503:         #endif
+  504:  
+  505:          if(NULL != gpfSpi1CallBack){
+  0018 320000   [5]             LDHX  gpfSpi1CallBack
+  001b 262f     [3]             BNE   L4C ;abs = 004c
+  506:            gpfSpi1CallBack();                          
+  507:          }
+  508:  
+  509:        }
+  510:        else{
+  511:          mu8SPI1Counter--;                  //Decreases the counter
+  512:          mSpi1DataReg = *mpu8SPI1Ptr++;     // Transmit next byte 
+  513:        }
+  514:  
+  515:      }
+  516:      else if (mSpiReceivingData_c == mSPI1Status){
+  517:      
+  518:        *mpu8SPI1Ptr = u8ReceivedByte;       //Read SPI Data 
+  519:        if (0 == mu8SPI1Counter){
+  520:        
+  521:          mSPI1Status = mSpiPeripheralAsserted_c; 
+  522:  
+  523:         #if gSpi1Mode_d == gSpiInterrupt_d   
+  524:          mSpi1DisableRxInterrupt();         //Disables SPI interrupt
+  525:         #endif
+  526:  
+  527:          if(NULL != gpfSpi1CallBack){
+  528:            gpfSpi1CallBack();                       
+  529:          }
+  530:        
+  531:        }
+  532:        else{
+  533:          mu8SPI1Counter--;                  //Decreases the counter
+  534:          mpu8SPI1Ptr++;  
+  535:          mSpi1DataReg = mDummyByte_c;       //Puts a dummy byte in the SPI data register              
+  536:        }
+  537:      
+  538:      }
+  539:      else{                                  //It isn't transmitting or receiving 
+  540:        
+  541:      }
+  542:    
+  543:    }
+  544:  
+  545:  }   
+  001d 8a       [3]             PULH  
+  001e 80       [9]             RTI   
+  001f          L1F:    
+  001f 450000   [3]             LDHX  @mu8SPI1Counter
+  0022 7a       [4]             DEC   ,X
+  0023 320000   [5]             LDHX  mpu8SPI1Ptr
+  0026 f6       [3]             LDA   ,X
+  0027 b700     [3]             STA   _SPI1D
+  0029 450000   [3]             LDHX  @mpu8SPI1Ptr
+  002c 6c01     [5]             INC   1,X
+  002e 262d     [3]             BNE   L5D ;abs = 005d
+  0030 7c       [4]             INC   ,X
+  0031 8a       [3]             PULH  
+  0032 80       [9]             RTI   
+  0033          L33:    
+  0033 a303     [2]             CPX   #3
+  0035 2626     [3]             BNE   L5D ;abs = 005d
+  0037 320000   [5]             LDHX  mpu8SPI1Ptr
+  003a f7       [2]             STA   ,X
+  003b c60000   [4]             LDA   mu8SPI1Counter
+  003e 260f     [3]             BNE   L4F ;abs = 004f
+  0040 a601     [2]             LDA   #1
+  0042 c70000   [4]             STA   mSPI1Status
+  0045 1f00     [5]             BCLR  7,_SPI1C1
+  0047 320000   [5]             LDHX  gpfSpi1CallBack
+  004a 2711     [3]             BEQ   L5D ;abs = 005d
+  004c          L4C:    
+  004c fd       [5]             JSR   ,X
+  004d 8a       [3]             PULH  
+  004e 80       [9]             RTI   
+  004f          L4F:    
+  004f 450000   [3]             LDHX  @mu8SPI1Counter
+  0052 7a       [4]             DEC   ,X
+  0053 450000   [3]             LDHX  @mpu8SPI1Ptr
+  0056 6c01     [5]             INC   1,X
+  0058 2601     [3]             BNE   L5B ;abs = 005b
+  005a 7c       [4]             INC   ,X
+  005b          L5B:    
+  005b 3f00     [5]             CLR   _SPI1D
+  005d          L5D:    
+  005d 8a       [3]             PULH  
+  005e 80       [9]             RTI   
+  546:  #pragma CODE_SEG DEFAULT
+  547:  
+  548:  #endif //gSpiUsePort1_d
+  549:  
+  550:  #endif //gSpiSupported_d
+  551:  
+  552:  /* Place it in NON_BANKED memory */
+  553:  #ifdef MEMORY_MODEL_BANKED
+  554:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  555:  #else
+  556:  #pragma CODE_SEG DEFAULT
+  557:  #endif /* MEMORY_MODEL_BANKED */
+  558:  
+  559:  /* SPI 2 Functions */
+  560:  
+  561:  #if TRUE == gSpiSupported_d
+  562:  #if gSpiUsePort2_d
+  563:  /***********************************************************************************/
+  564:  void SPI2_Init
+  565:  ( 
+  566:    spiBaudRateDivisor_t SpiBaud             //IN, Desired baudrate on the SPI bus
+  567:  )
+  568:  {
+  569:    
+  570:   /*sets all te SS pins to disable*/
+  571:   #if gSpi2UsePeripheral1_d   
+  572:    (void)Gpio_PinClear(gSpi2Peripheral1SsPort_c, gSpi2Peripheral1SsPinMask_c);
+  573:   #endif  
+  574:   #if gSpi2UsePeripheral2_d   
+  575:    (void)Gpio_PinClear(gSpi2Peripheral2SsPort_c, gSpi2Peripheral2SsPinMask_c);
+  576:   #endif   
+  577:  
+  578:    (void)mSpi2StatusReg;                    // Clear any Interrupt Flag 
+  579:    mSpi2BaudReg    = (uint8_t)SpiBaud;      // Baud Rate Divisor = SpiBaud 
+  580:    mSpi2Ctr1       = mSpi2Ctrl1RegVal_c; 
+  581:    mSpi2Ctr2       = mSpi2Ctrl2RegVal_c;    // SS as GPIO,SPI use separate pins 
+  582:    gpfSpi2CallBack = NULL;                  //Sets the SPI calback
+  583:    mSPI2Status     = mSpiIdle_c;            //Sets the SPI state machine in IDLE
+  584:    mpu8SPI2Ptr     = NULL;                  //Initializes the data pinter 
+  585:  
+  586:  }
+  587:  #endif
+  588:  #else //FALSE == gSpiSupported_d
+  589:  void SPI2_Init(spiBaudRateDivisor_t SpiBaud)
+  590:  {
+  591:    (void)SpiBaud;
+  592:  }
+  593:  
+  594:  #endif
+  595:  
+  596:  /***********************************************************************************/
+  597:  #if TRUE == gSpiSupported_d
+  598:  #if gSpiUsePort2_d
+  599:  spiErr_t SPI2_AssertPeripheralSsPin
+  600:  (
+  601:   uint8_t       u8PeripheralNum,      //IN, Which of the peripherals on the list will be used
+  602:   spiCallback_t pfUserCallBack        //IN, Pointer to the callback function called when a frame 
+  603:                                       //is completely received or transmitted 
+  604:  ) 
+  605:  {
+  606:  
+  607:    if(mSpiIdle_c == mSPI2Status){
+  608:  
+  609:      if(gSpi2PeripheralsOnTheBus_c >= u8PeripheralNum){
+  610:  
+  611:        /*Asserts the peripheral pin*/ 
+  612:        if(1 == u8PeripheralNum){
+  613:         #if gSpi2UsePeripheral1_d   
+  614:          (void)Gpio_PinSet(gSpi2Peripheral1SsPort_c, gSpi2Peripheral1SsPinMask_c);
+  615:         #endif
+  616:        }
+  617:        else{
+  618:         #if gSpi2UsePeripheral2_d   
+  619:          (void)Gpio_PinSet(gSpi2Peripheral2SsPort_c, gSpi2Peripheral2SsPinMask_c);
+  620:         #endif
+  621:        }
+  622:         gpfSpi2CallBack = pfUserCallBack;   //Sets the SPI calback
+  623:         mSPI2Status     = mSpiPeripheralAsserted_c;
+  624:         return gSpiErrNoError_c;
+  625:  
+  626:      }
+  627:      else {
+  628:        return gSpiErrInvalidParameter_c;
+  629:      }
+  630:  
+  631:    }
+  632:    else {
+  633:      return gSpiErrModuleBusy_c;
+  634:    }
+  635:  
+  636:  }
+  637:  #endif
+  638:  #else //FALSE == gSpiSupported_d
+  639:  
+  640:  spiErr_t SPI2_AssertPeripheralSsPin(uint8_t u8PeripheralNum, spiCallback_t pfUserCallBack)
+  641:  {
+  642:    (void)u8PeripheralNum;
+  643:    (void)pfUserCallBack;
+  644:    return gSpiErrNoError_c;
+  645:  }
+  646:  
+  647:  #endif
+  648:  
+  649:  /***********************************************************************************/
+  650:  #if TRUE == gSpiSupported_d
+  651:  #if gSpiUsePort2_d
+  652:  spiErr_t SPI2_DeassertPeripheralSsPin
+  653:  (
+  654:  void
+  655:  )
+  656:  {
+  657:  
+  658:    if(mSpiPeripheralAsserted_c == mSPI2Status){
+  659:  
+  660:       /*sets all te SS pins to disable*/
+  661:     #if gSpi2UsePeripheral1_d   
+  662:      (void)Gpio_PinClear(gSpi2Peripheral1SsPort_c, gSpi2Peripheral1SsPinMask_c);
+  663:     #endif  
+  664:     #if gSpi2UsePeripheral2_d   
+  665:      (void)Gpio_PinClear(gSpi2Peripheral2SsPort_c, gSpi2Peripheral2SsPinMask_c);
+  666:     #endif   
+  667:      mSPI2Status = mSpiIdle_c;
+  668:      return gSpiErrNoError_c;
+  669:  
+  670:    }
+  671:    else{
+  672:  
+  673:      if(mSpiIdle_c == mSPI2Status){
+  674:        return gSpiErrNoPinAsserted_c;
+  675:      }
+  676:      else{
+  677:        return gSpiErrTransferInProgress_c;
+  678:      }
+  679:  
+  680:    }
+  681:  
+  682:  }
+  683:  #endif
+  684:  #else //FALSE == gSpiSupported_d
+  685:  
+  686:  spiErr_t SPI2_DeassertPeripheralSsPin(void)
+  687:  {
+  688:    return gSpiErrNoError_c;
+  689:  }
+  690:  
+  691:  #endif
+  692:  
+  693:  
+  694:  /***********************************************************************************/
+  695:  #if TRUE == gSpiSupported_d
+  696:  #if gSpiUsePort2_d
+  697:  spiErr_t SPI2_WriteString
+  698:  (
+  699:  uint8_t *pu8TxString,                      //IN, Pointer to the buffer to be transmitted
+  700:  uint8_t  u8StringLenght                    //IN, Bufferr data length
+  701:  )
+  702:  {
+  703:  
+  704:    if(mSpiPeripheralAsserted_c == mSPI2Status){
+  705:  
+  706:      (void)mSpi2StatusReg;                  // Clear any unattended Interrupt Flag 
+  707:      mu8SPI2Counter = u8StringLenght - 1;   //Sets the amount of bytes to send
+  708:      mpu8SPI2Ptr    = pu8TxString;          //Sets the buffer to transmit
+  709:      mSPI2Status    = mSpiTransmittingData_c;
+  710:      mSpi2DataReg   = *mpu8SPI2Ptr++;       //Put the first byte in the SPI data register
+  711:  
+  712:     #if(gSpi2Mode_d == gSpiInterrupt_d)   
+  713:      mSpi2EnableTxInterrupt();              //Enables de SPI interrupt
+  714:     #endif
+  715:  
+  716:      return gSpiErrNoError_c;
+  717:  
+  718:    }
+  719:    else{
+  720:  
+  721:      if(mSpiIdle_c == mSPI2Status){
+  722:        return gSpiErrNoPinAsserted_c;
+  723:      }
+  724:      else{
+  725:        return gSpiErrTransferInProgress_c;
+  726:      }
+  727:  
+  728:    }
+  729:  
+  730:  }
+  731:  #endif
+  732:  #else //FALSE == gSpiSupported_d
+  733:  
+  734:  spiErr_t SPI2_WriteString(uint8_t *pu8TxString, uint8_t  u8StringLenght)
+  735:  {
+  736:    (void)pu8TxString;
+  737:    (void)u8StringLenght;
+  738:    return gSpiErrNoError_c;
+  739:  }
+  740:  
+  741:  #endif
+  742:  
+  743:  /***********************************************************************************/
+  744:  #if TRUE == gSpiSupported_d
+  745:  #if gSpiUsePort2_d
+  746:  spiErr_t SPI2_WriteStringBlocking
+  747:  (
+  748:  uint8_t *pu8TxString,                      //IN, Pointer to the buffer to be transmitted
+  749:  uint8_t  u8StringLenght                    //IN, Bufferr data length
+  750:  )
+  751:  {
+  752:    if(mSpiPeripheralAsserted_c == mSPI2Status){
+  753:      mSPI2Status    = mSpiTransmittingData_c;
+  754:      for(u8StringLenght; u8StringLenght > 0; u8StringLenght--){
+  755:         SPI2_WriteByteBlocking(*pu8TxString++);
+  756:      }
+  757:      mSPI2Status    = mSpiPeripheralAsserted_c;
+  758:      return gSpiErrNoError_c;
+  759:    }
+  760:    else{
+  761:    
+  762:      if(mSpiIdle_c == mSPI2Status){
+  763:        return gSpiErrNoPinAsserted_c;
+  764:      }
+  765:      else{
+  766:        return gSpiErrTransferInProgress_c;
+  767:      }
+  768:  
+  769:    }
+  770:  
+  771:  }
+  772:  #endif
+  773:  #else //FALSE == gSpiSupported_d
+  774:  
+  775:  spiErr_t SPI2_WriteStringBlocking(uint8_t *pu8TxString, uint8_t  u8StringLenght)
+  776:  {
+  777:    (void)pu8TxString;
+  778:    (void)u8StringLenght;
+  779:    return gSpiErrNoError_c;
+  780:  }
+  781:  
+  782:  #endif
+  783:  
+  784:  /***********************************************************************************/
+  785:  #if TRUE == gSpiSupported_d
+  786:  #if gSpiUsePort2_d
+  787:  spiErr_t SPI2_ReadString
+  788:  (
+  789:  uint8_t *pu8RxString,                      //IN, Pointer to the buffer to write the received data
+  790:  uint8_t  u8StringLenght                    //IN, Bufferr data length
+  791:  ) 
+  792:  {
+  793:    
+  794:    if(mSpiPeripheralAsserted_c == mSPI2Status){
+  795:  
+  796:      (void)mSpi2StatusReg;                  // Clear any unattended Interrupt Flag 
+  797:      mu8SPI2Counter = u8StringLenght - 1;   //Sets the amount of bytes to send
+  798:      mpu8SPI2Ptr    = pu8RxString;             //Sets the buffer to transmit
+  799:      mSPI2Status    = mSpiReceivingData_c;
+  800:      mSpi2DataReg   = mDummyByte_c;           //Puts a dummy byte in the SPI data register
+  801:  
+  802:     #if(gSpi2Mode_d == gSpiInterrupt_d)   
+  803:      mSpi2EnableRxInterrupt();              //Enables de SPI interrupt
+  804:     #endif
+  805:  
+  806:      return gSpiErrNoError_c;
+  807:  
+  808:    }
+  809:    else{
+  810:    
+  811:      if(mSpiIdle_c == mSPI2Status){
+  812:        return gSpiErrNoPinAsserted_c;
+  813:      }
+  814:      else{
+  815:        return gSpiErrTransferInProgress_c;
+  816:      }
+  817:    
+  818:    }  
+  819:  
+  820:  }
+  821:  #endif
+  822:  #else //FALSE == gSpiSupported_d
+  823:  
+  824:  spiErr_t SPI2_ReadString(uint8_t *pu8RxString, uint8_t  u8StringLenght)
+  825:  {
+  826:    (void)pu8RxString;
+  827:    (void)u8StringLenght;
+  828:    return gSpiErrNoError_c;
+  829:  }
+  830:  
+  831:  #endif
+  832:  
+  833:  /***********************************************************************************/
+  834:  #if TRUE == gSpiSupported_d
+  835:  #if gSpiUsePort2_d
+  836:  spiErr_t SPI2_ReadStringBlocking
+  837:  (
+  838:  uint8_t *pu8RxString,                      //IN, Pointer to the buffer to write the received data
+  839:  uint8_t  u8StringLenght                    //IN, Bufferr data length
+  840:  ) 
+  841:  {
+  842:  
+  843:    if(mSpiPeripheralAsserted_c == mSPI2Status){
+  844:  
+  845:      mSPI2Status    = mSpiReceivingData_c;
+  846:      for(u8StringLenght; u8StringLenght > 0; u8StringLenght--){
+  847:         *pu8RxString++ = SPI2_ReadByteBlocking();
+  848:      }
+  849:      mSPI2Status    = mSpiPeripheralAsserted_c;
+  850:      return gSpiErrNoError_c;
+  851:    }
+  852:    else{
+  853:  
+  854:      if(mSpiIdle_c == mSPI2Status){
+  855:        return gSpiErrNoPinAsserted_c;
+  856:      }
+  857:      else{
+  858:        return gSpiErrTransferInProgress_c;
+  859:      }
+  860:  
+  861:    }  
+  862:  
+  863:  }
+  864:  #endif
+  865:  #else //FALSE == gSpiSupported_d
+  866:  
+  867:  spiErr_t SPI2_ReadStringBlocking(uint8_t *pu8RxString, uint8_t  u8StringLenght)
+  868:  {
+  869:    (void)pu8RxString;
+  870:    (void)u8StringLenght;
+  871:    return gSpiErrNoError_c;
+  872:  }
+  873:  
+  874:  #endif
+  875:  
+  876:  
+  877:  /***********************************************************************************/
+  878:  #if TRUE == gSpiSupported_d
+  879:  #if gSpiUsePort2_d
+  880:  spiErr_t SPI2_WriteByte
+  881:  (
+  882:  uint8_t u8TxData                           //IN, Byte to be transmitted
+  883:  )
+  884:  {
+  885:    return SPI2_WriteString(&u8TxData, 1);
+  886:  }
+  887:  #endif
+  888:  #else //FALSE == gSpiSupported_d
+  889:  
+  890:  spiErr_t SPI2_WriteByte(uint8_t u8TxData)
+  891:  {
+  892:    (void)u8TxData;
+  893:    return gSpiErrNoError_c;
+  894:  }
+  895:  
+  896:  #endif
+  897:  
+  898:  /***********************************************************************************/
+  899:  #if TRUE == gSpiSupported_d
+  900:  #if gSpiUsePort2_d
+  901:  void SPI2_WriteByteBlocking
+  902:  (
+  903:  uint8_t u8TxData                           //IN, Byte to be transmitted
+  904:  )
+  905:  {
+  906:   (void)mSpi2StatusReg;                  // Clear any unattended Interrupt Flag 
+  907:    mSpi2DataReg = u8TxData;
+  908:    while (!(mSpi2TxFlag));
+  909:  }
+  910:  #endif
+  911:  #else //FALSE == gSpiSupported_d
+  912:  
+  913:  void SPI2_WriteByteBlocking(uint8_t u8TxData)
+  914:  {
+  915:    (void)u8TxData;
+  916:  }
+  917:  
+  918:  #endif
+  919:  
+  920:  /***********************************************************************************/
+  921:  #if TRUE == gSpiSupported_d
+  922:  #if gSpiUsePort2_d
+  923:  spiErr_t SPI2_ReadByte
+  924:  (
+  925:  uint8_t * pu8RxData                        //IN, Address to put the readed byte
+  926:  )
+  927:  {
+  928:    return SPI2_ReadString(pu8RxData, 1);
+  929:  }
+  930:  #endif
+  931:  #else //FALSE == gSpiSupported_d
+  932:  
+  933:  spiErr_t SPI2_ReadByte(uint8_t * pu8RxData)
+  934:  {
+  935:    (void)pu8RxData;
+  936:    return gSpiErrNoError_c; 
+  937:  }
+  938:  
+  939:  #endif
+  940:  
+  941:  /***********************************************************************************/
+  942:  #if TRUE == gSpiSupported_d
+  943:  #if gSpiUsePort2_d
+  944:  uint8_t SPI2_ReadByteBlocking
+  945:  (
+  946:  void                        //IN, Address to put the readed byte
+  947:  )
+  948:  {
+  949:   (void)mSpi2StatusReg;                  // Clear any unattended Interrupt Flag 
+  950:    mSpi2DataReg = mDummyByte_c;
+  951:    while (!(mSpi2RxFlag));
+  952:    return mSpi2DataReg;
+  953:  }
+  954:  #endif
+  955:  #else //FALSE == gSpiSupported_d
+  956:  
+  957:  uint8_t SPI2_ReadByteBlocking(void)
+  958:  {
+  959:    return 0; 
+  960:  }
+  961:  
+  962:  #endif
+  963:  
+  964:  #pragma CODE_SEG DEFAULT
+  965:  
+  966:  /***********************************************************************************/
+  967:  
+  968:  #if TRUE == gSpiSupported_d
+  969:  #if gSpiUsePort2_d
+  970:  #if (gSpi2Mode_d == gSpiInterrupt_d)
+  971:  
+  972:  /* Place it in NON_BANKED memory */
+  973:  #pragma CODE_SEG ISR_SEGMENT
+  974:  
+  975:  INTERRUPT_KEYWORD void SPI2_Isr(void)
+  976:  {
+  977:  #else
+  978:  void SPI2_Task(void)
+  979:  {
+  980:    if(mSpi2RxFlag || mSpi2TxFlag)
+  981:  #endif 
+  982:  
+  983:    {
+  984:  
+  985:      uint8_t u8ReceivedByte;
+  986:      (void)mSpi2StatusReg;                  // First step to erase the Interrupt flags 
+  987:      u8ReceivedByte = mSpi2DataReg;         // Second step to erase the Interrupt flags 
+  988:      if (mSpiTransmittingData_c == mSPI2Status){
+  989:  
+  990:        if (0 == mu8SPI2Counter){
+  991:  
+  992:          mSPI2Status = mSpiPeripheralAsserted_c; 
+  993:  
+  994:         #if gSpi2Mode_d == gSpiInterrupt_d   
+  995:          mSpi2DisableTxInterrupt();          //Disables SPI interrupt
+  996:         #endif
+  997:  
+  998:          if(NULL != gpfSpi2CallBack){
+  999:            gpfSpi2CallBack();       
+ 1000:          }
+ 1001:  
+ 1002:        }
+ 1003:        else{
+ 1004:          mu8SPI2Counter--;                  //Decreases the counter
+ 1005:          mSpi2DataReg = *mpu8SPI2Ptr++;     // Transmit next byte 
+ 1006:        }
+ 1007:  
+ 1008:      }
+ 1009:      else if (mSpiReceivingData_c == mSPI2Status){
+ 1010:  
+ 1011:        *mpu8SPI2Ptr = u8ReceivedByte;       //Read SPI Data 
+ 1012:        if (0 == mu8SPI2Counter){
+ 1013:  
+ 1014:          mSPI2Status = mSpiPeripheralAsserted_c; 
+ 1015:  
+ 1016:         #if gSpi2Mode_d == gSpiInterrupt_d   
+ 1017:          mSpi2DisableRxInterrupt();          //Disables SPI interrupt
+ 1018:         #endif
+ 1019:  
+ 1020:          if(NULL != gpfSpi2CallBack){
+ 1021:            gpfSpi2CallBack();       
+ 1022:          }
+ 1023:  
+ 1024:        }
+ 1025:        else{
+ 1026:          mu8SPI2Counter--;                  //Decreases the counter
+ 1027:          mpu8SPI2Ptr++;                     
+ 1028:          mSpi2DataReg = mDummyByte_c;       //Puts a dummy byte in the SPI data register
+ 1029:        }
+ 1030:  
+ 1031:      }
+ 1032:      else{                                  //It isn't transmitting or receiving 
+ 1033:        
+ 1034:      }
+ 1035:  
+ 1036:    }
+ 1037:  
+ 1038:  }
+ 1039:  
+ 1040:  #pragma CODE_SEG DEFAULT
+ 1041:  
+ 1042:  #endif //gSpiUsePort1_d
+ 1043:  #endif //gSpiSupported_d
+ 1044:  
+ 1045:  
+ 1046:  /************************************************************************************
+ 1047:  *************************************************************************************
+ 1048:  * private functions
+ 1049:  *************************************************************************************
+ 1050:  ************************************************************************************/
+ 1051:     
+ 1052:  

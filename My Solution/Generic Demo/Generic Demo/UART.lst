@@ -1,0 +1,1718 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /******************************************************************************
+    2:  * Source file for UART/SCI driver.
+    3:  *
+    4:  * (c) Copyright 2009, Freescale, Inc.  All rights reserved.
+    5:  *
+    6:  * No part of this document must be reproduced in any form - including copied,
+    7:  * transcribed, printed or by any electronic means - without specific written
+    8:  * permission from Freescale.
+    9:  *                               
+   10:  *******************************************************************************/
+   11:  
+   12:  /*Include files secction*/
+   13:  #include "UART.h"
+   14:  #pragma MESSAGE DISABLE C2705
+   15:  #pragma MESSAGE DISABLE C4001
+   16:  
+   17:  #if (gUartNumOfPorts_c > 0)
+   18:  
+   19:  /******************************************************************************
+   20:  *******************************************************************************
+   21:  * Private defines and macros
+   22:  *******************************************************************************
+   23:  *******************************************************************************/
+   24:  #define Get_Number_Of_FreeBytes(buffer, portNum)\
+   25:    do{\
+   26:      if(((mUartRxBufferIndx[portNum]).iLatestData) >= ((mUartTxBufferIndx[portNum]).iStartOfData)){ \
+   27:        buffer = ((mUartRxBufferIndx[portNum]).iLatestData) - ((mUartTxBufferIndx[portNum]).iStartOfData);\
+   28:      } else {\
+   29:        buffer = (gUartRxBuffSize_c - ((mUartTxBufferIndx[portNum]).iStartOfData)) + ((mUartRxBufferIndx[portNum]).iLatestData);\
+   30:      }\
+   31:    }while(FALSE)
+   32:  
+   33:  
+   34:  /******************************************************************************
+   35:  *******************************************************************************
+   36:  * Private constants
+   37:  *******************************************************************************
+   38:  *******************************************************************************/
+   39:  #if TRUE == gUartSupported_d 
+   40:   const uint8_t* maUartStartOfModule[gUartMaxIndex_c] = 
+   41:  #if gUart1_Enabled_d
+   42:   #if gUart2_Enabled_d
+   43:                  {&SCI1BDH, &SCI2BDH };
+   44:   #else
+   45:                  {&SCI1BDH};
+   46:   #endif
+   47:  #else
+   48:   #if gUart2_Enabled_d
+   49:                  {&SCI2BDH };
+   50:   #endif
+   51:  #endif
+   52:  
+   53:  #endif //gUartSupported_d
+   54:  
+   55:  
+   56:  /******************************************************************************
+   57:  *******************************************************************************
+   58:  * Private memory declarations
+   59:  *******************************************************************************
+   60:  *******************************************************************************/
+   61:  #if TRUE == gUartSupported_d
+   62:  static bool_t mSciModuleHwErrors;
+   63:  static bool_t mIsTxPending[gUartNumOfPorts_c];
+   64:  static uint8_t mUartRxBuff[gUartNumOfPorts_c][gUartRxBuffSize_c];
+   65:  static uint8_t mUartTxBuff[gUartNumOfPorts_c][gUartTxBuffSize_c];
+   66:  
+   67:  static uartBufferIndex_t mUartRxBufferIndx[gUartNumOfPorts_c];
+   68:  static uartBufferIndex_t mUartTxBufferIndx[gUartNumOfPorts_c];
+   69:  
+   70:  static uartRxCallback_t mUartRxCbFn[gUartNumOfPorts_c];
+   71:  static uartTxCallback_t mUartTxCbFn[gUartNumOfPorts_c];
+   72:  
+   73:  static uint8_t mUartRxCbFlags[gUartNumOfPorts_c];
+   74:  static uint8_t mUartTxNumOfFreeBytes[gUartNumOfPorts_c];
+   75:  #endif //gUartSupported_d
+   76:  
+   77:  
+   78:  /******************************************************************************
+   79:  *******************************************************************************
+   80:  * Public functions
+   81:  *******************************************************************************
+   82:  *******************************************************************************/
+   83:  
+   84:  
+   85:  /******************************************************************************
+   86:  * Uart_Init 
+   87:  *
+   88:  * Initializes UART module's variables and configure the SCI ports with the 
+   89:  * specified default values:
+   90:  *      Loop Mode off, SCI Clocks continue to run in wait mode, 
+   91:  *      start bit + 8 data bits, Idle line wakeup, no hardware parity checking
+   92:  *      gUartDefaultBaud_c
+   93:  *
+   94:  *******************************************************************************/
+   95:  #if TRUE == gUartSupported_d
+   96:  uartErr_t Uart_Init(void){
+  0000 8b       [2]             PSHH  
+   97:    uint8_t i;
+   98:    uint8_t j;
+   99:    uartModule_t *tmpUart;
+  100:    
+  101:    mSciModuleHwErrors = FALSE;
+  0001 4f       [1]             CLRA  
+  0002 c70000   [4]             STA   mSciModuleHwErrors
+  102:  
+  103:    for(i=0; i<gUartNumOfPorts_c; i++) {
+  0005 95       [2]             TSX   
+  0006 7f       [4]             CLR   ,X
+  0007          L7:     
+  104:  
+  105:      mIsTxPending[i] = FALSE;
+  0007 fe       [3]             LDX   ,X
+  0008 8c       [1]             CLRH  
+  0009 4f       [1]             CLRA  
+  000a d70000   [4]             STA   @mIsTxPending,X
+  106:      tmpUart = (uartModule_t *)(maUartStartOfModule[i]);
+  000d 58       [1]             LSLX  
+  000e 49       [1]             ROLA  
+  000f 87       [2]             PSHA  
+  0010 8a       [3]             PULH  
+  0011 9ebe0000 [6]             LDHX  @maUartStartOfModule,X
+  107:      tmpUart->SCIxBDH = (gUartDefaultBaud_c >> 8);
+  0015 7f       [4]             CLR   ,X
+  108:      tmpUart->SCIxBDL = (gUartDefaultBaud_c & 0xFF);
+  0016 a60d     [2]             LDA   #13
+  0018 e701     [3]             STA   1,X
+  109:      tmpUart->SCIxC1 = mSCI1C1_Init_c;
+  001a 6f02     [5]             CLR   2,X
+  110:      tmpUart->SCIxC3 = mSCI1C3_Init_c;
+  001c a60f     [2]             LDA   #15
+  001e e706     [3]             STA   6,X
+  111:      tmpUart->SCIxC2 = mSCI1C2_Init_c;
+  0020 a62c     [2]             LDA   #44
+  0022 e703     [3]             STA   3,X
+  112:  
+  113:      (mUartRxBufferIndx[i]).iLatestData = 0;
+  0024 95       [2]             TSX   
+  0025 fe       [3]             LDX   ,X
+  0026 58       [1]             LSLX  
+  0027 4f       [1]             CLRA  
+  0028 49       [1]             ROLA  
+  0029 87       [2]             PSHA  
+  002a 8a       [3]             PULH  
+  002b 4f       [1]             CLRA  
+  002c d70001   [4]             STA   @mUartRxBufferIndx:1,X
+  114:      (mUartRxBufferIndx[i]).iStartOfData = 0;
+  002f d70000   [4]             STA   @mUartRxBufferIndx,X
+  115:      (mUartTxBufferIndx[i]).iLatestData = 0;
+  0032 95       [2]             TSX   
+  0033 fe       [3]             LDX   ,X
+  0034 58       [1]             LSLX  
+  0035 49       [1]             ROLA  
+  0036 87       [2]             PSHA  
+  0037 8a       [3]             PULH  
+  0038 4f       [1]             CLRA  
+  0039 d70001   [4]             STA   @mUartTxBufferIndx:1,X
+  116:      (mUartTxBufferIndx[i]).iStartOfData = 0;
+  003c d70000   [4]             STA   @mUartTxBufferIndx,X
+  003f          L3F:    
+  117:  
+  118:      for(j=0; j<gUartRxBuffSize_c; j++)
+  119:        mUartRxBuff[i][j] = 0;
+  003f 95       [2]             TSX   
+  0040 fe       [3]             LDX   ,X
+  0041 87       [2]             PSHA  
+  0042 a640     [2]             LDA   #64
+  0044 ac00009c [8]             CALL  Uart_Init:156
+  0048 d70000   [4]             STA   @mUartRxBuff,X
+  004b 95       [2]             TSX   
+  004c f6       [3]             LDA   ,X
+  004d 4c       [1]             INCA  
+  004e a140     [2]             CMP   #64
+  0050 8a       [3]             PULH  
+  0051 25ec     [3]             BCS   L3F ;abs = 003f
+  120:      
+  121:      for(j=0; j<gUartTxBuffSize_c; j++)
+  0053 4f       [1]             CLRA  
+  0054          L54:    
+  122:        mUartTxBuff[i][j] = 0;
+  0054 95       [2]             TSX   
+  0055 fe       [3]             LDX   ,X
+  0056 87       [2]             PSHA  
+  0057 a6c8     [2]             LDA   #-56
+  0059 ac00009c [8]             CALL  Uart_Init:156
+  005d d70000   [4]             STA   @mUartTxBuff,X
+  0060 95       [2]             TSX   
+  0061 f6       [3]             LDA   ,X
+  0062 4c       [1]             INCA  
+  0063 a1c8     [2]             CMP   #-56
+  0065 8a       [3]             PULH  
+  0066 25ec     [3]             BCS   L54 ;abs = 0054
+  123:  
+  124:      mUartTxNumOfFreeBytes[i] = gUartTxBuffSize_c;
+  0068 95       [2]             TSX   
+  0069 fe       [3]             LDX   ,X
+  006a 8c       [1]             CLRH  
+  006b a6c8     [2]             LDA   #-56
+  006d d70000   [4]             STA   @mUartTxNumOfFreeBytes,X
+  125:  
+  126:      mUartRxCbFn[i] = NULL;
+  0070 58       [1]             LSLX  
+  0071 4f       [1]             CLRA  
+  0072 49       [1]             ROLA  
+  0073 87       [2]             PSHA  
+  0074 8a       [3]             PULH  
+  0075 4f       [1]             CLRA  
+  0076 d70001   [4]             STA   @mUartRxCbFn:1,X
+  0079 d70000   [4]             STA   @mUartRxCbFn,X
+  127:      mUartTxCbFn[i] = NULL;
+  007c 95       [2]             TSX   
+  007d f6       [3]             LDA   ,X
+  007e 48       [1]             LSLA  
+  007f 5f       [1]             CLRX  
+  0080 59       [1]             ROLX  
+  0081 87       [2]             PSHA  
+  0082 4f       [1]             CLRA  
+  0083 89       [2]             PSHX  
+  0084 8a       [3]             PULH  
+  0085 88       [3]             PULX  
+  0086 d70001   [4]             STA   @mUartTxCbFn:1,X
+  0089 d70000   [4]             STA   @mUartTxCbFn,X
+  008c 95       [2]             TSX   
+  008d 7c       [4]             INC   ,X
+  008e f6       [3]             LDA   ,X
+  008f a101     [2]             CMP   #1
+  0091 2403     [3]             BCC   L96 ;abs = 0096
+  0093 cc0007   [4]             JMP   L7 ;abs = 0007
+  0096          L96:    
+  128:    }
+  129:  
+  130:  #if gUart1_Enabled_d
+  131:    #if gUart1_EnableHWFlowControl_d
+  132:      Uart1_EnableFlow();
+  133:    #endif
+  134:  #endif
+  135:  
+  136:  #if gUart2_Enabled_d
+  137:    #if gUart2_EnableHWFlowControl_d
+  138:      Uart2_EnableFlow();
+  139:    #endif
+  140:  #endif
+  141:  
+  142:    return Uart_ClearErrors();
+  0096 ac000000 [8]             CALL  Uart_ClearErrors
+  143:  }
+  009a 8a       [3]             PULH  
+  009b 8d       [7]             RTC   
+  009c          L9C:    
+  009c 42       [5]             MUL   
+  009d 9eeb04   [4]             ADD   4,SP
+  00a0 87       [2]             PSHA  
+  00a1 9f       [1]             TXA   
+  00a2 a900     [2]             ADC   #0
+  00a4 87       [2]             PSHA  
+  00a5 8a       [3]             PULH  
+  00a6 88       [3]             PULX  
+  00a7 4f       [1]             CLRA  
+  00a8 8d       [7]             RTC   
+  144:  #else
+  145:  
+  146:  uartErr_t Uart_Init(void)
+  147:  {
+  148:    return gUartErrNoError_c;
+  149:  }
+  150:  
+  151:  #endif //gUartSupported_d
+  152:  
+  153:  /******************************************************************************
+  154:  * Uart_ClearErrors 
+  155:  *
+  156:  * Clears error bits on the SCI1 & SCI2 Status 1 Reg.  This function is called 
+  157:  * by Uart_Init
+  158:  *
+  159:  *******************************************************************************/
+  160:  #if TRUE == gUartSupported_d
+  161:  uartErr_t Uart_ClearErrors(void){
+  162:    uint8_t count;
+  163:    uint8_t dummy;
+  164:  
+  165:  #if gUart1_Enabled_d
+  166:    count = 0;
+  167:    while (SCI1S1 & (mSCIxS1_OR_c | mSCIxS1_NF_c | mSCIxS1_FE_c | mSCIxS1_PF_c)) {
+  168:      dummy = SCI1D;
+  169:      count++;
+  170:      if(gUartMaxHwTimeOut_c < count) {
+  171:        mSciModuleHwErrors = TRUE;
+  172:        return  gUartErrHwError_c;
+  173:      }
+  174:    }
+  175:  #endif
+  176:  
+  177:  #if gUart2_Enabled_d
+  178:    count = 0;
+  0000 5f       [1]             CLRX  
+  179:    while (SCI2S1 & (mSCIxS1_OR_c | mSCIxS1_NF_c | mSCIxS1_FE_c | mSCIxS1_PF_c)) {
+  0001 200f     [3]             BRA   L12 ;abs = 0012
+  0003          L3:     
+  180:      dummy = SCI2D;
+  0003 c60000   [4]             LDA   _SCI2D
+  181:      count++;
+  0006 5c       [1]             INCX  
+  182:      if(gUartMaxHwTimeOut_c < count){
+  0007 a380     [2]             CPX   #-128
+  0009 2307     [3]             BLS   L12 ;abs = 0012
+  183:        mSciModuleHwErrors = TRUE;
+  000b a601     [2]             LDA   #1
+  000d c70000   [4]             STA   mSciModuleHwErrors
+  184:        return  gUartErrHwError_c;
+  0010 4c       [1]             INCA  
+  0011 8d       [7]             RTC   
+  0012          L12:    
+  0012 c60000   [4]             LDA   _SCI2S1
+  0015 a50f     [2]             BIT   #15
+  0017 26ea     [3]             BNE   L3 ;abs = 0003
+  185:      }
+  186:    }
+  187:  #endif
+  188:  
+  189:    return gUartErrNoError_c;
+  0019 4f       [1]             CLRA  
+  190:  }
+  001a 8d       [7]             RTC   
+  191:  #else
+  192:  
+  193:  uartErr_t Uart_ClearErrors(void)
+  194:  {
+  195:    return gUartErrNoError_c;
+  196:  }
+  197:  
+  198:  #endif //gUartSupported_d
+  199:  
+  200:  
+  201:  /******************************************************************************
+  202:  * Uart_Configure 
+  203:  *
+  204:  * Configures the specified SCI "port" with the specified "pUartSettings". 
+  205:  * This function configures: 
+  206:  *                       Baudrate, Number of data bits, Flow control and Parity
+  207:  *
+  208:  *******************************************************************************/
+  209:  #if TRUE == gUartSupported_d
+  210:  uartErr_t Uart_Configure(uartPortNumber_t port, uartConfigSet_t * pUartSettings){
+  0000 87       [2]             PSHA  
+  0001 89       [2]             PSHX  
+  0002 8b       [2]             PSHH  
+  0003 a7fe     [2]             AIS   #-2
+  211:  
+  212:    uartModule_t *tmpUart;
+  213:  
+  214:    if(gUartMaxIndex_c <= port)
+  0005 95       [2]             TSX   
+  0006 6d04     [4]             TST   4,X
+  0008 2673     [3]             BNE   L7D ;abs = 007d
+  215:      return gUartErrInvalidParameter_c;
+  216:    
+  217:    tmpUart = (uartModule_t *)(maUartStartOfModule[port]);
+  000a 48       [1]             LSLA  
+  000b 5f       [1]             CLRX  
+  000c 59       [1]             ROLX  
+  000d 89       [2]             PSHX  
+  000e 8a       [3]             PULH  
+  000f 97       [1]             TAX   
+  0010 9ebe0000 [6]             LDHX  @maUartStartOfModule,X
+  0014 9eff01   [5]             STHX  1,SP
+  218:  
+  219:    if(NULL ==  pUartSettings)
+  0017 9efe03   [5]             LDHX  3,SP
+  001a 2761     [3]             BEQ   L7D ;abs = 007d
+  220:      return gUartErrInvalidParameter_c;
+  221:  
+  222:    /* Set Data bits */
+  223:    if(g8DataBits_c == (pUartSettings->dataBits))
+  001c e602     [3]             LDA   2,X
+  001e a108     [2]             CMP   #8
+  0020 2609     [3]             BNE   L2B ;abs = 002b
+  224:      tmpUart->SCIxC1 &= (~mSCIxC1_M_c);
+  0022 9efe01   [5]             LDHX  1,SP
+  0025 e602     [3]             LDA   2,X
+  0027 a4ef     [2]             AND   #-17
+  0029 200b     [3]             BRA   L36 ;abs = 0036
+  002b          L2B:    
+  225:    else if(g9DataBits_c == (pUartSettings->dataBits))
+  002b a109     [2]             CMP   #9
+  002d 264e     [3]             BNE   L7D ;abs = 007d
+  226:      tmpUart->SCIxC1 |= mSCIxC1_M_c;
+  002f 9efe01   [5]             LDHX  1,SP
+  0032 e602     [3]             LDA   2,X
+  0034 aa10     [2]             ORA   #16
+  0036          L36:    
+  0036 e702     [3]             STA   2,X
+  227:    else
+  228:      return gUartErrInvalidParameter_c;
+  229:  
+  230:    /* Set Parity */
+  231:    if(gUartParityNone_c == (pUartSettings->parity))
+  0038 9efe03   [5]             LDHX  3,SP
+  003b 6d03     [4]             TST   3,X
+  003d 261e     [3]             BNE   L5D ;abs = 005d
+  232:      tmpUart->SCIxC1 &= (~mSCIxC1_PE_c);
+  003f 9efe01   [5]             LDHX  1,SP
+  0042 e602     [3]             LDA   2,X
+  0044 a4fd     [2]             AND   #-3
+  0046          L46:    
+  0046 e702     [3]             STA   2,X
+  233:    else if(gUartParityOdd_c == (pUartSettings->parity))
+  234:      tmpUart->SCIxC1 |= (mSCIxC1_PE_c|mSCIxC1_PT_c);
+  235:    else if(gUartParityEven_c == (pUartSettings->parity)) {
+  236:      tmpUart->SCIxC1 |= mSCIxC1_PE_c;
+  237:      tmpUart->SCIxC1 &= (~mSCIxC1_PT_c);    
+  238:    } else
+  239:      return gUartErrInvalidParameter_c;
+  240:  
+  241:    /* Set Baud Rate */
+  242:    tmpUart->SCIxBDH = ((pUartSettings->baudRate) >> 8);
+  0048 9efe03   [5]             LDHX  3,SP
+  004b f6       [3]             LDA   ,X
+  004c 9efe01   [5]             LDHX  1,SP
+  004f f7       [2]             STA   ,X
+  243:    tmpUart->SCIxBDL = ((pUartSettings->baudRate) & 0xFF);
+  0050 9efe03   [5]             LDHX  3,SP
+  0053 e601     [3]             LDA   1,X
+  0055 9efe01   [5]             LDHX  1,SP
+  0058 e701     [3]             STA   1,X
+  244:  
+  245:    return gUartErrNoError_c;
+  005a 4f       [1]             CLRA  
+  005b 2022     [3]             BRA   L7F ;abs = 007f
+  005d          L5D:    
+  005d e603     [3]             LDA   3,X
+  005f a101     [2]             CMP   #1
+  0061 2609     [3]             BNE   L6C ;abs = 006c
+  0063 9efe01   [5]             LDHX  1,SP
+  0066 e602     [3]             LDA   2,X
+  0068 aa03     [2]             ORA   #3
+  006a 20da     [3]             BRA   L46 ;abs = 0046
+  006c          L6C:    
+  006c a102     [2]             CMP   #2
+  006e 260d     [3]             BNE   L7D ;abs = 007d
+  0070 9efe01   [5]             LDHX  1,SP
+  0073 e602     [3]             LDA   2,X
+  0075 aa02     [2]             ORA   #2
+  0077 e702     [3]             STA   2,X
+  0079 a4fe     [2]             AND   #-2
+  007b 20c9     [3]             BRA   L46 ;abs = 0046
+  007d          L7D:    
+  007d a603     [2]             LDA   #3
+  007f          L7F:    
+  246:  }
+  007f a705     [2]             AIS   #5
+  0081 8d       [7]             RTC   
+  247:  #else
+  248:  
+  249:  uartErr_t Uart_Configure(uartPortNumber_t port, uartConfigSet_t * pUartSettings)
+  250:  {
+  251:    (void)port;
+  252:    (void)pUartSettings;
+  253:    return gUartErrNoError_c;
+  254:  }
+  255:  
+  256:  #endif //gUartSupported_d
+  257:  
+  258:  
+  259:  /******************************************************************************
+  260:  * Uart_GetBytesFromRxBuffer 
+  261:  *
+  262:  * Copies a number of bytes from the UART reception buffer to the app buffer.
+  263:  * When returning from the total number of bytes currently copied are notified 
+  264:  * at the IN/OUT argument "pNumOfBytes"
+  265:  *
+  266:  *******************************************************************************/
+  267:  #if TRUE == gUartSupported_d
+  268:  uartErr_t Uart_GetBytesFromRxBuffer(uint8_t *pBuf, uint8_t *pNumOfBytes, uartPortNumber_t port){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  0003 a7fe     [2]             AIS   #-2
+  269:    uint8_t i,j;
+  270:    j = 0;
+  0005 95       [2]             TSX   
+  0006 6f01     [5]             CLR   1,X
+  271:  
+  272:    /* Arguments validation */
+  273:    if( (NULL == pBuf) ||
+  0008 9efe09   [5]             LDHX  9,SP
+  000b 270d     [3]             BEQ   L1A ;abs = 001a
+  274:        (gUartRxBuffSize_c < (*pNumOfBytes)) ||
+  000d 9efe04   [5]             LDHX  4,SP
+  0010 f6       [3]             LDA   ,X
+  0011 a140     [2]             CMP   #64
+  0013 2205     [3]             BHI   L1A ;abs = 001a
+  275:        (gUartMaxIndex_c <= port) )
+  0015 95       [2]             TSX   
+  0016 6d02     [4]             TST   2,X
+  0018 2704     [3]             BEQ   L1E ;abs = 001e
+  001a          L1A:    
+  276:      return gUartErrInvalidParameter_c;
+  001a a603     [2]             LDA   #3
+  001c 2011     [3]             BRA   L2F ;abs = 002f
+  001e          L1E:    
+  277:        
+  278:  
+  279:    /* If there is no new data then return */
+  280:    if(IsRxBufEmpty(port))
+  001e ee02     [3]             LDX   2,X
+  0020 58       [1]             LSLX  
+  0021 4f       [1]             CLRA  
+  0022 49       [1]             ROLA  
+  0023 87       [2]             PSHA  
+  0024 8a       [3]             PULH  
+  0025 d60000   [4]             LDA   @mUartRxBufferIndx,X
+  0028 d10001   [4]             CMP   @mUartRxBufferIndx:1,X
+  002b 2604     [3]             BNE   L31 ;abs = 0031
+  281:      return gUartErrNoNewData_c;
+  002d a605     [2]             LDA   #5
+  002f          L2F:    
+  002f 2079     [3]             BRA   LAA ;abs = 00aa
+  0031          L31:    
+  282:    
+  283:    /* Copy UART Rx buffer to Application buffer fill with 0 the extra bytes */
+  284:    for(i=0; i<(*pNumOfBytes); i++){
+  0031 95       [2]             TSX   
+  0032 7f       [4]             CLR   ,X
+  0033 2067     [3]             BRA   L9C ;abs = 009c
+  0035          L35:    
+  285:      if(!IsRxBufEmpty(port)){
+  0035 95       [2]             TSX   
+  0036 ee02     [3]             LDX   2,X
+  0038 58       [1]             LSLX  
+  0039 4f       [1]             CLRA  
+  003a 49       [1]             ROLA  
+  003b 87       [2]             PSHA  
+  003c 8a       [3]             PULH  
+  003d d60000   [4]             LDA   @mUartRxBufferIndx,X
+  0040 d10001   [4]             CMP   @mUartRxBufferIndx:1,X
+  0043 274b     [3]             BEQ   L90 ;abs = 0090
+  286:        *pBuf = mUartRxBuff[port][((mUartRxBufferIndx[port]).iStartOfData)];
+  0045 87       [2]             PSHA  
+  0046 a640     [2]             LDA   #64
+  0048 89       [2]             PSHX  
+  0049 9eee05   [4]             LDX   5,SP
+  004c 42       [5]             MUL   
+  004d 87       [2]             PSHA  
+  004e 9ee603   [4]             LDA   3,SP
+  0051 9eeb01   [4]             ADD   1,SP
+  0054 9ee701   [4]             STA   1,SP
+  0057 9f       [1]             TXA   
+  0058 a900     [2]             ADC   #0
+  005a 87       [2]             PSHA  
+  005b 8b       [2]             PSHH  
+  005c 86       [3]             PULA  
+  005d 95       [2]             TSX   
+  005e e703     [3]             STA   3,X
+  0060 8a       [3]             PULH  
+  0061 88       [3]             PULX  
+  0062 de0000   [4]             LDX   @mUartRxBuff,X
+  0065 9f       [1]             TXA   
+  0066 9efe0b   [5]             LDHX  11,SP
+  0069 f7       [2]             STA   ,X
+  287:        Uart_Inc_RxIndx(((mUartRxBufferIndx[port]).iStartOfData));
+  006a 95       [2]             TSX   
+  006b e601     [3]             LDA   1,X
+  006d 87       [2]             PSHA  
+  006e 8a       [3]             PULH  
+  006f 88       [3]             PULX  
+  0070 d60000   [4]             LDA   @mUartRxBufferIndx,X
+  0073 a13f     [2]             CMP   #63
+  0075 97       [1]             TAX   
+  0076 4f       [1]             CLRA  
+  0077 8a       [3]             PULH  
+  0078 2402     [3]             BCC   L7C ;abs = 007c
+  007a 5c       [1]             INCX  
+  007b 9f       [1]             TXA   
+  007c          L7C:    
+  007c 95       [2]             TSX   
+  007d ee02     [3]             LDX   2,X
+  007f 58       [1]             LSLX  
+  0080 87       [2]             PSHA  
+  0081 4f       [1]             CLRA  
+  0082 49       [1]             ROLA  
+  0083 87       [2]             PSHA  
+  0084 8a       [3]             PULH  
+  0085 86       [3]             PULA  
+  0086 d70000   [4]             STA   @mUartRxBufferIndx,X
+  288:        j = i + 1;
+  0089 95       [2]             TSX   
+  008a f6       [3]             LDA   ,X
+  008b 4c       [1]             INCA  
+  008c e701     [3]             STA   1,X
+  289:      }else{
+  008e 2004     [3]             BRA   L94 ;abs = 0094
+  0090          L90:    
+  290:        *pBuf = '\0';
+  0090 9efe09   [5]             LDHX  9,SP
+  0093 7f       [4]             CLR   ,X
+  0094          L94:    
+  291:      }
+  292:      pBuf++;
+  0094 95       [2]             TSX   
+  0095 6c09     [5]             INC   9,X
+  0097 2602     [3]             BNE   L9B ;abs = 009b
+  0099 6c08     [5]             INC   8,X
+  009b          L9B:    
+  009b 7c       [4]             INC   ,X
+  009c          L9C:    
+  009c 9efe04   [5]             LDHX  4,SP
+  009f f6       [3]             LDA   ,X
+  00a0 9ee101   [4]             CMP   1,SP
+  00a3 2290     [3]             BHI   L35 ;abs = 0035
+  293:    }
+  294:    (*pNumOfBytes) = j;
+  00a5 9ee602   [4]             LDA   2,SP
+  00a8 f7       [2]             STA   ,X
+  295:  
+  296:  
+  297:  #if (gUart1_EnableHWFlowControl_d || gUart2_EnableHWFlowControl_d)
+  298:    EnableFlowIfConditionsOk(port);
+  299:  #endif
+  300:  
+  301:  
+  302:    return gUartErrNoError_c;
+  00a9 4f       [1]             CLRA  
+  00aa          LAA:    
+  303:  }
+  00aa a705     [2]             AIS   #5
+  00ac 8d       [7]             RTC   
+  304:  #else
+  305:  
+  306:  uartErr_t Uart_GetBytesFromRxBuffer(uint8_t *pBuf, uint8_t *pNumOfBytes, uartPortNumber_t port)
+  307:  {
+  308:    (void)pBuf;
+  309:    (void)pNumOfBytes;
+  310:    (void)port;
+  311:    return gUartErrNoError_c;
+  312:  }
+  313:  
+  314:  #endif //gUartSupported_d
+  315:  
+  316:  
+  317:  /******************************************************************************
+  318:  * Uart_GetBytesFromRxBufferUntilToken 
+  319:  *
+  320:  * Copies a number of bytes from the UART reception buffer to the app buffer 
+  321:  * until the token is found or UART reception buffer is empty.
+  322:  *
+  323:  *******************************************************************************/
+  324:  #if TRUE == gUartSupported_d
+  325:  uartErr_t Uart_GetBytesFromRxBufferUntilToken(uint8_t *pBuf, uint8_t token, uartPortNumber_t port){
+  0000 89       [2]             PSHX  
+  0001 87       [2]             PSHA  
+  0002 a7fe     [2]             AIS   #-2
+  326:    uint8_t iRecovery;
+  327:  
+  328:    /* Arguments validation */
+  329:    if( (NULL == pBuf) ||
+  0004 9efe08   [5]             LDHX  8,SP
+  0007 2705     [3]             BEQ   LE ;abs = 000e
+  330:        (gUartMaxIndex_c <= port) )
+  0009 95       [2]             TSX   
+  000a 6d02     [4]             TST   2,X
+  000c 2704     [3]             BEQ   L12 ;abs = 0012
+  000e          LE:     
+  331:      return gUartErrInvalidParameter_c;
+  000e a603     [2]             LDA   #3
+  0010 2073     [3]             BRA   L85 ;abs = 0085
+  0012          L12:    
+  332:        
+  333:  
+  334:    /* If there is no new data return */
+  335:    if(IsRxBufEmpty(port))
+  0012 48       [1]             LSLA  
+  0013 5f       [1]             CLRX  
+  0014 59       [1]             ROLX  
+  0015 89       [2]             PSHX  
+  0016 8a       [3]             PULH  
+  0017 97       [1]             TAX   
+  0018 d60000   [4]             LDA   @mUartRxBufferIndx,X
+  001b d10001   [4]             CMP   @mUartRxBufferIndx:1,X
+  001e 2604     [3]             BNE   L24 ;abs = 0024
+  336:      return gUartErrNoNewData_c;
+  0020 a605     [2]             LDA   #5
+  0022 2061     [3]             BRA   L85 ;abs = 0085
+  0024          L24:    
+  337:  
+  338:    iRecovery = ((mUartRxBufferIndx[port]).iStartOfData);
+  0024 95       [2]             TSX   
+  0025 e701     [3]             STA   1,X
+  0027          L27:    
+  339:    /* Copy UART Rx buffer to Application buffer fill with 0 the extra bytes */
+  340:    do{
+  341:      if(!IsRxBufEmpty(port)){
+  0027 95       [2]             TSX   
+  0028 ee02     [3]             LDX   2,X
+  002a 58       [1]             LSLX  
+  002b 4f       [1]             CLRA  
+  002c 49       [1]             ROLA  
+  002d 87       [2]             PSHA  
+  002e 8a       [3]             PULH  
+  002f d60000   [4]             LDA   @mUartRxBufferIndx,X
+  0032 d10001   [4]             CMP   @mUartRxBufferIndx:1,X
+  0035 2746     [3]             BEQ   L7D ;abs = 007d
+  342:        *pBuf = mUartRxBuff[port][((mUartRxBufferIndx[port]).iStartOfData)];
+  0037 87       [2]             PSHA  
+  0038 a640     [2]             LDA   #64
+  003a 89       [2]             PSHX  
+  003b 9eee05   [4]             LDX   5,SP
+  003e 42       [5]             MUL   
+  003f 87       [2]             PSHA  
+  0040 9ee603   [4]             LDA   3,SP
+  0043 9eeb01   [4]             ADD   1,SP
+  0046 9ee701   [4]             STA   1,SP
+  0049 9f       [1]             TXA   
+  004a a900     [2]             ADC   #0
+  004c 87       [2]             PSHA  
+  004d 8b       [2]             PSHH  
+  004e 86       [3]             PULA  
+  004f 95       [2]             TSX   
+  0050 e703     [3]             STA   3,X
+  0052 8a       [3]             PULH  
+  0053 88       [3]             PULX  
+  0054 de0000   [4]             LDX   @mUartRxBuff,X
+  0057 9f       [1]             TXA   
+  0058 9efe0a   [5]             LDHX  10,SP
+  005b f7       [2]             STA   ,X
+  343:        Uart_Inc_RxIndx(((mUartRxBufferIndx[port]).iStartOfData));
+  005c 95       [2]             TSX   
+  005d e601     [3]             LDA   1,X
+  005f 87       [2]             PSHA  
+  0060 8a       [3]             PULH  
+  0061 88       [3]             PULX  
+  0062 d60000   [4]             LDA   @mUartRxBufferIndx,X
+  0065 a13f     [2]             CMP   #63
+  0067 97       [1]             TAX   
+  0068 4f       [1]             CLRA  
+  0069 8a       [3]             PULH  
+  006a 2402     [3]             BCC   L6E ;abs = 006e
+  006c 5c       [1]             INCX  
+  006d 9f       [1]             TXA   
+  006e          L6E:    
+  006e 95       [2]             TSX   
+  006f ee02     [3]             LDX   2,X
+  0071 58       [1]             LSLX  
+  0072 87       [2]             PSHA  
+  0073 4f       [1]             CLRA  
+  0074 49       [1]             ROLA  
+  0075 87       [2]             PSHA  
+  0076 8a       [3]             PULH  
+  0077 86       [3]             PULA  
+  0078 d70000   [4]             STA   @mUartRxBufferIndx,X
+  344:      }else{
+  007b 200a     [3]             BRA   L87 ;abs = 0087
+  007d          L7D:    
+  345:        ((mUartRxBufferIndx[port]).iStartOfData) = iRecovery;
+  007d 9ee602   [4]             LDA   2,SP
+  0080 d70000   [4]             STA   @mUartRxBufferIndx,X
+  346:        return gUartErrNoTokenFound_c;
+  0083 a606     [2]             LDA   #6
+  0085          L85:    
+  0085 204b     [3]             BRA   LD2 ;abs = 00d2
+  0087          L87:    
+  347:      }
+  348:      pBuf++;
+  0087 95       [2]             TSX   
+  0088 6c08     [5]             INC   8,X
+  008a 2602     [3]             BNE   L8E ;abs = 008e
+  008c 6c07     [5]             INC   7,X
+  008e          L8E:    
+  349:    } while(token != (mUartRxBuff[port][((mUartRxBufferIndx[port]).iStartOfData)]));
+  008e ee02     [3]             LDX   2,X
+  0090 58       [1]             LSLX  
+  0091 4f       [1]             CLRA  
+  0092 49       [1]             ROLA  
+  0093 87       [2]             PSHA  
+  0094 8a       [3]             PULH  
+  0095 d60000   [4]             LDA   @mUartRxBufferIndx,X
+  0098 ae40     [2]             LDX   #64
+  009a 9ee701   [4]             STA   1,SP
+  009d 9ee603   [4]             LDA   3,SP
+  00a0 42       [5]             MUL   
+  00a1 87       [2]             PSHA  
+  00a2 9ee602   [4]             LDA   2,SP
+  00a5 9eeb01   [4]             ADD   1,SP
+  00a8 9ee701   [4]             STA   1,SP
+  00ab 9f       [1]             TXA   
+  00ac a900     [2]             ADC   #0
+  00ae 87       [2]             PSHA  
+  00af 95       [2]             TSX   
+  00b0 e605     [3]             LDA   5,X
+  00b2 8a       [3]             PULH  
+  00b3 88       [3]             PULX  
+  00b4 d10000   [4]             CMP   @mUartRxBuff,X
+  00b7 2703     [3]             BEQ   LBC ;abs = 00bc
+  00b9 cc0027   [4]             JMP   L27 ;abs = 0027
+  00bc          LBC:    
+  350:  
+  351:    /* Remove the token from the buffer */
+  352:    Uart_Inc_RxIndx(((mUartRxBufferIndx[port]).iStartOfData));
+  00bc 95       [2]             TSX   
+  00bd f6       [3]             LDA   ,X
+  00be a13f     [2]             CMP   #63
+  00c0 4f       [1]             CLRA  
+  00c1 2402     [3]             BCC   LC5 ;abs = 00c5
+  00c3 f6       [3]             LDA   ,X
+  00c4 4c       [1]             INCA  
+  00c5          LC5:    
+  00c5 ee02     [3]             LDX   2,X
+  00c7 58       [1]             LSLX  
+  00c8 87       [2]             PSHA  
+  00c9 4f       [1]             CLRA  
+  00ca 49       [1]             ROLA  
+  00cb 87       [2]             PSHA  
+  00cc 8a       [3]             PULH  
+  00cd 86       [3]             PULA  
+  00ce d70000   [4]             STA   @mUartRxBufferIndx,X
+  353:  
+  354:  #if (gUart1_EnableHWFlowControl_d || gUart2_EnableHWFlowControl_d)
+  355:    EnableFlowIfConditionsOk(port);
+  356:  #endif
+  357:  
+  358:    return gUartErrNoError_c;
+  00d1 4f       [1]             CLRA  
+  00d2          LD2:    
+  359:  }
+  00d2 a704     [2]             AIS   #4
+  00d4 8d       [7]             RTC   
+  360:  #else
+  361:  
+  362:  uartErr_t Uart_GetBytesFromRxBufferUntilToken(uint8_t *pBuf, uint8_t token, uartPortNumber_t port)
+  363:  {
+  364:    (void)pBuf;
+  365:    (void)token;
+  366:    (void)port;
+  367:    return gUartErrNoError_c;
+  368:  }
+  369:  
+  370:  #endif //gUartSupported_d
+  371:  
+  372:  
+  373:  /******************************************************************************
+  374:  * Uart_RegisterRxCallBack 
+  375:  *
+  376:  * Register the function to be called upon a reception condition on the an 
+  377:  * specific UART/SCI port
+  378:  *
+  379:  *******************************************************************************/
+  380:  #if TRUE == gUartSupported_d
+  381:  uartErr_t Uart_RegisterRxCallBack(uartRxCallback_t pFunc, uint8_t flags, uartPortNumber_t port){
+  0000 89       [2]             PSHX  
+  382:  
+  383:    if((NULL == pFunc) ||
+  0001 9efe05   [5]             LDHX  5,SP
+  0004 2703     [3]             BEQ   L9 ;abs = 0009
+  384:       (gUartMaxIndex_c <= port) )
+  0006 4d       [1]             TSTA  
+  0007 2704     [3]             BEQ   LD ;abs = 000d
+  0009          L9:     
+  385:      return gUartErrInvalidParameter_c;
+  0009 a603     [2]             LDA   #3
+  386:       
+  387:    mUartRxCbFn[port] = pFunc;
+  388:    mUartRxCbFlags[port] = flags;
+  389:    
+  390:    return gUartErrNoError_c;
+  391:  }
+  000b 8a       [3]             PULH  
+  000c 8d       [7]             RTC   
+  000d          LD:     
+  000d 87       [2]             PSHA  
+  000e 48       [1]             LSLA  
+  000f 5f       [1]             CLRX  
+  0010 59       [1]             ROLX  
+  0011 87       [2]             PSHA  
+  0012 89       [2]             PSHX  
+  0013 95       [2]             TSX   
+  0014 e608     [3]             LDA   8,X
+  0016 8a       [3]             PULH  
+  0017 88       [3]             PULX  
+  0018 d70001   [4]             STA   @mUartRxCbFn:1,X
+  001b 9ee606   [4]             LDA   6,SP
+  001e d70000   [4]             STA   @mUartRxCbFn,X
+  0021 8c       [1]             CLRH  
+  0022 9ee602   [4]             LDA   2,SP
+  0025 88       [3]             PULX  
+  0026 d70000   [4]             STA   @mUartRxCbFlags,X
+  0029 4f       [1]             CLRA  
+  002a 8a       [3]             PULH  
+  002b 8d       [7]             RTC   
+  392:  #else
+  393:  uartErr_t Uart_RegisterRxCallBack(uartRxCallback_t pFunc, uint8_t flags, uartPortNumber_t port)
+  394:  {
+  395:    (void)pFunc;
+  396:    (void)flags;
+  397:    (void)port;
+  398:    return gUartErrNoError_c;
+  399:  }
+  400:  
+  401:  #endif //gUartSupported_d
+  402:  
+  403:  
+  404:  /******************************************************************************
+  405:  * Uart_RegisterTxCallBack
+  406:  *
+  407:  * Register the function to be called when the TX buffer has been totally
+  408:  * transmitted
+  409:  *
+  410:  *******************************************************************************/
+  411:  #if TRUE == gUartSupported_d
+  412:  uartErr_t Uart_RegisterTxCallBack(uartTxCallback_t pfCallBack, uartPortNumber_t port){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  413:  
+  414:    if((NULL == pfCallBack) ||
+  0002 650000   [3]             CPHX  #0
+  0005 2707     [3]             BEQ   LE ;abs = 000e
+  415:       (gUartMaxIndex_c <= port) )
+  0007 8c       [1]             CLRH  
+  0008 97       [1]             TAX   
+  0009 650001   [3]             CPHX  #1
+  000c 9104     [3]             BLT   L12 ;abs = 0012
+  000e          LE:     
+  416:      return gUartErrInvalidParameter_c;
+  000e a603     [2]             LDA   #3
+  0010 201b     [3]             BRA   L2D ;abs = 002d
+  0012          L12:    
+  417:  
+  418:    /* If there is an ongoing transmition do not accept the request */
+  419:    if(TRUE == mIsTxPending[port])
+  0012 d60000   [4]             LDA   @mIsTxPending,X
+  0015 4b04     [4]             DBNZA L1B ;abs = 001b
+  420:      return gUartErrTxOnProgress_c;
+  0017 a607     [2]             LDA   #7
+  0019 2012     [3]             BRA   L2D ;abs = 002d
+  001b          L1B:    
+  421:  
+  422:    /* Register TX callback function */
+  423:    mUartTxCbFn[port] = pfCallBack;
+  001b 58       [1]             LSLX  
+  001c 4f       [1]             CLRA  
+  001d 49       [1]             ROLA  
+  001e 87       [2]             PSHA  
+  001f 9ee603   [4]             LDA   3,SP
+  0022 8a       [3]             PULH  
+  0023 d70001   [4]             STA   @mUartTxCbFn:1,X
+  0026 9ee601   [4]             LDA   1,SP
+  0029 d70000   [4]             STA   @mUartTxCbFn,X
+  424:    
+  425:    return gUartErrNoError_c;
+  002c 4f       [1]             CLRA  
+  002d          L2D:    
+  426:  }
+  002d a702     [2]             AIS   #2
+  002f 8d       [7]             RTC   
+  427:  #else
+  428:  uartErr_t Uart_RegisterTxCallBack(uartTxCallback_t pfCallBack, uartPortNumber_t port)
+  429:  {
+  430:    (void)pfCallBack;
+  431:    (void)port;
+  432:    return gUartErrNoError_c;
+  433:  }
+  434:  
+  435:  #endif //gUartSupported_d
+  436:  
+  437:  
+  438:  /******************************************************************************
+  439:  * Uart_BlokingStringTx 
+  440:  *
+  441:  * Transmits a string and does not return until completing the operation
+  442:  *
+  443:  *******************************************************************************/
+  444:  #if TRUE == gUartSupported_d
+  445:  uartErr_t Uart_BlockingStringTx(uint8_t const *pBuf, uartPortNumber_t port){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  446:  
+  447:    /* If there is an ongoing transmition do not accept the request */
+  448:    if(TRUE == mIsTxPending[port])
+  0003 8c       [1]             CLRH  
+  0004 97       [1]             TAX   
+  0005 de0000   [4]             LDX   @mIsTxPending,X
+  0008 a301     [2]             CPX   #1
+  000a 2604     [3]             BNE   L10 ;abs = 0010
+  449:      return gUartErrTxOnProgress_c;
+  000c a607     [2]             LDA   #7
+  000e 2020     [3]             BRA   L30 ;abs = 0030
+  0010          L10:    
+  450:  
+  451:    /* Arguments validation */
+  452:    if(gUartMaxIndex_c <= port)
+  0010 95       [2]             TSX   
+  0011 7d       [3]             TST   ,X
+  0012 2715     [3]             BEQ   L29 ;abs = 0029
+  453:      return gUartErrInvalidParameter_c;
+  0014 a603     [2]             LDA   #3
+  0016 2018     [3]             BRA   L30 ;abs = 0030
+  0018          L18:    
+  454:  
+  455:    while('\0' != (*pBuf)){
+  456:      (void)Uart_BlockingByteTx(*pBuf++, port);
+  0018 9efe02   [5]             LDHX  2,SP
+  001b f6       [3]             LDA   ,X
+  001c af01     [2]             AIX   #1
+  001e 9eff02   [5]             STHX  2,SP
+  0021 97       [1]             TAX   
+  0022 9ee601   [4]             LDA   1,SP
+  0025 ac000000 [8]             CALL  Uart_BlockingByteTx
+  0029          L29:    
+  0029 9efe02   [5]             LDHX  2,SP
+  002c 7d       [3]             TST   ,X
+  002d 26e9     [3]             BNE   L18 ;abs = 0018
+  457:    }
+  458:  
+  459:  
+  460:    return gUartErrNoError_c;
+  002f 4f       [1]             CLRA  
+  0030          L30:    
+  461:  }
+  0030 a703     [2]             AIS   #3
+  0032 8d       [7]             RTC   
+  462:  #else
+  463:  uartErr_t Uart_BlockingStringTx(uint8_t const *pBuf, uartPortNumber_t port)
+  464:  {
+  465:    (void)pBuf;
+  466:    (void)port;
+  467:    return gUartErrNoError_c;
+  468:  }
+  469:  
+  470:  #endif //gUartSupported_d
+  471:  
+  472:  /******************************************************************************
+  473:  * Uart_BlockingByteTx 
+  474:  *
+  475:  * Transmits a byte and return after the byte is transmitted
+  476:  *
+  477:  *******************************************************************************/
+  478:  #if TRUE == gUartSupported_d
+  479:  uartErr_t Uart_BlockingByteTx(uint8_t datum, uartPortNumber_t port){
+  0000 89       [2]             PSHX  
+  480:    uartModule_t *tmpUart;
+  481:    /* If there is an ongoing transmition do not accept the request */
+  482:    if(TRUE == mIsTxPending[port])
+  0001 8c       [1]             CLRH  
+  0002 97       [1]             TAX   
+  0003 de0000   [4]             LDX   @mIsTxPending,X
+  0006 5b04     [4]             DBNZX LC ;abs = 000c
+  483:      return gUartErrTxOnProgress_c;
+  0008 a607     [2]             LDA   #7
+  484:    
+  485:    tmpUart = (uartModule_t *)(maUartStartOfModule[port]);
+  486:  
+  487:    while (! ( (tmpUart->SCIxS1) & mSCIxS1_TDRE_c) );  /* ensure Tx data buffer empty */
+  488:    tmpUart->SCIxD = datum; /* load data to SCI2 register */
+  489:    while (! ( (tmpUart->SCIxS1) & mSCIxS1_TC_c) ); /* wait for Tx complete */
+  490:  
+  491:    return gUartErrNoError_c;
+  492:  }
+  000a 8a       [3]             PULH  
+  000b 8d       [7]             RTC   
+  000c          LC:     
+  000c 48       [1]             LSLA  
+  000d 5f       [1]             CLRX  
+  000e 59       [1]             ROLX  
+  000f 89       [2]             PSHX  
+  0010 8a       [3]             PULH  
+  0011 97       [1]             TAX   
+  0012 9ebe0000 [6]             LDHX  @maUartStartOfModule,X
+  0016          L16:    
+  0016 e604     [3]             LDA   4,X
+  0018 2afc     [3]             BPL   L16 ;abs = 0016
+  001a 9ee601   [4]             LDA   1,SP
+  001d e707     [3]             STA   7,X
+  001f          L1F:    
+  001f e604     [3]             LDA   4,X
+  0021 a540     [2]             BIT   #64
+  0023 27fa     [3]             BEQ   L1F ;abs = 001f
+  0025 4f       [1]             CLRA  
+  0026 8a       [3]             PULH  
+  0027 8d       [7]             RTC   
+  493:  #else
+  494:  uartErr_t Uart_BlockingByteTx(uint8_t datum, uartPortNumber_t port)
+  495:  {
+  496:    (void)datum;
+  497:    (void)port;
+  498:    return gUartErrNoError_c;
+  499:  }
+  500:  
+  501:  #endif //gUartSupported_d
+  502:  
+  503:  /******************************************************************************
+  504:  * Uart_StringTx 
+  505:  *
+  506:  * Transmits a \0 terminated string
+  507:  *
+  508:  *******************************************************************************/
+  509:  #if TRUE == gUartSupported_d
+  510:  uartErr_t Uart_StringTx(uint8_t const *pBuf, uartPortNumber_t port){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  511:    uint8_t i;
+  512:    i = StringLen(pBuf);
+  0003 ac000000 [8]             CALL  StringLen
+  513:    return Uart_Transmit(pBuf, i, port); 
+  0007 9efe02   [5]             LDHX  2,SP
+  000a 89       [2]             PSHX  
+  000b 8b       [2]             PSHH  
+  000c 97       [1]             TAX   
+  000d 9ee603   [4]             LDA   3,SP
+  0010 ac000000 [8]             CALL  Uart_Transmit
+  514:  }
+  0014 a705     [2]             AIS   #5
+  0016 8d       [7]             RTC   
+  515:  #else
+  516:  uartErr_t Uart_StringTx(uint8_t const *pBuf, uartPortNumber_t port)
+  517:  {
+  518:    (void)pBuf;
+  519:    (void)port;
+  520:    return gUartErrNoError_c;
+  521:  }
+  522:  
+  523:  #endif //gUartSupported_d
+  524:  
+  525:  /******************************************************************************
+  526:  * Uart_Transmit 
+  527:  *
+  528:  * Transmits a number of bytes thru the UART/SCI
+  529:  *
+  530:  *******************************************************************************/
+  531:  #if TRUE == gUartSupported_d
+  532:  uartErr_t Uart_Transmit(uint8_t const *pBuf, uint8_t bufLen, uartPortNumber_t port){
+  0000 89       [2]             PSHX  
+  0001 87       [2]             PSHA  
+  0002 a7fc     [2]             AIS   #-4
+  533:     uint8_t i;
+  534:    uartModule_t *tmpUart;
+  535:  
+  536:  
+  537:    /* Arguments validation */
+  538:    if( (NULL == pBuf)               ||
+  0004 9efe0a   [5]             LDHX  10,SP
+  0007 650000   [3]             CPHX  #0
+  000a 2709     [3]             BEQ   L15 ;abs = 0015
+  539:        (0 == bufLen)                ||
+  000c 95       [2]             TSX   
+  000d 6d05     [4]             TST   5,X
+  000f 2704     [3]             BEQ   L15 ;abs = 0015
+  540:        (gUartMaxIndex_c <= port)
+  0011 6d04     [4]             TST   4,X
+  0013 2704     [3]             BEQ   L19 ;abs = 0019
+  0015          L15:    
+  541:      )
+  542:      return gUartErrInvalidParameter_c;
+  0015 a603     [2]             LDA   #3
+  0017 200c     [3]             BRA   L25 ;abs = 0025
+  0019          L19:    
+  543:  
+  544:    if(bufLen > mUartTxNumOfFreeBytes[port])
+  0019 8c       [1]             CLRH  
+  001a 97       [1]             TAX   
+  001b 9ee606   [4]             LDA   6,SP
+  001e d10000   [4]             CMP   @mUartTxNumOfFreeBytes,X
+  0021 2305     [3]             BLS   L28 ;abs = 0028
+  545:      return gUartErrBuffFull_c;
+  0023 a601     [2]             LDA   #1
+  0025          L25:    
+  0025 cc00d1   [4]             JMP   LD1 ;abs = 00d1
+  0028          L28:    
+  546:  
+  547:  
+  548:    /* Disable TX interrupts before updating shared variables */
+  549:    tmpUart = (uartModule_t *)(maUartStartOfModule[port]);
+  0028 89       [2]             PSHX  
+  0029 58       [1]             LSLX  
+  002a 4f       [1]             CLRA  
+  002b 49       [1]             ROLA  
+  002c 87       [2]             PSHA  
+  002d 8a       [3]             PULH  
+  002e 9ebe0000 [6]             LDHX  @maUartStartOfModule,X
+  0032 9eff04   [5]             STHX  4,SP
+  550:  #if (gInterruption_c == gUartTxMode_d)
+  551:    (tmpUart->SCIxC2) &= ~mSCIxC2_TIE_c;
+  0035 e603     [3]             LDA   3,X
+  0037 a47f     [2]             AND   #127
+  0039 e703     [3]             STA   3,X
+  552:  #endif
+  553:  
+  554:    mUartTxNumOfFreeBytes[port] = (mUartTxNumOfFreeBytes[port]) - bufLen;
+  003b 8c       [1]             CLRH  
+  003c 88       [3]             PULX  
+  003d d60000   [4]             LDA   @mUartTxNumOfFreeBytes,X
+  0040 9ee006   [4]             SUB   6,SP
+  0043 d70000   [4]             STA   @mUartTxNumOfFreeBytes,X
+  555:  
+  556:  
+  557:    /* Copy Application buffer to UART Tx buffer */
+  558:    for(i=0; i<bufLen; i++){
+  0046 95       [2]             TSX   
+  0047 6f01     [5]             CLR   1,X
+  0049 2048     [3]             BRA   L93 ;abs = 0093
+  004b          L4B:    
+  559:      mUartTxBuff[port][((mUartTxBufferIndx[port]).iLatestData)] = (*pBuf);
+  004b ee04     [3]             LDX   4,X
+  004d 58       [1]             LSLX  
+  004e 4f       [1]             CLRA  
+  004f 49       [1]             ROLA  
+  0050 87       [2]             PSHA  
+  0051 8a       [3]             PULH  
+  0052 d60001   [4]             LDA   @mUartTxBufferIndx:1,X
+  0055 aec8     [2]             LDX   #-56
+  0057 9ee701   [4]             STA   1,SP
+  005a 9ee605   [4]             LDA   5,SP
+  005d 42       [5]             MUL   
+  005e 87       [2]             PSHA  
+  005f 9ee602   [4]             LDA   2,SP
+  0062 9eeb01   [4]             ADD   1,SP
+  0065 9ee701   [4]             STA   1,SP
+  0068 9f       [1]             TXA   
+  0069 a900     [2]             ADC   #0
+  006b 9efe0b   [5]             LDHX  11,SP
+  006e 87       [2]             PSHA  
+  006f f6       [3]             LDA   ,X
+  0070 8a       [3]             PULH  
+  0071 88       [3]             PULX  
+  0072 d70000   [4]             STA   @mUartTxBuff,X
+  560:      Uart_Inc_TxIndx(((mUartTxBufferIndx[port]).iLatestData));
+  0075 95       [2]             TSX   
+  0076 f6       [3]             LDA   ,X
+  0077 a1c7     [2]             CMP   #-57
+  0079 4f       [1]             CLRA  
+  007a 2402     [3]             BCC   L7E ;abs = 007e
+  007c f6       [3]             LDA   ,X
+  007d 4c       [1]             INCA  
+  007e          L7E:    
+  007e ee04     [3]             LDX   4,X
+  0080 58       [1]             LSLX  
+  0081 87       [2]             PSHA  
+  0082 4f       [1]             CLRA  
+  0083 49       [1]             ROLA  
+  0084 87       [2]             PSHA  
+  0085 8a       [3]             PULH  
+  0086 86       [3]             PULA  
+  0087 d70001   [4]             STA   @mUartTxBufferIndx:1,X
+  561:      pBuf++;
+  008a 95       [2]             TSX   
+  008b 6c0a     [5]             INC   10,X
+  008d 2602     [3]             BNE   L91 ;abs = 0091
+  008f 6c09     [5]             INC   9,X
+  0091          L91:    
+  0091 6c01     [5]             INC   1,X
+  0093          L93:    
+  0093 e605     [3]             LDA   5,X
+  0095 e101     [3]             CMP   1,X
+  0097 22b2     [3]             BHI   L4B ;abs = 004b
+  562:    }
+  563:    mIsTxPending[port] = TRUE;
+  0099 ee04     [3]             LDX   4,X
+  009b 8c       [1]             CLRH  
+  009c a601     [2]             LDA   #1
+  009e d70000   [4]             STA   @mIsTxPending,X
+  564:  
+  565:    /* Transmit the first byte, other will be sent at ISR */
+  566:    i = (tmpUart->SCIxS1);
+  567:    tmpUart->SCIxD = mUartTxBuff[port][((mUartTxBufferIndx[port]).iStartOfData)];
+  00a1 58       [1]             LSLX  
+  00a2 4f       [1]             CLRA  
+  00a3 49       [1]             ROLA  
+  00a4 87       [2]             PSHA  
+  00a5 8a       [3]             PULH  
+  00a6 d60000   [4]             LDA   @mUartTxBufferIndx,X
+  00a9 aec8     [2]             LDX   #-56
+  00ab 87       [2]             PSHA  
+  00ac 9ee606   [4]             LDA   6,SP
+  00af 42       [5]             MUL   
+  00b0 87       [2]             PSHA  
+  00b1 9ee602   [4]             LDA   2,SP
+  00b4 9eeb01   [4]             ADD   1,SP
+  00b7 9ee701   [4]             STA   1,SP
+  00ba 9f       [1]             TXA   
+  00bb a900     [2]             ADC   #0
+  00bd 87       [2]             PSHA  
+  00be 8a       [3]             PULH  
+  00bf 88       [3]             PULX  
+  00c0 de0000   [4]             LDX   @mUartTxBuff,X
+  00c3 9f       [1]             TXA   
+  00c4 9efe04   [5]             LDHX  4,SP
+  00c7 e707     [3]             STA   7,X
+  568:  
+  569:    /* Restore UART TX interrupts*/
+  570:  #if (gInterruption_c == gUartTxMode_d)
+  571:    (tmpUart->SCIxC2) |= mSCIxC2_TIE_c;
+  00c9 e603     [3]             LDA   3,X
+  00cb aa80     [2]             ORA   #-128
+  00cd e703     [3]             STA   3,X
+  572:  #endif
+  573:  
+  574:  
+  575:    return gUartErrNoError_c;
+  00cf 4f       [1]             CLRA  
+  00d0 8a       [3]             PULH  
+  00d1          LD1:    
+  576:  }
+  00d1 a706     [2]             AIS   #6
+  00d3 8d       [7]             RTC   
+  577:  #else
+  578:  uartErr_t Uart_Transmit(uint8_t const *pBuf, uint8_t bufLen, uartPortNumber_t port)
+  579:  {
+  580:    (void)pBuf;
+  581:    (void)bufLen;
+  582:    (void)port;
+  583:    return gUartErrNoError_c;
+  584:  }
+  585:  
+  586:  #endif //gUartSupported_d
+  587:  
+  588:  #if TRUE == gUartSupported_d
+  589:  
+  590:  #if gUart1_Enabled_d
+  591:  /******************************************************************************
+  592:  * Uart1_Task
+  593:  *
+  594:  *
+  595:  *******************************************************************************/
+  596:  void Uart1_Task(void){
+  597:  
+  598:  }
+  599:  #endif
+  600:  
+  601:  
+  602:  #if gUart2_Enabled_d /* Not for MC1323x */
+  603:  /******************************************************************************
+  604:  * Uart2_Task 
+  605:  *
+  606:  *
+  607:  *******************************************************************************/
+  608:  void Uart2_Task(void){
+  609:  
+  610:  }
+  0000 8d       [7]             RTC   
+  611:  #endif
+  612:  
+  613:  
+  614:  
+  615:  #if gUart1_Enabled_d
+  616:  /******************************************************************************
+  617:  * Uart1_TxIsr 
+  618:  *
+  619:  * Interrupt routine for TX events from UART 1.
+  620:  *
+  621:  *******************************************************************************/
+  622:  #pragma CODE_SEG ISR_SEGMENT
+  623:  #if (gInterruption_c == gUartTxMode_d)
+  624:  INTERRUPT_KEYWORD void Uart1_TxIsr(void) {
+  625:  #else
+  626:  void Uart1_TxTask(void){
+  627:    if( (TRUE == mIsTxPending[gUart1Index_c]) &&
+  628:        (mSCIxS1_TC_c & SCI1S1) )
+  629:  #endif
+  630:  
+  631:    {
+  632:      uint8_t dummy;
+  633:  
+  634:      Uart_Inc_TxIndx(((mUartTxBufferIndx[gUart1Index_c]).iStartOfData));
+  635:      (mUartTxNumOfFreeBytes[gUart1Index_c])++;
+  636:  
+  637:      dummy = SCI1S1;
+  638:      if(IsTxBufEmpty(gUart1Index_c)){
+  639:  #if (gInterruption_c == gUartTxMode_d)
+  640:        SCI1C2 &= ~mSCIxC2_TIE_c;
+  641:  #endif
+  642:        (mUartTxCbFn[gUart1Index_c])();
+  643:        mIsTxPending[gUart1Index_c] = FALSE;
+  644:      }
+  645:      else{
+  646:        SCI1D = mUartTxBuff[gUart1Index_c][((mUartTxBufferIndx[gUart1Index_c]).iStartOfData)];
+  647:      }
+  648:    }
+  649:  }
+  650:  #pragma CODE_SEG DEFAULT
+  651:  
+  652:  
+  653:  /******************************************************************************
+  654:  * Uart1_RxIsr 
+  655:  *
+  656:  * Interrupt routine for RX events from UART 1.
+  657:  *
+  658:  *******************************************************************************/
+  659:  #pragma CODE_SEG ISR_SEGMENT
+  660:  INTERRUPT_KEYWORD void Uart1_RxIsr(void){
+  661:    uint8_t rxFlags;
+  662:    uint8_t dummy;
+  663:    uint8_t cBytesInBuffer;
+  664:  
+  665:    rxFlags = gUartRxCbCodeNoFlags_c;
+  666:    /* Receive register full and no errors */
+  667:    if ((SCI1S1 & (mSCIxS1_RDRF_c | mSCIxS1_OR_c | mSCIxS1_NF_c | mSCIxS1_FE_c | mSCIxS1_PF_c)) == mSCIxS1_RDRF_c) 
+  668:    {
+  669:      mUartRxBuff[gUart1Index_c][((mUartRxBufferIndx[gUart1Index_c]).iLatestData)] = SCI1D;
+  670:      Uart_Inc_RxIndx(((mUartRxBufferIndx[gUart1Index_c]).iLatestData));
+  671:      rxFlags |= gUartRxCbCodeNewByte_c;
+  672:  
+  673:  
+  674:      Get_Number_Of_FreeBytes(cBytesInBuffer, gUart1Index_c);
+  675:  
+  676:      if(cBytesInBuffer > gUartRxFlowThreshold_c) 
+  677:      {
+  678:        rxFlags |= gUartRxCbCodeThreshold_c;
+  679:  #if gUart1_EnableHWFlowControl_d
+  680:        Uart1_DisableFlow();
+  681:  #endif
+  682:      }
+  683:      if(cBytesInBuffer == gUartRxBuffSize_c) 
+  684:      {
+  685:        rxFlags |= gUartRxCbCodeMaxBytes_c;
+  686:      }
+  687:      
+  688:      /* If any of the events match the callback's flags call it*/
+  689:      if(gUartRxCbCodeNoFlags_c != (rxFlags & (mUartRxCbFlags[gUart1Index_c]))){
+  690:        (mUartRxCbFn[gUart1Index_c])(rxFlags);
+  691:      }
+  692:  
+  693:    } else {
+  694:      dummy = SCI1D;
+  695:    }
+  696:  
+  697:  }
+  698:  #pragma CODE_SEG DEFAULT
+  699:  
+  700:  
+  701:  /******************************************************************************
+  702:  * Uart1_ErrorIsr 
+  703:  *
+  704:  * This ISR for SCI1 errors.
+  705:  * Any code for managing SCI errors could be placed here
+  706:  *
+  707:  *******************************************************************************/
+  708:  #pragma CODE_SEG ISR_SEGMENT
+  709:  INTERRUPT_KEYWORD void Uart1_ErrorIsr(void){ 
+  710:    /* PLACE YOUR CODE HERE */
+  711:  }
+  712:  #pragma CODE_SEG DEFAULT
+  713:  
+  714:  
+  715:  #endif /* gUart1_Enabled_d */
+  716:  
+  717:  
+  718:  #if gUart2_Enabled_d /* Not for MC1323x */
+  719:  /******************************************************************************
+  720:  * Uart2_TxIsr 
+  721:  *
+  722:  * Interrupt routine for TX events from UART 2.
+  723:  *
+  724:  *******************************************************************************/
+  725:  #pragma CODE_SEG ISR_SEGMENT
+  726:  #if (gInterruption_c == gUartTxMode_d) 
+  727:  INTERRUPT_KEYWORD void Uart2_TxIsr(void){
+  0000 8b       [2]             PSHH  
+  728:  #else
+  729:  void Uart2_TxTask(void){
+  730:    if( (TRUE == mIsTxPending[gUart2Index_c]) &&
+  731:        (mSCIxS1_TC_c & SCI2S1) )
+  732:  #endif
+  733:   {
+  734:      uint8_t dummy;
+  735:  
+  736:      Uart_Inc_TxIndx(((mUartTxBufferIndx[gUart2Index_c]).iStartOfData));
+  0001 c60000   [4]             LDA   mUartTxBufferIndx
+  0004 a1c7     [2]             CMP   #-57
+  0006 2502     [3]             BCS   LA ;abs = 000a
+  0008 4f       [1]             CLRA  
+  0009 21       [3]             SKIP1 LB ;abs = 000b
+  000a          LA:     
+  000a 4c       [1]             INCA  
+  000b          LB:     
+  000b c70000   [4]             STA   mUartTxBufferIndx
+  737:      (mUartTxNumOfFreeBytes[gUart2Index_c])++;
+  000e 450000   [3]             LDHX  @mUartTxNumOfFreeBytes
+  0011 7c       [4]             INC   ,X
+  738:  
+  739:      dummy = SCI2S1;
+  0012 ce0000   [4]             LDX   _SCI2S1
+  740:      if(IsTxBufEmpty(gUart2Index_c)){
+  0015 c10001   [4]             CMP   mUartTxBufferIndx:1
+  0018 2611     [3]             BNE   L2B ;abs = 002b
+  741:  #if (gInterruption_c == gUartTxMode_d) 
+  742:        SCI2C2 &= ~mSCIxC2_TIE_c;
+  001a 450000   [3]             LDHX  @_SCI2C2
+  001d f6       [3]             LDA   ,X
+  001e a47f     [2]             AND   #127
+  0020 f7       [2]             STA   ,X
+  743:  #endif
+  744:        (mUartTxCbFn[gUart2Index_c])();
+  0021 320000   [5]             LDHX  mUartTxCbFn
+  0024 fd       [5]             JSR   ,X
+  745:        mIsTxPending[gUart2Index_c] = FALSE;
+  0025 4f       [1]             CLRA  
+  0026 c70000   [4]             STA   mIsTxPending
+  746:      } else {
+  747:        SCI2D = mUartTxBuff[gUart2Index_c][((mUartTxBufferIndx[gUart2Index_c]).iStartOfData)];
+  748:      }
+  749:    }
+  750:  
+  751:  }
+  0029 8a       [3]             PULH  
+  002a 80       [9]             RTI   
+  002b          L2B:    
+  002b ce0000   [4]             LDX   mUartTxBufferIndx
+  002e 8c       [1]             CLRH  
+  002f d60000   [4]             LDA   @mUartTxBuff,X
+  0032 c70000   [4]             STA   _SCI2D
+  0035 8a       [3]             PULH  
+  0036 80       [9]             RTI   
+  752:  #pragma CODE_SEG DEFAULT
+  753:  
+  754:  
+  755:  /******************************************************************************
+  756:  * Uart2_RxIsr 
+  757:  *
+  758:  * Interrupt routine for RX events from UART 2.
+  759:  *
+  760:  *******************************************************************************/
+  761:  #pragma CODE_SEG ISR_SEGMENT
+  762:  INTERRUPT_KEYWORD void Uart2_RxIsr(void){
+  0000 8b       [2]             PSHH  
+  0001 8b       [2]             PSHH  
+  763:    uint8_t rxFlags;
+  764:    uint8_t dummy;
+  765:    uint8_t cBytesInBuffer;
+  766:  
+  767:    rxFlags = gUartRxCbCodeNoFlags_c;
+  768:    /* Receive register full and no errors */
+  769:    if ((SCI2S1 & (mSCIxS1_RDRF_c | mSCIxS1_OR_c | mSCIxS1_NF_c | mSCIxS1_FE_c | mSCIxS1_PF_c)) == mSCIxS1_RDRF_c) 
+  0002 c60000   [4]             LDA   _SCI2S1
+  0005 a42f     [2]             AND   #47
+  0007 a120     [2]             CMP   #32
+  0009 2650     [3]             BNE   L5B ;abs = 005b
+  770:    {
+  771:      mUartRxBuff[gUart2Index_c][((mUartRxBufferIndx[gUart2Index_c]).iLatestData)] = SCI2D;
+  000b ce0001   [4]             LDX   mUartRxBufferIndx:1
+  000e c60000   [4]             LDA   _SCI2D
+  0011 8c       [1]             CLRH  
+  0012 d70000   [4]             STA   @mUartRxBuff,X
+  772:      Uart_Inc_RxIndx(((mUartRxBufferIndx[gUart2Index_c]).iLatestData));
+  0015 a33f     [2]             CPX   #63
+  0017 2502     [3]             BCS   L1B ;abs = 001b
+  0019 5f       [1]             CLRX  
+  001a 21       [3]             SKIP1 L1C ;abs = 001c
+  001b          L1B:    
+  001b 5c       [1]             INCX  
+  001c          L1C:    
+  001c 4f       [1]             CLRA  
+  001d cf0001   [4]             STX   mUartRxBufferIndx:1
+  773:      rxFlags |= gUartRxCbCodeNewByte_c;
+  0020 aa04     [2]             ORA   #4
+  774:  
+  775:      Get_Number_Of_FreeBytes(cBytesInBuffer, gUart2Index_c);
+  0022 ce0000   [4]             LDX   mUartTxBufferIndx
+  0025 c30001   [4]             CPX   mUartRxBufferIndx:1
+  0028 2209     [3]             BHI   L33 ;abs = 0033
+  002a 87       [2]             PSHA  
+  002b c60001   [4]             LDA   mUartRxBufferIndx:1
+  002e c00000   [4]             SUB   mUartTxBufferIndx
+  0031 2009     [3]             BRA   L3C ;abs = 003c
+  0033          L33:    
+  0033 87       [2]             PSHA  
+  0034 a640     [2]             LDA   #64
+  0036 c00000   [4]             SUB   mUartTxBufferIndx
+  0039 cb0001   [4]             ADD   mUartRxBufferIndx:1
+  003c          L3C:    
+  003c 95       [2]             TSX   
+  003d e701     [3]             STA   1,X
+  003f 86       [3]             PULA  
+  776:  
+  777:      if(cBytesInBuffer > gUartRxFlowThreshold_c) 
+  0040 95       [2]             TSX   
+  0041 fe       [3]             LDX   ,X
+  0042 a320     [2]             CPX   #32
+  0044 2302     [3]             BLS   L48 ;abs = 0048
+  778:      {
+  779:        rxFlags |= gUartRxCbCodeThreshold_c;
+  0046 aa02     [2]             ORA   #2
+  0048          L48:    
+  780:  #if gUart2_EnableHWFlowControl_d
+  781:        Uart2_DisableFlow();
+  782:  #endif
+  783:      }
+  784:      if(cBytesInBuffer == gUartRxBuffSize_c) 
+  0048 a340     [2]             CPX   #64
+  004a 2602     [3]             BNE   L4E ;abs = 004e
+  785:      {
+  786:        rxFlags |= gUartRxCbCodeMaxBytes_c;
+  004c aa01     [2]             ORA   #1
+  004e          L4E:    
+  787:      }
+  788:  
+  789:      /* If any of the events match the callback's flags call it*/
+  790:      if(gUartRxCbCodeNoFlags_c != (rxFlags & (mUartRxCbFlags[gUart2Index_c]))){
+  004e 97       [1]             TAX   
+  004f c40000   [4]             AND   mUartRxCbFlags
+  0052 270a     [3]             BEQ   L5E ;abs = 005e
+  791:        (mUartRxCbFn[gUart2Index_c])(rxFlags);
+  0054 9f       [1]             TXA   
+  0055 320000   [5]             LDHX  mUartRxCbFn
+  0058 fd       [5]             JSR   ,X
+  0059 2003     [3]             BRA   L5E ;abs = 005e
+  005b          L5B:    
+  792:      }
+  793:  
+  794:    } else {
+  795:      dummy = SCI2D;
+  005b c60000   [4]             LDA   _SCI2D
+  005e          L5E:    
+  796:    }
+  797:  
+  798:  }
+  005e 8a       [3]             PULH  
+  005f 8a       [3]             PULH  
+  0060 80       [9]             RTI   
+  799:  #pragma CODE_SEG DEFAULT
+  800:  
+  801:  
+  802:  /******************************************************************************
+  803:  * Uart2_ErrorIsr 
+  804:  *
+  805:  * This ISR for SCI2 errors.
+  806:  * Any code for managing SCI errors could be placed here
+  807:  *
+  808:  *******************************************************************************/
+  809:  #pragma CODE_SEG ISR_SEGMENT
+  810:  INTERRUPT_KEYWORD void Uart2_ErrorIsr(void){
+  811:    /* PLACE YOUR CODE HERE */
+  812:  }
+  0000 80       [9]             RTI   
+  813:  #pragma CODE_SEG DEFAULT
+  814:  
+  815:  
+  816:  #endif /* gUart2_Enabled_d */
+  817:  
+  818:  #endif //gUartSupported_d
+  819:  
+  820:  /******************************************************************************
+  821:  *******************************************************************************
+  822:  * Private functions
+  823:  *******************************************************************************
+  824:  *******************************************************************************/
+  825:  
+  826:  #if TRUE == gUartSupported_d
+  827:  /******************************************************************************
+  828:  * EnableFlowIfConditionsOk 
+  829:  *
+  830:  * This function checks if there are enought available bytes on the RX buffer
+  831:  * then if that is the case enables the flow control to continue receiving
+  832:  *
+  833:  *******************************************************************************/
+  834:  static void EnableFlowIfConditionsOk(uartPortNumber_t port){
+  835:  
+  836:  #if (gUart1_EnableHWFlowControl_d || gUart2_EnableHWFlowControl_d)
+  837:    uint8_t cBytesInBuffer;
+  838:  #else
+  839:    (void)port;
+  840:  #endif
+  841:  
+  842:  #if gUart1_EnableHWFlowControl_d 
+  843:    if(gUart1Index_c == port){
+  844:      Get_Number_Of_FreeBytes(cBytesInBuffer, gUart1Index_c);
+  845:      if(gUartRxFlowThreshold_c < cBytesInBuffer)
+  846:        Uart1_EnableFlow();
+  847:    }
+  848:  #endif
+  849:  
+  850:  #if gUart2_EnableHWFlowControl_d
+  851:    if(gUart2Index_c == port){
+  852:      Get_Number_Of_FreeBytes(cBytesInBuffer, gUart2Index_c);
+  853:      if(gUartRxFlowThreshold_c < cBytesInBuffer)
+  854:        Uart2_EnableFlow();
+  855:    }
+  856:  #endif
+  857:    
+  858:  }
+  0000 8d       [7]             RTC   
+  859:  
+  860:  
+  861:  /******************************************************************************
+  862:  * StringLen 
+  863:  *
+  864:  * This function returns the size of a \0 terminated string, 0 in the case of
+  865:  * NULL pointer
+  866:  *
+  867:  *******************************************************************************/
+  868:  static uint8_t StringLen(uint8_t const *pBuf){
+  869:    uint8_t i;
+  870:    i = 0;
+  0000 4f       [1]             CLRA  
+  871:    while('\0' != *pBuf) {
+  0001 2003     [3]             BRA   L6 ;abs = 0006
+  0003          L3:     
+  872:      pBuf++;
+  0003 af01     [2]             AIX   #1
+  873:      i++;
+  0005 4c       [1]             INCA  
+  0006          L6:     
+  0006 7d       [3]             TST   ,X
+  0007 2702     [3]             BEQ   LB ;abs = 000b
+  0009 20f8     [3]             BRA   L3 ;abs = 0003
+  000b          LB:     
+  874:    }
+  875:    return i;
+  876:  }
+  000b 8d       [7]             RTC   
+  877:  
+  878:  #endif //gUartSupported_d
+  879:  
+  880:  /******************************************************************************/
+  881:  
+  882:  
+  883:  
+  884:  #endif /* (gUartNumOfPorts_c > 0) */
+  885:  

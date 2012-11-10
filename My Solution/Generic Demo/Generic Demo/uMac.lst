@@ -1,0 +1,330 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*
+    2:   * uMac.c
+    3:   *
+    4:   *  Created on: Nov 1, 2012
+    5:   */
+    6:  
+    7:  
+    8:  //Librerias
+    9:  #include "McuInit.h"                /*CPU and System Clock related functions*/
+   10:  #include "EmbeddedTypes.h"          /*Include special data types*/       
+   11:  #include "SMAC_Interface.h"         /*Include all OTA functionality*/
+   12:  #include "uMac.h"        			 /*Include all OTA functionality*/
+   13:  #include "app_config.h"
+   14:  
+   15:  
+   16:  //Definiciones
+   17:  typedef enum{
+   18:  	uMac_NoInit = 0,
+   19:  	uMac_Init = 1,
+   20:  	uMac_WaitRx = 2,
+   21:  	uMac_Rx = 3,
+   22:  	uMac_Tx = 4
+   23:  }uMac_Engine_State;
+   24:  
+   25:  channels_t       bestChannel;
+   26:  bool_t           bScanDone;
+   27:  
+   28:  static uMac_Engine_State uMac_Current_State;
+   29:  static bool_t uMac_On = FALSE;
+   30:  static uint8_t uMac_Best_Channel;
+   31:  
+   32:  //Variables
+   33:  static uint8_t gau8RxDataBuffer[130]; /* 123 bytes is the SDU max size in non
+   34:                                           promiscuous mode. 
+   35:                                           125 bytes is the SDU max size in 
+   36:                                           promiscuous mode. 
+   37:                                           You have to consider the SDU plus 5 more 
+   38:                                           bytes for SMAC header and that the buffer 
+   39:                                           can not be bigger than 130 */
+   40:  static uint8_t gau8TxDataBuffer[128]; /* This buffer can be as big as the biggest
+   41:                                           packet to transmit in the app plus 3 
+   42:                                           bytes reserved for SMAC packet header.
+   43:                                           The buffer can not be bigger than 128 */
+   44:          
+   45:  static txPacket_t * AppTxPacket;
+   46:  static rxPacket_t * AppRxPacket;
+   47:  
+   48:  static uMac_Packet * uMac_RxPacket;
+   49:  static uMac_Packet * uMac_TxPacket;
+   50:  
+   51:  bool_t			bTxDone;
+   52:  bool_t			bRxDone;		
+   53:  
+   54:  //Prototipos
+   55:  //void MLMEScanComfirm(channels_t ClearestChann); //Poner tambien
+   56:  void InitSmac(void); //Poner en memoria bankeada******
+   57:  
+   58:  void Init_uMac(uMac_nodeType NodeType,uMac_txCallBack TxCallBack,uMac_rxCallBack RxCallBack){
+   59:  	uMac_On = TRUE;
+  0000 a601     [2]             LDA   #1
+  0002 c70000   [4]             STA   uMac_On
+   60:  	uMac_RxPacket = (uMac_Packet *)AppRxPacket->smacPdu.u8Data;
+  0005 320000   [5]             LDHX  AppRxPacket
+  0008 af05     [2]             AIX   #5
+  000a 960000   [5]             STHX  uMac_RxPacket
+   61:  	uMac_TxPacket = (uMac_Packet *)AppTxPacket->smacPdu.u8Data;
+  000d 320000   [5]             LDHX  AppTxPacket
+  0010 af03     [2]             AIX   #3
+  0012 960000   [5]             STHX  uMac_TxPacket
+   62:  	//guardar tipo de nodo y callbacks
+   63:  }
+  0015 8d       [7]             RTC   
+   64:  
+   65:  void uMac_Engine(){
+  0000 a7ee     [2]             AIS   #-18
+   66:  	uint16_t ChannelsToScan = 0xFFF;
+  0002 450fff   [3]             LDHX  #4095
+  0005 9eff01   [5]             STHX  1,SP
+   67:  	uint8_t TheBestChannel[16];
+   68:  	rxPacket_t ReceivedPacket;
+   69:  	uMac_Packet HelloResponse;
+   70:  	switch (uMac_Current_State){
+  0008 c60000   [4]             LDA   uMac_Current_State
+  000b a104     [2]             CMP   #4
+  000d 220f     [3]             BHI   L1E ;abs = 001e
+  000f 4d       [1]             TSTA  
+  0010 270e     [3]             BEQ   L20 ;abs = 0020
+  0012 41012c   [4]             CBEQA #1,L41 ;abs = 0041
+  0015 41024b   [4]             CBEQA #2,L63 ;abs = 0063
+  0018 a104     [2]             CMP   #4
+  001a 2674     [3]             BNE   L90 ;abs = 0090
+  001c 2074     [3]             BRA   L92 ;abs = 0092
+  001e          L1E:    
+  001e 2070     [3]             BRA   L90 ;abs = 0090
+  0020          L20:    
+   71:  		case uMac_NoInit:
+   72:  			//No Init
+   73:  			if(uMac_On==TRUE){
+  0020 c60000   [4]             LDA   uMac_On
+  0023 4b77     [4]             DBNZA L9C ;abs = 009c
+   74:  				uMac_On = FALSE;
+  0025 4f       [1]             CLRA  
+  0026 c70000   [4]             STA   uMac_On
+   75:  				InitSmac();
+  0029 ac000000 [8]             CALL  InitSmac
+   76:  				(void) MLMEScanRequest(ChannelsToScan, gScanModeED_c, TheBestChannel);
+  002d 9efe01   [5]             LDHX  1,SP
+  0030 89       [2]             PSHX  
+  0031 8b       [2]             PSHH  
+  0032 a601     [2]             LDA   #1
+  0034 95       [2]             TSX   
+  0035 af04     [2]             AIX   #4
+  0037 ac000000 [8]             CALL  MLMEScanRequest
+  003b a702     [2]             AIS   #2
+   77:  				uMac_Current_State = uMac_Init;
+  003d a601     [2]             LDA   #1
+  003f 2058     [3]             BRA   L99 ;abs = 0099
+  0041          L41:    
+   78:  			}
+   79:  		break;
+   80:  		case uMac_Init:
+   81:  			//Init
+   82:  			if(bScanDone==TRUE){
+  0041 c60000   [4]             LDA   bScanDone
+  0044 4b56     [4]             DBNZA L9C ;abs = 009c
+   83:  				bScanDone = FALSE;
+  0046 4f       [1]             CLRA  
+  0047 c70000   [4]             STA   bScanDone
+   84:  				(void) MLMESetChannelRequest(bestChannel);
+  004a c60000   [4]             LDA   bestChannel
+  004d ac000000 [8]             CALL  MLMESetChannelRequest
+   85:  				(void) MLMERXEnableRequest(AppRxPacket,0); 
+  0051 320000   [5]             LDHX  AppRxPacket
+  0054 89       [2]             PSHX  
+  0055 8b       [2]             PSHH  
+  0056 4f       [1]             CLRA  
+  0057 87       [2]             PSHA  
+  0058 87       [2]             PSHA  
+  0059 87       [2]             PSHA  
+  005a 87       [2]             PSHA  
+  005b ac000000 [8]             CALL  MLMERXEnableRequest
+  005f a706     [2]             AIS   #6
+  0061 2034     [3]             BRA   L97 ;abs = 0097
+  0063          L63:    
+   86:  				uMac_Current_State = uMac_WaitRx;
+   87:  			}
+   88:  		break;
+   89:  		case uMac_WaitRx:
+   90:  			//Wait Rx
+   91:  			if(bRxDone==TRUE){
+  0063 c60000   [4]             LDA   bRxDone
+  0066 4b34     [4]             DBNZA L9C ;abs = 009c
+   92:  				bRxDone = FALSE;
+  0068 4f       [1]             CLRA  
+  0069 c70000   [4]             STA   bRxDone
+   93:  				//Analizar el paquete
+   94:  				if(AppRxPacket->rxStatus==rxSuccessStatus_c){
+  006c 320000   [5]             LDHX  AppRxPacket
+  006f e601     [3]             LDA   1,X
+  0071 a102     [2]             CMP   #2
+  0073 2627     [3]             BNE   L9C ;abs = 009c
+   95:  					//El paquete esta chido
+   96:  					uMac_RxPacket = (uMac_Packet *)&AppRxPacket->smacPdu.u8Data;
+  0075 af05     [2]             AIX   #5
+  0077 960000   [5]             STHX  uMac_RxPacket
+   97:  					if(uMac_RxPacket->Packet_Type==uMac_Hello){
+  007a 6d01     [4]             TST   1,X
+  007c 261e     [3]             BNE   L9C ;abs = 009c
+   98:  						//Si el paquete es de control, responder con otro hello
+   99:  						uMac_TxPacket->Dest_Add = uMac_RxPacket->Source_Add;
+  007e e602     [3]             LDA   2,X
+  0080 320000   [5]             LDHX  uMac_TxPacket
+  0083 e703     [3]             STA   3,X
+  100:  						uMac_TxPacket->Packet_Type = uMac_Hello;
+  0085 6f01     [5]             CLR   1,X
+  101:  						uMac_TxPacket->Pan_ID = 44;
+  0087 a62c     [2]             LDA   #44
+  0089 f7       [2]             STA   ,X
+  102:  						uMac_TxPacket->Source_Add = 0;
+  008a 6f02     [5]             CLR   2,X
+  103:  						uMac_TxPacket->uMac_PDU[0] = 'H';
+  008c a648     [2]             LDA   #72
+  008e e704     [3]             STA   4,X
+  0090          L90:    
+  0090 200a     [3]             BRA   L9C ;abs = 009c
+  0092          L92:    
+  104:  						// AppTxPacket->smacPdu.u8Data = HelloResponse;
+  105:  					}
+  106:  				}
+  107:  			}
+  108:  			
+  109:  		break;
+  110:  		case uMac_Rx:
+  111:  			//Rx
+  112:  		break;
+  113:  		case uMac_Tx:
+  114:  			if(bRxDone==TRUE){
+  0092 c60000   [4]             LDA   bRxDone
+  0095 4b05     [4]             DBNZA L9C ;abs = 009c
+  0097          L97:    
+  115:  				uMac_Current_State = uMac_WaitRx;
+  0097 a602     [2]             LDA   #2
+  0099          L99:    
+  0099 c70000   [4]             STA   uMac_Current_State
+  009c          L9C:    
+  116:  			}
+  117:  		break;
+  118:  	}
+  119:  }
+  009c a712     [2]             AIS   #18
+  009e 8d       [7]             RTC   
+  120:  
+  121:  /************************************************************************************
+  122:  *
+  123:  * InitSmac
+  124:  *
+  125:  ************************************************************************************/
+  126:  void InitSmac(void)
+  127:  {
+  128:      AppTxPacket = (txPacket_t*)gau8TxDataBuffer;
+  0000 450000   [3]             LDHX  @gau8TxDataBuffer
+  0003 960000   [5]             STHX  AppTxPacket
+  129:      AppRxPacket = (rxPacket_t*)gau8RxDataBuffer; 
+  0006 450000   [3]             LDHX  @gau8RxDataBuffer
+  0009 960000   [5]             STHX  AppRxPacket
+  130:      AppRxPacket->u8MaxDataLength = gMaxSmacSDULenght_c;
+  000c a67b     [2]             LDA   #123
+  000e f7       [2]             STA   ,X
+  131:      AppTxPacket->smacPdu.u8Data[0] = 'T';
+  000f a654     [2]             LDA   #84
+  0011 450000   [3]             LDHX  @gau8TxDataBuffer
+  0014 e703     [3]             STA   3,X
+  132:      
+  133:      
+  134:      (void)MLMERadioInit();
+  0016 ac000000 [8]             CALL  MLMERadioInit
+  135:      (void)MLMESetClockRate(gClko16MHz_c);
+  001a 4f       [1]             CLRA  
+  001b ac000000 [8]             CALL  MLMESetClockRate
+  136:      (void)MCU_UseExternalClock();
+  001f ac000000 [8]             CALL  MCU_UseExternalClock
+  137:      
+  138:      (void)MLMESetTmrPrescale(gTimeBase250kHz_c);
+  0023 a603     [2]             LDA   #3
+  0025 ac000000 [8]             CALL  MLMESetTmrPrescale
+  0029          L29:    
+  139:      while (gErrorNoError_c != MLMESetChannelRequest(gDefaultChannelNumber_c));
+  0029 a60f     [2]             LDA   #15
+  002b ac000000 [8]             CALL  MLMESetChannelRequest
+  002f 4d       [1]             TSTA  
+  0030 26f7     [3]             BNE   L29 ;abs = 0029
+  140:      (void)MLMEPAOutputAdjust(gDefaultOutputPower_c);
+  0032 a608     [2]             LDA   #8
+  0034 ac000000 [8]             CALL  MLMEPAOutputAdjust
+  141:      (void)MLMEFEGainAdjust(gGainOffset_c);
+  0038 a69b     [2]             LDA   #-101
+  003a ac000000 [8]             CALL  MLMEFEGainAdjust
+  142:   }
+  003e 8d       [7]             RTC   
+  143:  
+  144:  /* Place it in NON_BANKED memory */
+  145:  #ifdef MEMORY_MODEL_BANKED
+  146:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  147:  #else
+  148:  #pragma CODE_SEG DEFAULT
+  149:  #endif /* MEMORY_MODEL_BANKED */
+  150:  
+  151:  /************************************************************************************
+  152:  * MLMEScanComfirm
+  153:  * 
+  154:  *
+  155:  *
+  156:  ************************************************************************************/
+  157:  void MLMEScanComfirm(channels_t ClearestChann)
+  158:  {
+  159:    bestChannel = ClearestChann; 
+  0000 c70000   [4]             STA   bestChannel
+  160:    bScanDone = TRUE;
+  0003 a601     [2]             LDA   #1
+  0005 c70000   [4]             STA   bScanDone
+  161:  }
+  0008 81       [6]             RTS   
+  162:  
+  163:  /************************************************************************************
+  164:  * MCPSDataIndication
+  165:  * 
+  166:  *
+  167:  *
+  168:  ************************************************************************************/
+  169:  void MCPSDataIndication(rxPacket_t *gsRxPacket)
+  170:  {  
+  171:    //Otap_OpcMCPSDataIndication(gsRxPacket);
+  172:    bRxDone = TRUE;
+  0000 a601     [2]             LDA   #1
+  0002 c70000   [4]             STA   bRxDone
+  173:  }
+  0005 81       [6]             RTS   
+  174:  
+  175:  /************************************************************************************
+  176:  * MCPSDataComfirm
+  177:  * 
+  178:  *
+  179:  *
+  180:  ************************************************************************************/
+  181:  void MCPSDataComfirm(txStatus_t TransmissionResult)
+  182:  {  
+  183:      //Otap_OpcMCPSDataComfirm(&TransmissionResult);
+  184:      bTxDone = TRUE;
+  0000 a601     [2]             LDA   #1
+  0002 c70000   [4]             STA   bTxDone
+  185:  }
+  0005 81       [6]             RTS   
+  186:  
+  187:  void MLMEResetIndication(void)
+  188:  {
+  189:    
+  190:  }
+  0000 81       [6]             RTS   
+  191:  
+  192:  
+  193:  void MLMEWakeComfirm(void)
+  194:  {
+  195:    
+  196:  }
+  0000 81       [6]             RTS   
+  197:  
+  198:  
+  199:  #pragma CODE_SEG DEFAULT

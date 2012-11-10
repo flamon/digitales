@@ -1,0 +1,12 @@
+ERROR L1818: Symbol 21 - bTxDone duplicated in main_c.obj and uMac_c.obj
+ERROR L1818: Symbol 22 - bRxDone duplicated in main_c.obj and uMac_c.obj
+ERROR L1818: Symbol 23 - bScanDone duplicated in main_c.obj and uMac_c.obj
+ERROR L1818: Symbol 25 - bestChannel duplicated in main_c.obj and uMac_c.obj
+WARNING L1827: Symbol InitSmac has different size in main_c.obj (56 bytes) and uMac_c.obj (63 bytes)
+ERROR L1818: Symbol 34 - InitSmac duplicated in main_c.obj and uMac_c.obj
+WARNING L1827: Symbol MCPSDataComfirm has different size in main_c.obj (12 bytes) and uMac_c.obj (6 bytes)
+ERROR L1818: Symbol 64 - MCPSDataComfirm duplicated in main_c.obj and uMac_c.obj
+WARNING L1827: Symbol MCPSDataIndication has different size in main_c.obj (9 bytes) and uMac_c.obj (6 bytes)
+ERROR L1818: Symbol 66 - MCPSDataIndication duplicated in main_c.obj and uMac_c.obj
+ERROR L1818: Symbol 67 - MLMEScanComfirm duplicated in main_c.obj and uMac_c.obj
+ERROR L1301: Cannot open file C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/Generic Demo/Application/Source/main_c.obj

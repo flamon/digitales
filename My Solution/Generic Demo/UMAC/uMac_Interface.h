@@ -2,7 +2,6 @@
  * uMac_Interface.h
  *
  *  Created on: Nov 1, 2012
- *      Author: Jesús
  */
 
 #ifndef UMAC_INTERFACE_H_
@@ -20,9 +19,9 @@ typedef enum{
 }uMac_nodeType;
 
 typedef enum{
-	uMac_Hello = 0,
-	uMac_Data = 1,
-	uMac_Other
+	uMac_Hello,
+	uMac_Data,
+	uMac_Other1
 }uMac_PacketType;
 
 typedef struct{

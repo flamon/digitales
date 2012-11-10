@@ -1,0 +1,852 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*****************************************************************************
+    2:  * Source file for Lcd driver.
+    3:  * 
+    4:  * 
+    5:  * Copyright (c) 2009, Freescale, Inc. All rights reserved.
+    6:  *
+    7:  * 
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  *****************************************************************************/
+   13:  
+   14:  #include "LCD.h"
+   15:  
+   16:  /************************************************************************************
+   17:  *************************************************************************************
+   18:  * Private memory declarations
+   19:  *************************************************************************************
+   20:  ************************************************************************************/
+   21:  #if(TRUE == gLcdSupported_d) 
+   22:      /* Lcd Driver Status */
+   23:      static lcdState_t      mLcdStatus = mLcdStateNotInit_c;  
+   24:      /* Lcd String to be written to Lcd*/
+   25:      static uint8_t         *mu8LcdString;     
+   26:      static uint8_t         mu8RsState;
+   27:      static uint8_t         mu8LcdStringLength;
+   28:      static bool_t          mu8LcdStrFlag;
+   29:      static bool_t          mbLcdBlockingFlag;
+   30:      LcdCallback_t          gpfLcdCallBack;  
+   31:      #if (gMc1323xRcm_c == gTargetBoard_c)
+   32:        static uint8_t         mu8LcdSpiCounter;
+   33:      #endif
+   34:   
+   35:  #endif 
+   36:  /************************************************************************************
+   37:  *************************************************************************************
+   38:  * Public functions
+   39:  *************************************************************************************
+   40:  ************************************************************************************/
+   41:  
+   42:  /************************************************************************************
+   43:  * Lcd_Init
+   44:  ************************************************************************************/
+   45:  #if(TRUE == gLcdSupported_d) 
+   46:  lcdErrors_t Lcd_Init
+   47:  (
+   48:   LcdCallback_t   pfUserCallBack
+   49:  )
+   50:  {    
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+   51:        mu8LcdString = NULL;
+  0002 5f       [1]             CLRX  
+  0003 8c       [1]             CLRH  
+  0004 960000   [5]             STHX  mu8LcdString
+   52:        mbLcdBlockingFlag = TRUE; 
+  0007 a601     [2]             LDA   #1
+  0009 c70000   [4]             STA   mbLcdBlockingFlag
+   53:        mLcdStatus = mLcdStateNotInit_c;          
+  000c cf0000   [4]             STX   mLcdStatus
+   54:        #if (gMc1321xNcb_c == gTargetBoard_c)
+   55:        /*To clear the Lcd_Enable pin on the MC1321x NCB and enable the display*/    
+   56:          LcdEnable();                   
+   57:        #endif        
+   58:        Delay_ms( mWait40mSec_c );             
+  000f ae0f     [2]             LDX   #15
+  0011 ac000000 [8]             CALL  Delay_ms
+   59:        #if (gTargetBoard_c == gMc1320xS08qe128Evb_c || gTargetBoard_c == gMc1321xNcb_c)        
+   60:           LcdClear_E_RS_RW();                   
+  0015 ae03     [2]             LDX   #3
+  0017 a620     [2]             LDA   #32
+  0019 ac000000 [8]             CALL  Gpio_PinClear
+  001d ae03     [2]             LDX   #3
+  001f a640     [2]             LDA   #64
+  0021 ac000000 [8]             CALL  Gpio_PinClear
+  0025 ae03     [2]             LDX   #3
+  0027 a680     [2]             LDA   #-128
+  0029 ac000000 [8]             CALL  Gpio_PinClear
+  002d ac00008d [8]             CALL  Lcd_Init:141
+   61:           Delay_us( mWait125uSec_c ); 
+   62:           /*Return Home*/             
+   63:           LcdWriteCmd(mLcdRsCmd_c, 0x02);         
+  0031 5f       [1]             CLRX  
+  0032 a602     [2]             LDA   #2
+  0034 ac000081 [8]             CALL  Lcd_Init:129
+  0038 ac00008d [8]             CALL  Lcd_Init:141
+   64:           Delay_ms( mWait10mSec_c );
+   65:        #endif           
+   66:        Delay_us( mWait125uSec_c ); 
+   67:        
+   68:        /*Function Set*/ 
+   69:        LcdWriteCmd(mLcdRsCmd_c,0x20);
+  003c 5f       [1]             CLRX  
+  003d a620     [2]             LDA   #32
+  003f ac000078 [8]             CALL  Lcd_Init:120
+   70:        Delay_us( mWait125uSec_c );                           
+   71:        
+   72:        /*Function Set*/       
+   73:        LcdWriteCmd(mLcdRsCmd_c,0x20);             
+  0043 5f       [1]             CLRX  
+  0044 a620     [2]             LDA   #32
+  0046 ac000078 [8]             CALL  Lcd_Init:120
+   74:        Delay_us( mWait125uSec_c );  
+   75:              
+   76:        /*Display Clear*/             
+   77:        LcdWriteCmd(mLcdRsCmd_c, 0x01);        
+  004a 5f       [1]             CLRX  
+  004b a601     [2]             LDA   #1
+  004d ac000081 [8]             CALL  Lcd_Init:129
+   78:        Delay_ms( mWait10mSec_c );
+   79:        
+   80:        /*Entry Mode Set*/     
+   81:        LcdWriteCmd(mLcdRsCmd_c, 0x06);        
+  0051 5f       [1]             CLRX  
+  0052 a606     [2]             LDA   #6
+  0054 ac000078 [8]             CALL  Lcd_Init:120
+   82:        Delay_us( mWait125uSec_c ); 
+   83:              
+   84:        /*Display ON/OFF control*/  
+   85:        LcdWriteCmd(mLcdRsCmd_c,0x0E);   
+  0058 5f       [1]             CLRX  
+  0059 a60e     [2]             LDA   #14
+  005b ac000078 [8]             CALL  Lcd_Init:120
+   86:        Delay_us( mWait125uSec_c );                                 
+   87:        
+   88:        mLcdStatus = mLcdStateIdle_c;
+  005f a601     [2]             LDA   #1
+  0061 c70000   [4]             STA   mLcdStatus
+   89:        /*Sets the LCD callback */
+   90:        gpfLcdCallBack = pfUserCallBack;                  
+  0064 9efe01   [5]             LDHX  1,SP
+  0067 960000   [5]             STHX  gpfLcdCallBack
+   91:        mu8LcdStrFlag = TRUE;      
+  006a c70000   [4]             STA   mu8LcdStrFlag
+   92:        if(NULL != gpfLcdCallBack)
+  006d 650000   [3]             CPHX  #0
+  0070 2702     [3]             BEQ   L74 ;abs = 0074
+   93:         {
+   94:          gpfLcdCallBack(gLcdErrNoError_c);                       
+  0072 4f       [1]             CLRA  
+  0073 fd       [5]             JSR   ,X
+  0074          L74:    
+   95:         } 
+   96:        return gLcdErrNoError_c;                                
+  0074 4f       [1]             CLRA  
+   97:  }
+  0075 a702     [2]             AIS   #2
+  0077 8d       [7]             RTC   
+  0078          L78:    
+  0078 ac000000 [8]             CALL  LcdWriteCmd
+  007c ac00008d [8]             CALL  Lcd_Init:141
+  0080 8d       [7]             RTC   
+  0081          L81:    
+  0081 ac000000 [8]             CALL  LcdWriteCmd
+  0085 ae05     [2]             LDX   #5
+  0087 8c       [1]             CLRH  
+  0088 ac000000 [8]             CALL  Delay_ms
+  008c 8d       [7]             RTC   
+  008d          L8D:    
+  008d ae19     [2]             LDX   #25
+  008f 8c       [1]             CLRH  
+  0090 ac000000 [8]             CALL  Delay_us
+  0094 8d       [7]             RTC   
+   98:  #else
+   99:  lcdErrors_t Lcd_Init(LcdCallback_t   pfUserCallBack)
+  100:  {
+  101:    (void) pfUserCallBack;
+  102:    return gLcdErrNoError_c;
+  103:  }
+  104:  #endif  // gLcdSupported_d
+  105:  
+  106:  
+  107:  /************************************************************************************
+  108:  * Lcd_Config
+  109:  ************************************************************************************/
+  110:  #if(TRUE == gLcdSupported_d) 
+  111:  lcdErrors_t Lcd_Config
+  112:  (
+  113:    bool_t LcdDisplayOn, bool_t LcdCursorOn, bool_t LcdBlinkOn
+  114:  ) 
+  115:  { 
+  0000 89       [2]             PSHX  
+  0001 87       [2]             PSHA  
+  0002 8b       [2]             PSHH  
+  116:      #if (TRUE == gLcdParametersValidation_d)
+  117:        if(mLcdStateIdle_c != mLcdStatus)
+  0003 c60000   [4]             LDA   mLcdStatus
+  0006 410104   [4]             CBEQA #1,LD ;abs = 000d
+  118:         {    
+  119:          return gLcdErrBusBusy_c;
+  0009 a602     [2]             LDA   #2
+  000b 203a     [3]             BRA   L47 ;abs = 0047
+  000d          LD:     
+  120:         }    
+  121:      #endif 
+  122:      mbLcdBlockingFlag = TRUE;      
+  000d a601     [2]             LDA   #1
+  000f c70000   [4]             STA   mbLcdBlockingFlag
+  123:      mLcdStatus = mLcdStateTransmittingData_c; 
+  0012 ae02     [2]             LDX   #2
+  0014 cf0000   [4]             STX   mLcdStatus
+  124:      /*Display ON/OFF, Cursor ON/OFF, Char Blink ON/OFF*/
+  125:      LcdWriteCmd(mLcdRsCmd_c,(0x08 | LcdDisplayOn << 2 | LcdCursorOn < 1 | LcdBlinkOn )); 
+  0017 5f       [1]             CLRX  
+  0018 9ee103   [4]             CMP   3,SP
+  001b 2201     [3]             BHI   L1E ;abs = 001e
+  001d 4f       [1]             CLRA  
+  001e          L1E:    
+  001e 9ee701   [4]             STA   1,SP
+  0021 9ee607   [4]             LDA   7,SP
+  0024 48       [1]             LSLA  
+  0025 48       [1]             LSLA  
+  0026 aa08     [2]             ORA   #8
+  0028 9eea01   [4]             ORA   1,SP
+  002b 9eea02   [4]             ORA   2,SP
+  002e ac00004a [8]             CALL  Lcd_Config:74
+  0032 ac00004a [8]             CALL  Lcd_Config:74
+  126:      #if (gTargetBoard_c == gMc1320xS08qe128Evb_c || gTargetBoard_c == gMc1321xNcb_c)
+  127:          Delay_us( mWait125uSec_c );        
+  128:          LcdWriteCmd(mLcdRsCmd_c,0x28); 
+  129:          Delay_us( mWait125uSec_c );        
+  130:          LcdWriteCmd(mLcdRsCmd_c,0x28);   
+  0036 ac000000 [8]             CALL  LcdWriteCmd
+  131:         // Delay_us( mWait125uSec_c );        
+  132:      #endif           
+  133:      mLcdStatus = mLcdStateIdle_c;     
+  003a a601     [2]             LDA   #1
+  003c c70000   [4]             STA   mLcdStatus
+  134:      if(NULL != gpfLcdCallBack)
+  003f 320000   [5]             LDHX  gpfLcdCallBack
+  0042 2702     [3]             BEQ   L46 ;abs = 0046
+  135:      {
+  136:       gpfLcdCallBack(gLcdErrNoError_c);                       
+  0044 4f       [1]             CLRA  
+  0045 fd       [5]             JSR   ,X
+  0046          L46:    
+  137:      }  
+  138:      return gLcdErrNoError_c;                                      
+  0046 4f       [1]             CLRA  
+  0047          L47:    
+  139:  }
+  0047 a703     [2]             AIS   #3
+  0049 8d       [7]             RTC   
+  004a          L4A:    
+  004a ac000000 [8]             CALL  LcdWriteCmd
+  004e ae19     [2]             LDX   #25
+  0050 8c       [1]             CLRH  
+  0051 ac000000 [8]             CALL  Delay_us
+  0055 5f       [1]             CLRX  
+  0056 a628     [2]             LDA   #40
+  0058 8d       [7]             RTC   
+  140:  #else
+  141:  lcdErrors_t Lcd_Config(bool_t LcdDisplayOn, bool_t LcdCursorOn, bool_t LcdBlinkOn)
+  142:  {
+  143:      (void) LcdDisplayOn;
+  144:      (void) LcdCursorOn;
+  145:      (void) LcdBlinkOn;
+  146:      return gLcdErrNoError_c;
+  147:  }
+  148:  #endif // gLcdSupported_d 
+  149:  
+  150:  
+  151:  /************************************************************************************
+  152:  * Lcd_WriteChar
+  153:  ************************************************************************************/
+  154:  #if(TRUE == gLcdSupported_d) 
+  155:  lcdErrors_t Lcd_WriteChar( uint8_t u8line,  uint8_t u8CharToWrite)
+  156:  {     
+  0000 87       [2]             PSHA  
+  157:     mu8LcdStrFlag = FALSE;
+  0001 4f       [1]             CLRA  
+  0002 c70000   [4]             STA   mu8LcdStrFlag
+  158:     return Lcd_WriteStringBlocking(u8line, &u8CharToWrite);     
+  0005 9f       [1]             TXA   
+  0006 95       [2]             TSX   
+  0007 ac000000 [8]             CALL  Lcd_WriteStringBlocking
+  159:  }
+  000b 8a       [3]             PULH  
+  000c 8d       [7]             RTC   
+  160:  #else
+  161:  lcdErrors_t Lcd_WriteChar( uint8_t u8line,  uint8_t u8CharToWrite)
+  162:  {
+  163:    
+  164:     (void) u8line;
+  165:     (void) u8CharToWrite;  
+  166:     return gLcdErrNoError_c;
+  167:  }
+  168:  #endif // gLcdSupported_d 
+  169:  
+  170:  /************************************************************************************
+  171:  * Lcd_WriteString
+  172:  ************************************************************************************/
+  173:  #if(TRUE == gLcdSupported_d)
+  174:  lcdErrors_t Lcd_WriteStringNonBlocking
+  175:  ( 
+  176:    uint8_t u8line,  
+  177:    uint8_t *pString
+  178:  )
+  179:  {
+  0000 87       [2]             PSHA  
+  180:       #if (TRUE == gLcdParametersValidation_d)
+  181:        if(mLcdStateIdle_c != mLcdStatus)
+  0001 c60000   [4]             LDA   mLcdStatus
+  0004 410104   [4]             CBEQA #1,LB ;abs = 000b
+  182:         {    
+  183:          return gLcdErrBusBusy_c;
+  0007 a602     [2]             LDA   #2
+  184:         }    
+  185:       #endif 
+  186:       mbLcdBlockingFlag = FALSE; 
+  187:       mLcdStatus = mLcdStateTransmittingData_c;   
+  188:       mu8LcdString = pString;     
+  189:       if(mu8LcdStrFlag)
+  190:        {  
+  191:          mu8LcdStringLength = (uint8_t) strlen(mu8LcdString) ;      
+  192:        }
+  193:       else
+  194:        {  
+  195:          mu8LcdStringLength = mLcdCharSize_c;
+  196:        }      
+  197:       #if (TRUE == gLcdParametersValidation_d)          
+  198:         if((u8line > mSecondLine_c) || (mu8LcdStringLength > mLcdMaxChars_c))
+  199:         {  
+  200:          mLcdStatus = mLcdStateIdle_c;
+  201:          return gLcdErrInvalidParameter_c;    
+  202:         }
+  203:       #endif   
+  204:       if(mSecondLine_c == u8line)
+  205:        {  
+  206:        
+  207:          LcdSelectSecondLine();
+  208:        }
+  209:       else
+  210:        {  
+  211:          LcdSelectFirstLine();
+  212:        }   
+  213:        #if (gMc1323xRcm_c == gTargetBoard_c)
+  214:          mu8LcdSpiCounter =  mu8LcdStringLength * 2;
+  215:          LcdWriteCmdNonBlocking(mLcdRsData_c, *mu8LcdString);         
+  216:        #else
+  217:          while(mLcdStateTransmittingData_c == mLcdStatus) 
+  218:           {
+  219:            if(mu8LcdStringLength>0) 
+  220:            {
+  221:              LcdWriteCmd(mLcdRsData_c, *mu8LcdString++);   
+  222:              mu8LcdStringLength--;
+  223:            } 
+  224:            else 
+  225:            {
+  226:              mLcdStatus = mLcdStateIdle_c;
+  227:              mu8LcdStrFlag = TRUE;
+  228:            }  
+  229:           }
+  230:        #endif                                            
+  231:       if(NULL != gpfLcdCallBack)
+  232:        {                      
+  233:         gpfLcdCallBack(gLcdErrNoError_c);                       
+  234:        }
+  235:       return gLcdErrNoError_c;    
+  236:  }
+  0009 8a       [3]             PULH  
+  000a 8d       [7]             RTC   
+  000b          LB:     
+  000b 4f       [1]             CLRA  
+  000c c70000   [4]             STA   mbLcdBlockingFlag
+  000f a602     [2]             LDA   #2
+  0011 c70000   [4]             STA   mLcdStatus
+  0014 960000   [5]             STHX  mu8LcdString
+  0017 c60000   [4]             LDA   mu8LcdStrFlag
+  001a 270c     [3]             BEQ   L28 ;abs = 0028
+  001c 320000   [5]             LDHX  mu8LcdString
+  001f ac000000 [8]             CALL  strlen
+  0023 cf0000   [4]             STX   mu8LcdStringLength
+  0026 2005     [3]             BRA   L2D ;abs = 002d
+  0028          L28:    
+  0028 a601     [2]             LDA   #1
+  002a c70000   [4]             STA   mu8LcdStringLength
+  002d          L2D:    
+  002d 95       [2]             TSX   
+  002e f6       [3]             LDA   ,X
+  002f a102     [2]             CMP   #2
+  0031 2207     [3]             BHI   L3A ;abs = 003a
+  0033 ce0000   [4]             LDX   mu8LcdStringLength
+  0036 a310     [2]             CPX   #16
+  0038 2307     [3]             BLS   L41 ;abs = 0041
+  003a          L3A:    
+  003a a601     [2]             LDA   #1
+  003c c70000   [4]             STA   mLcdStatus
+  003f 8a       [3]             PULH  
+  0040 8d       [7]             RTC   
+  0041          L41:    
+  0041 a102     [2]             CMP   #2
+  0043 2606     [3]             BNE   L4B ;abs = 004b
+  0045 ac000000 [8]             CALL  LcdSelectSecondLine
+  0049 2028     [3]             BRA   L73 ;abs = 0073
+  004b          L4B:    
+  004b ac000000 [8]             CALL  LcdSelectFirstLine
+  004f 2022     [3]             BRA   L73 ;abs = 0073
+  0051          L51:    
+  0051 c60000   [4]             LDA   mu8LcdStringLength
+  0054 2715     [3]             BEQ   L6B ;abs = 006b
+  0056 320000   [5]             LDHX  mu8LcdString
+  0059 f6       [3]             LDA   ,X
+  005a af01     [2]             AIX   #1
+  005c 960000   [5]             STHX  mu8LcdString
+  005f ae10     [2]             LDX   #16
+  0061 ac000000 [8]             CALL  LcdWriteCmd
+  0065 450000   [3]             LDHX  @mu8LcdStringLength
+  0068 7a       [4]             DEC   ,X
+  0069 2008     [3]             BRA   L73 ;abs = 0073
+  006b          L6B:    
+  006b a601     [2]             LDA   #1
+  006d c70000   [4]             STA   mLcdStatus
+  0070 c70000   [4]             STA   mu8LcdStrFlag
+  0073          L73:    
+  0073 c60000   [4]             LDA   mLcdStatus
+  0076 4102d8   [4]             CBEQA #2,L51 ;abs = 0051
+  0079 320000   [5]             LDHX  gpfLcdCallBack
+  007c 2702     [3]             BEQ   L80 ;abs = 0080
+  007e 4f       [1]             CLRA  
+  007f fd       [5]             JSR   ,X
+  0080          L80:    
+  0080 4f       [1]             CLRA  
+  0081 8a       [3]             PULH  
+  0082 8d       [7]             RTC   
+  237:  #else
+  238:  lcdErrors_t Lcd_WriteStringNonBlocking (uint8_t u8line, uint8_t *pString)
+  239:  {
+  240:    (void) u8line;
+  241:    (void) pString;  
+  242:    return gLcdErrNoError_c;
+  243:  }
+  244:  #endif // gLcdSupported_d
+  245:  
+  246:  /************************************************************************************
+  247:  * Lcd_WriteStringBlocking
+  248:  ************************************************************************************/
+  249:  #if(TRUE == gLcdSupported_d)
+  250:  lcdErrors_t Lcd_WriteStringBlocking
+  251:  ( 
+  252:    uint8_t u8line, 
+  253:    uint8_t *pString
+  254:  )
+  255:  { 
+  0000 87       [2]             PSHA  
+  256:       #if (TRUE == gLcdParametersValidation_d)
+  257:        if(mLcdStateIdle_c != mLcdStatus)
+  0001 c60000   [4]             LDA   mLcdStatus
+  0004 410104   [4]             CBEQA #1,LB ;abs = 000b
+  258:         {    
+  259:          return gLcdErrBusBusy_c;
+  0007 a602     [2]             LDA   #2
+  260:         }    
+  261:       #endif  
+  262:       mbLcdBlockingFlag = TRUE;   
+  263:       mLcdStatus = mLcdStateTransmittingData_c;   
+  264:       mu8LcdString = pString;     
+  265:       if(mu8LcdStrFlag)
+  266:        {  
+  267:          mu8LcdStringLength = (uint8_t) strlen(mu8LcdString) ;
+  268:        }
+  269:       else
+  270:        {  
+  271:          mu8LcdStringLength = mLcdCharSize_c;
+  272:        }
+  273:       #if (TRUE == gLcdParametersValidation_d)       
+  274:          if((u8line > mSecondLine_c) || (mu8LcdStringLength > mLcdMaxChars_c))
+  275:          {  
+  276:            mLcdStatus = mLcdStateIdle_c;
+  277:            return gLcdErrInvalidParameter_c;    
+  278:          }
+  279:       #endif  
+  280:       if(mSecondLine_c == u8line)
+  281:        {  
+  282:          LcdSelectSecondLine();
+  283:        }
+  284:       else
+  285:        {  
+  286:          LcdSelectFirstLine();
+  287:        }        
+  288:       while(mLcdStateTransmittingData_c == mLcdStatus) 
+  289:       {
+  290:          if(mu8LcdStringLength>0) 
+  291:          {
+  292:            LcdWriteCmd(mLcdRsData_c, *mu8LcdString++);   
+  293:            mu8LcdStringLength--;
+  294:          } 
+  295:          else 
+  296:          {
+  297:            mLcdStatus = mLcdStateIdle_c;
+  298:            mu8LcdStrFlag = TRUE;
+  299:          }  
+  300:       }      
+  301:       if(NULL != gpfLcdCallBack)
+  302:        {
+  303:         gpfLcdCallBack(gLcdErrNoError_c);                       
+  304:        }
+  305:       
+  306:      return gLcdErrNoError_c;  
+  307:  }
+  0009 8a       [3]             PULH  
+  000a 8d       [7]             RTC   
+  000b          LB:     
+  000b c70000   [4]             STA   mbLcdBlockingFlag
+  000e a602     [2]             LDA   #2
+  0010 c70000   [4]             STA   mLcdStatus
+  0013 960000   [5]             STHX  mu8LcdString
+  0016 c60000   [4]             LDA   mu8LcdStrFlag
+  0019 270c     [3]             BEQ   L27 ;abs = 0027
+  001b 320000   [5]             LDHX  mu8LcdString
+  001e ac000000 [8]             CALL  strlen
+  0022 cf0000   [4]             STX   mu8LcdStringLength
+  0025 2005     [3]             BRA   L2C ;abs = 002c
+  0027          L27:    
+  0027 a601     [2]             LDA   #1
+  0029 c70000   [4]             STA   mu8LcdStringLength
+  002c          L2C:    
+  002c 95       [2]             TSX   
+  002d f6       [3]             LDA   ,X
+  002e a102     [2]             CMP   #2
+  0030 2207     [3]             BHI   L39 ;abs = 0039
+  0032 ce0000   [4]             LDX   mu8LcdStringLength
+  0035 a310     [2]             CPX   #16
+  0037 2307     [3]             BLS   L40 ;abs = 0040
+  0039          L39:    
+  0039 a601     [2]             LDA   #1
+  003b c70000   [4]             STA   mLcdStatus
+  003e 8a       [3]             PULH  
+  003f 8d       [7]             RTC   
+  0040          L40:    
+  0040 a102     [2]             CMP   #2
+  0042 2606     [3]             BNE   L4A ;abs = 004a
+  0044 ac000000 [8]             CALL  LcdSelectSecondLine
+  0048 2028     [3]             BRA   L72 ;abs = 0072
+  004a          L4A:    
+  004a ac000000 [8]             CALL  LcdSelectFirstLine
+  004e 2022     [3]             BRA   L72 ;abs = 0072
+  0050          L50:    
+  0050 c60000   [4]             LDA   mu8LcdStringLength
+  0053 2715     [3]             BEQ   L6A ;abs = 006a
+  0055 320000   [5]             LDHX  mu8LcdString
+  0058 f6       [3]             LDA   ,X
+  0059 af01     [2]             AIX   #1
+  005b 960000   [5]             STHX  mu8LcdString
+  005e ae10     [2]             LDX   #16
+  0060 ac000000 [8]             CALL  LcdWriteCmd
+  0064 450000   [3]             LDHX  @mu8LcdStringLength
+  0067 7a       [4]             DEC   ,X
+  0068 2008     [3]             BRA   L72 ;abs = 0072
+  006a          L6A:    
+  006a a601     [2]             LDA   #1
+  006c c70000   [4]             STA   mLcdStatus
+  006f c70000   [4]             STA   mu8LcdStrFlag
+  0072          L72:    
+  0072 c60000   [4]             LDA   mLcdStatus
+  0075 4102d8   [4]             CBEQA #2,L50 ;abs = 0050
+  0078 320000   [5]             LDHX  gpfLcdCallBack
+  007b 2702     [3]             BEQ   L7F ;abs = 007f
+  007d 4f       [1]             CLRA  
+  007e fd       [5]             JSR   ,X
+  007f          L7F:    
+  007f 4f       [1]             CLRA  
+  0080 8a       [3]             PULH  
+  0081 8d       [7]             RTC   
+  308:  #else
+  309:  lcdErrors_t Lcd_WriteStringBlocking(uint8_t u8line, uint8_t *pString)
+  310:  {
+  311:    (void) u8line;
+  312:    (void) pString;  
+  313:    return gLcdErrNoError_c;
+  314:  }
+  315:  #endif // gLcdSupported_d 
+  316:  
+  317:  /************************************************************************************
+  318:  * Lcd_ClearDisplay
+  319:  ************************************************************************************/
+  320:  #if(TRUE == gLcdSupported_d)
+  321:  lcdErrors_t Lcd_Clear
+  322:  (
+  323:  void
+  324:  )
+  325:  { 
+  326:    mbLcdBlockingFlag = TRUE;
+  0000 a601     [2]             LDA   #1
+  0002 c70000   [4]             STA   mbLcdBlockingFlag
+  327:    #if (TRUE == gLcdParametersValidation_d)                         
+  328:      if(mLcdStateIdle_c != mLcdStatus)
+  0005 c10000   [4]             CMP   mLcdStatus
+  0008 2702     [3]             BEQ   LC ;abs = 000c
+  329:      {    
+  330:       return gLcdErrBusBusy_c;
+  000a 4c       [1]             INCA  
+  000b 8d       [7]             RTC   
+  000c          LC:     
+  331:      }
+  332:    #endif 
+  333:    mLcdStatus = mLcdStateTransmittingData_c;  
+  000c ae02     [2]             LDX   #2
+  000e cf0000   [4]             STX   mLcdStatus
+  334:    LcdWriteCmd(mLcdRsCmd_c, mLcdClrDisplay_c);
+  0011 5f       [1]             CLRX  
+  0012 ac000000 [8]             CALL  LcdWriteCmd
+  335:    Delay_us(mWait1500uSec_c);  
+  0016 ae96     [2]             LDX   #-106
+  0018 8c       [1]             CLRH  
+  0019 ac000000 [8]             CALL  Delay_us
+  336:    mLcdStatus = mLcdStateIdle_c;
+  001d a601     [2]             LDA   #1
+  001f c70000   [4]             STA   mLcdStatus
+  337:    if(NULL != gpfLcdCallBack)
+  0022 320000   [5]             LDHX  gpfLcdCallBack
+  0025 2702     [3]             BEQ   L29 ;abs = 0029
+  338:    {
+  339:     gpfLcdCallBack(gLcdErrNoError_c);                       
+  0027 4f       [1]             CLRA  
+  0028 fd       [5]             JSR   ,X
+  0029          L29:    
+  340:    }
+  341:    return gLcdErrNoError_c;     
+  0029 4f       [1]             CLRA  
+  342:  }
+  002a 8d       [7]             RTC   
+  343:  #else
+  344:  lcdErrors_t Lcd_Clear(void)
+  345:  {
+  346:     return gLcdErrNoError_c; 
+  347:  }
+  348:  
+  349:  #endif  //gLcdSupported_d
+  350:  
+  351:  
+  352:  #if(TRUE == gLcdSupported_d)
+  353:  /*************************************************************************************/
+  354:  #if (gMc1323xRcm_c == gTargetBoard_c) 
+  355:  static void LcdCtlToogle(void) 
+  356:  {          
+  357:   (void)SPI1_AssertPeripheralSsPin(2,NULL); 
+  358:   (void)SPI1_DeassertPeripheralSsPin(); 
+  359:  }
+  360:  #else
+  361:  #endif
+  362:  /*************************************************************************************/
+  363:  static void LcdSelectFirstLine
+  364:  (
+  365:    void
+  366:  )
+  367:  {   
+  368:     LcdWriteCmd( mLcdRsCmd_c, mLcdFirstLine_c );    
+  0000 5f       [1]             CLRX  
+  0001 a680     [2]             LDA   #-128
+  0003 ac000000 [8]             CALL  LcdWriteCmd
+  369:  }
+  0007 8d       [7]             RTC   
+  370:   
+  371:  
+  372:  /************************************************************************************/
+  373:  static void  LcdSelectSecondLine
+  374:  (
+  375:    void
+  376:  )
+  377:  {
+  378:     //LcdWriteCmd(mLcdRsCmd_c,0x20);     
+  379:     LcdWriteCmd( mLcdRsCmd_c, mLcdSecondLine_c );    
+  0000 5f       [1]             CLRX  
+  0001 a6c0     [2]             LDA   #-64
+  0003 ac000000 [8]             CALL  LcdWriteCmd
+  380:  }
+  0007 8d       [7]             RTC   
+  381:  
+  382:  
+  383:  /*************************************************************************************/
+  384:  static void LcdWriteCmd
+  385:  ( 
+  386:    uint8_t u8RsState, 
+  387:    uint8_t u8ByteToWrite
+  388:  )
+  389:  { 
+  0000 87       [2]             PSHA  
+  390:  #if(TRUE == gLcdSupported_d) 
+  391:      mu8RsState = u8RsState;         
+  0001 cf0000   [4]             STX   mu8RsState
+  392:      #if (gMc1323xRcm_c == gTargetBoard_c) 
+  393:        LcdSetPort( u8RsState, moreSignificantNibble );
+  394:        LcdCtlToogle();
+  395:        LcdSetPort( u8RsState, lessSignificantNibble );                                           
+  396:        LcdCtlToogle();
+  397:      #else
+  398:        LcdSetPort( u8RsState, moreSignificantNibble );
+  0004 89       [2]             PSHX  
+  0005 a4f0     [2]             AND   #-16
+  0007 ac000000 [8]             CALL  LcdSetPort
+  399:        LcdSetPort( u8RsState, lessSignificantNibble );                                           
+  000b 95       [2]             TSX   
+  000c e601     [3]             LDA   1,X
+  000e 88       [3]             PULX  
+  000f 62       [1]             NSA   
+  0010 a4f0     [2]             AND   #-16
+  0012 ac000000 [8]             CALL  LcdSetPort
+  400:      #endif
+  401:  #else
+  402:      (void) u8RsState;
+  403:      (void) u8ByteToWrite;  
+  404:  #endif  
+  405:  }
+  0016 8a       [3]             PULH  
+  0017 8d       [7]             RTC   
+  406:  
+  407:  
+  408:  /*************************************************************************************/
+  409:  
+  410:  #if (gMc1323xRcm_c == gTargetBoard_c) 
+  411:  static void LcdWriteCmdNonBlocking
+  412:  ( 
+  413:    uint8_t u8RsState, 
+  414:    uint8_t u8ByteToWrite
+  415:  )
+  416:  { 
+  417:     mu8RsState = u8RsState;  
+  418:    (void)SPI1_AssertPeripheralSsPin(2,LcdCallBack);          
+  419:    LcdSetPort( u8RsState, moreSignificantNibble );  
+  420:  }
+  421:  #endif
+  422:  
+  423:  /**************************************************************************************/
+  424:  static void LcdSetPort
+  425:  (
+  426:    uint8_t u8RsState, 
+  427:    uint8_t u8ByteToWrite
+  428:  ) 
+  429:  { 
+  0000 87       [2]             PSHA  
+  430:    #if (gMc1321xNcb_c== gTargetBoard_c)
+  431:    bitByte_t fLcdDataPortValue;
+  432:    #endif
+  433:    
+  434:    #if (gMc1323xRcm_c == gTargetBoard_c) 
+  435:       if (TRUE == mbLcdBlockingFlag || u8RsState == mLcdRsCmd_c ) 
+  436:       {
+  437:        /* when blocking functions */      
+  438:          if(mLcdRsData_c == u8RsState) 
+  439:          {        
+  440:            LcdWrite4BitsBlocking(u8ByteToWrite|0x10);          
+  441:          }
+  442:          else
+  443:          {        
+  444:            LcdWrite4BitsBlocking(u8ByteToWrite);    
+  445:          }
+  446:       } 
+  447:       else
+  448:       {     
+  449:         /* when non-blocking functions*/
+  450:         if(mLcdRsData_c == u8RsState) 
+  451:          {        
+  452:            LcdWrite4BitsNonBlocking(u8ByteToWrite|0x10);          
+  453:          }    
+  454:       }
+  455:    #else if (gMc1320xS08qe128Evb_c == gTargetBoard_c || gMc1321xNcb_c == gTargetBoard_c) 
+  456:      LcdToggleEN();
+  0001 89       [2]             PSHX  
+  0002 ae03     [2]             LDX   #3
+  0004 a640     [2]             LDA   #64
+  0006 ac000000 [8]             CALL  Gpio_PinToggle
+  457:      if(mLcdRsData_c == u8RsState)
+  000a 86       [3]             PULA  
+  000b a110     [2]             CMP   #16
+  000d 260a     [3]             BNE   L19 ;abs = 0019
+  458:      {      
+  459:        LcdSetRs();
+  000f ae03     [2]             LDX   #3
+  0011 a620     [2]             LDA   #32
+  0013 ac000000 [8]             CALL  Gpio_PinSet
+  460:        Delay_us(mWait25uSec_c); 
+  461:      }
+  0017 2008     [3]             BRA   L21 ;abs = 0021
+  0019          L19:    
+  462:      else
+  463:      {      
+  464:        LcdClearRs();
+  0019 ae03     [2]             LDX   #3
+  001b a620     [2]             LDA   #32
+  001d ac000000 [8]             CALL  Gpio_PinClear
+  0021          L21:    
+  465:        Delay_us( mWait25uSec_c ); 
+  0021 ae02     [2]             LDX   #2
+  0023 8c       [1]             CLRH  
+  0024 ac000000 [8]             CALL  Delay_us
+  466:      }   
+  467:       #if (gMc1321xNcb_c== gTargetBoard_c) 
+  468:         fLcdDataPortValue = Gpio_PortValue(gLcdDataPort_c);
+  469:         LcdWrite4Bits( u8ByteToWrite, fLcdDataPortValue );
+  470:       #else
+  471:         LcdWrite4Bits( u8ByteToWrite ); 
+  0028 ae05     [2]             LDX   #5
+  002a 9ee601   [4]             LDA   1,SP
+  002d ac000000 [8]             CALL  Gpio_PortWrite
+  472:      #endif
+  473:      LcdToggleEN();          
+  0031 ae03     [2]             LDX   #3
+  0033 a640     [2]             LDA   #64
+  0035 ac000000 [8]             CALL  Gpio_PinToggle
+  474:    #endif
+  475:  }
+  0039 8a       [3]             PULH  
+  003a 8d       [7]             RTC   
+  476:  
+  477:  #if (gMc1323xRcm_c == gTargetBoard_c) 
+  478:    #ifdef MEMORY_MODEL_BANKED
+  479:       #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  480:    #else
+  481:       #pragma CODE_SEG DEFAULT
+  482:    #endif
+  483:    
+  484:  /**************************************************************************************/
+  485:    void LcdCallBack
+  486:    ( 
+  487:     void
+  488:    )
+  489:    {
+  490:      (void)SPI1_DeassertPeripheralSsPin (); 
+  491:      if (mLcdStateTransmittingData_c == mLcdStatus)
+  492:        {
+  493:           mu8LcdSpiCounter--;
+  494:           if ( 0 != mu8LcdSpiCounter ) 
+  495:            {    
+  496:               if (1 == (0x01 & mu8LcdSpiCounter))/*even*/
+  497:                {
+  498:                  /*send the LSB*/
+  499:                  (void)SPI1_AssertPeripheralSsPin(2,LcdCallBack); 
+  500:                  LcdSetPort( mLcdRsData_c, (*mu8LcdString>>4) & mLessSignificantNibbleMask_c );                   
+  501:                } 
+  502:                else /*odd*/
+  503:                 {
+  504:                  /*send the MSB*/
+  505:                  (void)SPI1_AssertPeripheralSsPin(2,LcdCallBack);
+  506:                  LcdWriteCmdNonBlocking(mLcdRsData_c, *mu8LcdString++);             
+  507:                 }      
+  508:            }   
+  509:           else /*If counter = 0*/
+  510:            {
+  511:              if (mLcdStateTransmittingData_c == mLcdStatus)
+  512:                {        
+  513:                 mLcdStatus = mLcdStateIdle_c;   
+  514:                }            
+  515:            }   
+  516:        }     
+  517:    } 
+  518:    #pragma CODE_SEG DEFAULT 
+  519:  #endif
+  520:  #endif //#(gLcdSupported_d)

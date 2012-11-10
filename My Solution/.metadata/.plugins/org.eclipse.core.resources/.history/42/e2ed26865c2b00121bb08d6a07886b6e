@@ -1,0 +1,255 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * Flash4OTAP driver implementation. 
+    3:  *
+    4:  * (c) Copyright 2010, Freescale, Inc.  All rights reserved.
+    5:  *
+    6:  * Freescale Semiconductor Confidential Proprietary
+    7:  *
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  ************************************************************************************/
+   13:  
+   14:  
+   15:  #include "Flash4Otap.h"
+   16:  #include "SMAC_config.h"
+   17:  
+   18:  #pragma MESSAGE DISABLE C1805
+   19:  
+   20:  #if(TRUE == gOtapSupported_d)
+   21:  
+   22:  /************************************************************************************
+   23:  *************************************************************************************
+   24:  * Private memory declarations
+   25:  *************************************************************************************
+   26:  ************************************************************************************/
+   27:                                            
+   28:  #pragma DATA_SEG FLASH_ROUTINES_RAM 
+   29:  volatile uint8_t FlashRamDummyDataOtap = 0; //It is just to avoid Linker warning                                    
+   30:  #pragma DATA_SEG DEFAULT
+   31:              
+   32:                                            
+   33:  extern uint8_t __SEG_START_FLASH_ROUTINES_RAM[];
+   34:  extern uint8_t __SEG_SIZE_FLASH_ROUTINES_RAM[];
+   35:  
+   36:  /************************************************************************************
+   37:  *************************************************************************************
+   38:  * Public functions
+   39:  *************************************************************************************
+   40:  ************************************************************************************/
+   41:  
+   42:  /************************************************************************************
+   43:  *
+   44:  * Flash4OTAP_CmdHandler
+   45:  *
+   46:  ************************************************************************************/
+   47:  
+   48:  #pragma CODE_SEG FLASH4OTAP_ROUTINES  
+   49:  
+   50:  Flash4OTAPErr_t Flash4OTAP_CmdHandler
+   51:  (
+   52:    uint32_t u32FlashAddress,  
+   53:    uint8_t* pu8FlashData, 
+   54:    uint16_t u16FlashDataSize, 
+   55:    uint8_t u8FlashCmd
+   56:  )
+   57:  {
+   58:      uint16_t u16LocalAddress;
+   59:    
+   60:      #ifdef gMcs08Gt60Platform_d       
+   61:          u16LocalAddress = (uint16_t)(u32FlashAddress);  
+   62:      #else // gMcs08qe128Platform_d || gMc1323xPlatform_d      
+   63:          PPAGE = ((u32FlashAddress & 0x0001C000)>>14);
+   64:          u16LocalAddress = ((uint16_t)(u32FlashAddress & 0x00003FFF)+0x8000);     
+   65:      #endif
+   66:      #if (TRUE == gFlash4OTAPParamAndInitValidation_d)
+   67:          if(!u16FlashDataSize)   // DataSize may not be 0.
+   68:          {
+   69:            return gFlash4OTAPErrInvalidParam_c;
+   70:          } 
+   71:          if(((u8FlashCmd == gFlash4OTAPCmdProgram_c)||(u8FlashCmd == gFlash4OTAPCmdBurst_c)) && ((&pu8FlashData) == NULL)) 
+   72:          {
+   73:            return gFlash4OTAPErrInvalidParam_c;
+   74:          }
+   75:      #endif
+   76:         
+   77:       if (FSTAT & (FSTAT_FACCERR_MASK | FSTAT_FACCERR_MASK | FSTAT_FBLANK_MASK))
+   78:      {     
+   79:      // Clear Access Error and Write Protection Error Flags
+   80:      FSTAT |= (FSTAT_FACCERR_MASK | FSTAT_FPVIOL_MASK | FSTAT_FBLANK_MASK);
+   81:      }
+   82:      do
+   83:      {
+   84:          // Wait for the Last Burst Command to complete 
+   85:          while(!(FSTAT & FSTAT_FCBEF_MASK));
+   86:           
+   87:          // Dummy write before setting the Flash command
+   88:          (*((volatile uint8_t *)(u16LocalAddress++))) = *pu8FlashData; 
+   89:  
+   90:          pu8FlashData++;     
+   91:      
+   92:          FCMD = u8FlashCmd;            // Configures the Flash command          
+   93:          FSTAT |= FSTAT_FCBEF_MASK;    // Clears FCBEF to Start the command 
+   94:          
+   95:          // Wait at least 4 cycles to read the Error Flags 
+   96:          _asm NOP;
+   97:          _asm NOP;
+   98:          _asm NOP;
+   99:          _asm NOP;
+  100:          
+  101:  
+  102:          if (FSTAT & FSTAT_FACCERR_MASK)
+  103:          {
+  104:            return gFlash4OTAPErrAccess_c;
+  105:          }
+  106:          if (FSTAT & FSTAT_FPVIOL_MASK) 
+  107:          {
+  108:            return gFlash4OTAPErrWriteProtection_c;
+  109:          }
+  110:          
+  111:      }while (--u16FlashDataSize);
+  112:     
+  113:      
+  114:      while ((FSTAT  & FSTAT_FCCF_MASK)==0);  // Wait for the last command to complete  
+  115:      
+  116:      if (u8FlashCmd == gFlash4OTAPCmdBlankCheck_c)  
+  117:      {
+  118:         if (!(FSTAT & FSTAT_FBLANK_MASK))      
+  119:         {
+  120:            return gFlash4OTAPErrBlankCheck_c;       
+  121:         }
+  122:      
+  123:      } 
+  124:          
+  125:      return gFlash4OTAPNoErr_c;                           
+  126:  }
+  127:  
+  128:  #pragma CODE_SEG OFLC_ROUTINES
+  129:  
+  130:  /************************************************************************************
+  131:  *
+  132:  * Flash_Init
+  133:  *
+  134:  ************************************************************************************/
+  135:  
+  136:  
+  137:  Flash4OTAPErr_t Flash4OTAP_Init
+  138:    (
+  139:      Flash4OTAPClkValues_t FlashClkValue
+  140:    )
+  141:  { 
+  142:      #if (TRUE == gFlash4OTAPParamAndInitValidation_d)
+  143:     
+  144:        if(FlashClkValue > gFlash4OTAPClkMax_c)
+  145:        {
+  146:          return gFlash4OTAPErrInvalidParam_c;
+  147:        }
+  148:          
+  149:        if (FCDIV & FCDIV_FDIVLD_MASK) // Check if the FDIV register was written before
+  150:        {
+  151:          return gFlash4OTAPErrOncePerRst_c;
+  152:        }
+  153:      
+  154:      #endif 
+  155:     
+  156:      // Clear FACCERR and FPVIOL Flags 
+  157:      FSTAT = FSTAT | 0x30;  
+  158:      
+  159:      switch (FlashClkValue)
+  160:      {
+  161:        case gFlash4OTAPClk20MHz_c:  FCDIV = 0x4C; break;
+  162:        case gFlash4OTAPClk16MHz_c:  FCDIV = 0x49; break;
+  163:        case gFlash4OTAPClk10MHz_c:  FCDIV = 0x31; break;
+  164:        case gFlash4OTAPClk8MHz_c:   FCDIV = 39; break; 
+  165:        case gFlash4OTAPClk4MHz_c:   FCDIV = 20; break;  // 19 for QE and 1323x
+  166:        case gFlash4OTAPClk2MHz_c:   FCDIV = 9; break;
+  167:        case gFlash4OTAPClk1MHz_c:   FCDIV = 4; break;
+  168:        case gFlash4OTAPClk200kHz_c: FCDIV = 0; break;
+  169:        case gFlash4OTAPClk100kHz_c: FCDIV = 0; break;
+  170:        
+  171:        default:  FCDIV = 20;break;
+  172:      }
+  173:      
+  174:      // A new command may be written in the command buffer.   
+  175:      FSTAT |= FSTAT_FCBEF_MASK;   
+  176:  
+  177:       
+  178:      if (FSTAT & FSTAT_FACCERR_MASK)
+  179:      {
+  180:        return gFlash4OTAPErrAccess_c;
+  181:      }
+  182:      if (FSTAT & FSTAT_FPVIOL_MASK) 
+  183:      {
+  184:        return gFlash4OTAPErrWriteProtection_c;
+  185:      }
+  186:    
+  187:      FlashRamDummyDataOtap = 0; //It is just to avoid Linker warning                                    
+  188:      Flash4OTAPCopyInRAM();
+  189:     
+  190:      return gFlash4OTAPNoErr_c;
+  191:   }
+  192:   
+  193:   /************************************************************************************
+  194:  *
+  195:  * Flash4OTAP_Read
+  196:  *
+  197:  ************************************************************************************/
+  198:   
+  199:   Flash4OTAPErr_t Flash4OTAP_Read (uint32_t u32FlashAddress,uint8_t* pu8FlashData)
+  200:   {
+  201:  
+  202:      #if (TRUE == gFlash4OTAPParamAndInitValidation_d)
+  203:        if((u32FlashAddress > mMaxFlashAddress_c) || (NULL == pu8FlashData))
+  204:        {
+  205:          return gFlash4OTAPErrInvalidParam_c;
+  206:        }
+  207:      #endif
+  208:      
+  209:      #ifdef gMcs08Gt60Platform_d         
+  210:          *pu8FlashData = *(uint16_t*)u32FlashAddress;      
+  211:      #else // gMcs08qe128Platform_d || gMc1323xPlatform_d      
+  212:          LAP0 =  (uint8_t)(u32FlashAddress & 0x000000FF);
+  213:          LAP1 =  (uint8_t)((u32FlashAddress >> 8) & 0x000000FF);
+  214:          LAP2 =  (uint8_t)((u32FlashAddress >> 16)& 0x00000001);
+  215:          *pu8FlashData = LB;
+  216:      #endif
+  217:      
+  218:     return gFlash4OTAPNoErr_c;
+  219:   }
+  220:   
+  221:  
+  222:  /************************************************************************************
+  223:  *************************************************************************************
+  224:  * Private functions
+  225:  *************************************************************************************
+  226:  ************************************************************************************/
+  227:  
+  228:  
+  229:  /************************************************************************************
+  230:  *
+  231:  * Flash4OTAPCopyInRAM
+  232:  *
+  233:  ************************************************************************************/
+  234:  
+  235:  void Flash4OTAPCopyInRAM(void) 
+  236:  {                                  
+  237:    uint8_t *srcPtr, *dstPtr;
+  238:    uint16_t count;
+  239:    srcPtr = (uint8_t *)StartCopyInRAM4OTAP;
+  240:    dstPtr = (uint8_t *)&Flash4OTAP_CmdHandler;
+  241:    for (count = 0; count < (uint16_t) SizeCopyInRAM4OTAP;  count++, dstPtr++, srcPtr++) 
+  242:    {
+  243:      *dstPtr = *srcPtr;
+  244:    }
+  245:  }
+  246:  
+  247:  
+  248:  #pragma CODE_SEG DEFAULT
+  249:  
+  250:  #endif /*(TRUE == gOtapSupported_d)*/
+  251:  
+  252:  /* End of Flash4Otap.c */
+  253:  

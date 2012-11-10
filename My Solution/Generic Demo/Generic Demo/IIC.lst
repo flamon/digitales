@@ -1,0 +1,990 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*****************************************************************************
+    2:  * IIC driver implementation.
+    3:  * 
+    4:  * 
+    5:  * Copyright (c) 2010, Freescale, Inc. All rights reserved.
+    6:  *
+    7:  * 
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  *****************************************************************************/
+   13:  
+   14:  #include "IIC.h"
+   15:  
+   16:  /************************************************************************************
+   17:  *************************************************************************************
+   18:  * Private memory declarations
+   19:  *************************************************************************************
+   20:  ************************************************************************************/
+   21:  #if TRUE == gIicSupported_d   
+   22:  static uint8_t *     mpu8IicTxRxPointer;
+   23:  static uint8_t       mu8IicDataCounter;
+   24:  static mIicStates_t  mIicState = mIicNoInit_c;
+   25:  static iicCallback_t mpfIicCallback;
+   26:  static uint8_t       gu8IicStarterAddress; 
+   27:  static bool_t        bIicDeviceAddressFlag;
+   28:  #endif
+   29:  
+   30:  /************************************************************************************
+   31:  *************************************************************************************
+   32:  * Interface functions
+   33:  *************************************************************************************
+   34:  ************************************************************************************/
+   35:  /************************************************************************************
+   36:  *
+   37:  * IIC_Init
+   38:  *
+   39:  ************************************************************************************/
+   40:  #if TRUE == gIicSupported_d 
+   41:  iicErr_t IIC_Init
+   42:  ( 
+   43:    iicMultiplierFactors_t IICMultiplier, //IN, Multiplier factor needed to set the 
+   44:                                          //    desired baud rate
+   45:    iicClockRates_t        IICClockrate   //IN, Clock rates needed to set the baud rate
+   46:  ) 
+   47:  {
+  0000 87       [2]             PSHA  
+   48:  #if (TRUE == gIicParamAndInitValidation_d)
+   49:    if((gIicMulMax_c <= IICMultiplier) || (gIicICR_Max_c <= IICClockrate))
+  0001 a303     [2]             CPX   #3
+  0003 2404     [3]             BCC   L9 ;abs = 0009
+  0005 a140     [2]             CMP   #64
+  0007 2504     [3]             BCS   LD ;abs = 000d
+  0009          L9:     
+   50:    {
+   51:      return gIicErrInvalidParameter_c; 
+  0009 a601     [2]             LDA   #1
+   52:    }
+   53:  #endif  
+   54:  
+   55:    mIicState = mIicIdle_c;
+   56:    bIicDeviceAddressFlag = FALSE;
+   57:  
+   58:    IICC |= mIicEnableMask_c;
+   59:    IICF = ((IICMultiplier<<6)|IICClockrate);
+   60:    return gIicErrNoError_c;  
+   61:  }
+  000b 8a       [3]             PULH  
+  000c 8d       [7]             RTC   
+  000d          LD:     
+  000d a601     [2]             LDA   #1
+  000f c70000   [4]             STA   mIicState
+  0012 4f       [1]             CLRA  
+  0013 c70000   [4]             STA   bIicDeviceAddressFlag
+  0016 1e00     [5]             BSET  7,_IIC1C1
+  0018 a640     [2]             LDA   #64
+  001a 42       [5]             MUL   
+  001b 95       [2]             TSX   
+  001c fa       [3]             ORA   ,X
+  001d b700     [3]             STA   _IIC1F
+  001f 4f       [1]             CLRA  
+  0020 8a       [3]             PULH  
+  0021 8d       [7]             RTC   
+   62:  #else  //FALSE == gIicSupported_d
+   63:  
+   64:  iicErr_t IIC_Init(iicMultiplierFactors_t IICMultiplier,iicClockRates_t IICClockrate)
+   65:  {
+   66:    (void)IICMultiplier;
+   67:    (void)IICClockrate;
+   68:    return gIicErrNoError_c;
+   69:  }
+   70:  #endif
+   71:  
+   72:  /************************************************************************************
+   73:  *
+   74:  * IIC_Write
+   75:  *
+   76:  ************************************************************************************/
+   77:  #if TRUE == gIicSupported_d
+   78:  iicErr_t IIC_Write
+   79:  (
+   80:    uint8_t         u8SlaveAddress,  //IN, Address of one slave on the IIC bus on which 
+   81:                                     //    the Master device has a transaction.
+   82:    uint8_t*        pu8TxString,     //IN, Pointer to the string to be transmitted.
+   83:    uint8_t         u8StringLenght,  //IN, String Lenght 
+   84:    iicCallback_t   pfUserCallBack   //IN, to the callback function called at the end 
+   85:                                     //    of transmitting the entrie string.
+   86:  ) 
+   87:  {
+  0000 87       [2]             PSHA  
+  0001 89       [2]             PSHX  
+  0002 8b       [2]             PSHH  
+  0003 8b       [2]             PSHH  
+   88:    bool_t bStartingTx;
+   89:  #if (TRUE == gIicParamAndInitValidation_d)
+   90:    if(mIicNoInit_c == mIicState)
+  0004 c60000   [4]             LDA   mIicState
+  0007 2604     [3]             BNE   LD ;abs = 000d
+   91:    {
+   92:      return  gIicErrInvalidCondition_c;
+  0009 a603     [2]             LDA   #3
+  000b 2026     [3]             BRA   L33 ;abs = 0033
+  000d          LD:     
+   93:    }
+   94:    if((mIicMaxSlaveAddres_c <= u8SlaveAddress) || (NULL == pu8TxString) || 
+  000d 95       [2]             TSX   
+  000e ee09     [3]             LDX   9,X
+  0010 a37f     [2]             CPX   #127
+  0012 2412     [3]             BCC   L26 ;abs = 0026
+  0014 9efe08   [5]             LDHX  8,SP
+  0017 650000   [3]             CPHX  #0
+  001a 270a     [3]             BEQ   L26 ;abs = 0026
+   95:       (0 == u8StringLenght) || (NULL == pfUserCallBack))
+  001c 95       [2]             TSX   
+  001d 6d03     [4]             TST   3,X
+  001f 2705     [3]             BEQ   L26 ;abs = 0026
+  0021 9efe02   [5]             LDHX  2,SP
+  0024 2604     [3]             BNE   L2A ;abs = 002a
+  0026          L26:    
+   96:    {
+   97:      return gIicErrInvalidParameter_c; 
+  0026 a601     [2]             LDA   #1
+  0028 2067     [3]             BRA   L91 ;abs = 0091
+  002a          L2A:    
+   98:    }
+   99:  #endif 
+  100:    if((mIicTransmittingData_c == mIicState) || (mIicReceivingData_c == mIicState))
+  002a 410204   [4]             CBEQA #2,L31 ;abs = 0031
+  002d a103     [2]             CMP   #3
+  002f 2604     [3]             BNE   L35 ;abs = 0035
+  0031          L31:    
+  101:    {
+  102:      return gIicErrModuleBusy_c; 
+  103:    }
+  104:    else if(mIicTransactionInProcess_c == mIicState)
+  105:    {
+  106:      if(gu8IicStarterAddress == u8SlaveAddress)
+  107:      {
+  108:          bStartingTx = FALSE;
+  109:      }
+  110:      else
+  111:      {
+  112:        return gIicErrModuleBusy_c; 
+  0031 a602     [2]             LDA   #2
+  0033          L33:    
+  0033 205c     [3]             BRA   L91 ;abs = 0091
+  0035          L35:    
+  0035 a104     [2]             CMP   #4
+  0037 260b     [3]             BNE   L44 ;abs = 0044
+  0039 c60000   [4]             LDA   gu8IicStarterAddress
+  003c 95       [2]             TSX   
+  003d e109     [3]             CMP   9,X
+  003f 26f0     [3]             BNE   L31 ;abs = 0031
+  0041 7f       [4]             CLR   ,X
+  0042 200f     [3]             BRA   L53 ;abs = 0053
+  0044          L44:    
+  113:      }
+  114:    }
+  115:    else /*mIicIdle_c*/
+  116:    {
+  117:      gu8IicStarterAddress = u8SlaveAddress;
+  0044 95       [2]             TSX   
+  0045 e609     [3]             LDA   9,X
+  0047 c70000   [4]             STA   gu8IicStarterAddress
+  118:      IICC |= (mIicMasterModeSelectMask_c|mIicTransmitModeSelectMask_c);
+  004a b600     [3]             LDA   _IIC1C1
+  004c aa30     [2]             ORA   #48
+  004e b700     [3]             STA   _IIC1C1
+  119:      bStartingTx = TRUE;
+  0050 a601     [2]             LDA   #1
+  0052 f7       [2]             STA   ,X
+  0053          L53:    
+  120:    }
+  121:    mDelay20us();
+  0053 a628     [2]             LDA   #40
+  0055          L55:    
+  0055 4bfe     [4]             DBNZA L55 ;abs = 0055
+  122:    mu8IicDataCounter  = u8StringLenght;
+  0057 95       [2]             TSX   
+  0058 e603     [3]             LDA   3,X
+  005a c70000   [4]             STA   mu8IicDataCounter
+  123:    mpu8IicTxRxPointer = pu8TxString; 
+  005d 9efe08   [5]             LDHX  8,SP
+  0060 960000   [5]             STHX  mpu8IicTxRxPointer
+  124:    mpfIicCallback     = pfUserCallBack;
+  0063 9efe02   [5]             LDHX  2,SP
+  0066 960000   [5]             STHX  mpfIicCallback
+  125:    
+  126:    mIicState = mIicTransmittingData_c;
+  0069 a602     [2]             LDA   #2
+  006b c70000   [4]             STA   mIicState
+  127:    
+  128:    mIicEnableInterrupt();
+  006e 1200     [5]             BSET  1,_IIC1S
+  0070 1c00     [5]             BSET  6,_IIC1C1
+  129:    if(bStartingTx)
+  0072 95       [2]             TSX   
+  0073 7d       [3]             TST   ,X
+  0074 2708     [3]             BEQ   L7E ;abs = 007e
+  130:    {
+  131:      IICD = (gu8IicStarterAddress<<1) & 0xFE; 
+  0076 c60000   [4]             LDA   gu8IicStarterAddress
+  0079 48       [1]             LSLA  
+  007a b700     [3]             STA   _IIC1D
+  132:    }
+  007c 2012     [3]             BRA   L90 ;abs = 0090
+  007e          L7E:    
+  133:    else
+  134:    {
+  135:      IICD = *mpu8IicTxRxPointer++;
+  007e 320000   [5]             LDHX  mpu8IicTxRxPointer
+  0081 f6       [3]             LDA   ,X
+  0082 b700     [3]             STA   _IIC1D
+  0084 450000   [3]             LDHX  @mpu8IicTxRxPointer
+  0087 6c01     [5]             INC   1,X
+  0089 2601     [3]             BNE   L8C ;abs = 008c
+  008b 7c       [4]             INC   ,X
+  008c          L8C:    
+  136:      mu8IicDataCounter--;
+  008c 450000   [3]             LDHX  @mu8IicDataCounter
+  008f 7a       [4]             DEC   ,X
+  0090          L90:    
+  137:    }
+  138:    
+  139:    return gIicErrNoError_c;  
+  0090 4f       [1]             CLRA  
+  0091          L91:    
+  140:  }
+  0091 a704     [2]             AIS   #4
+  0093 8d       [7]             RTC   
+  141:  
+  142:  #else  //FALSE == gIicSupported_d
+  143:  
+  144:  iicErr_t IIC_Write(uint8_t u8SlaveAddress,uint8_t* pu8TxString,uint8_t u8StringLenght,iicCallback_t   pfUserCallBack) 
+  145:  {
+  146:    (void)u8SlaveAddress;
+  147:    (void)pu8TxString;
+  148:    (void)u8StringLenght;
+  149:    (void)pfUserCallBack;
+  150:    return gIicErrNoError_c;
+  151:  }
+  152:  #endif
+  153:  
+  154:  /************************************************************************************
+  155:  *
+  156:  * IIC_Read
+  157:  *
+  158:  ************************************************************************************/
+  159:  #if TRUE == gIicSupported_d
+  160:  iicErr_t IIC_Read
+  161:  (
+  162:    uint8_t         u8SlaveAddress,  //IN, Address of one slave on the IIC bus on which 
+  163:                                     //    the Master device has a transaction.
+  164:    uint8_t*        pu8RxString,     //OUT, Pointer to the string to be received.
+  165:    uint8_t         u8StringLenght,  //IN, String Lenght 
+  166:    iicCallback_t   pfUserCallBack   //IN, to the callback function called at the end 
+  167:                                     //    of receiving the entrie string.
+  168:  )
+  169:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  170:  #if (TRUE == gIicParamAndInitValidation_d)
+  171:    if(mIicNoInit_c == mIicState)
+  0002 ce0000   [4]             LDX   mIicState
+  0005 2604     [3]             BNE   LB ;abs = 000b
+  172:    {
+  173:      return  gIicErrInvalidCondition_c;
+  0007 a603     [2]             LDA   #3
+  0009 206c     [3]             BRA   L77 ;abs = 0077
+  000b          LB:     
+  174:    }
+  175:    if((mIicMaxSlaveAddres_c <= u8SlaveAddress) || (NULL == pu8RxString) || 
+  000b 95       [2]             TSX   
+  000c ee07     [3]             LDX   7,X
+  000e a37f     [2]             CPX   #127
+  0010 2410     [3]             BCC   L22 ;abs = 0022
+  0012 9efe06   [5]             LDHX  6,SP
+  0015 650000   [3]             CPHX  #0
+  0018 2708     [3]             BEQ   L22 ;abs = 0022
+  176:       (0 == u8StringLenght) || (NULL == pfUserCallBack))
+  001a 4d       [1]             TSTA  
+  001b 2705     [3]             BEQ   L22 ;abs = 0022
+  001d 9efe01   [5]             LDHX  1,SP
+  0020 2604     [3]             BNE   L26 ;abs = 0026
+  0022          L22:    
+  177:    {
+  178:      return gIicErrInvalidParameter_c; 
+  0022 a601     [2]             LDA   #1
+  0024 2051     [3]             BRA   L77 ;abs = 0077
+  0026          L26:    
+  179:    }
+  180:  #endif 
+  181:    if((mIicTransmittingData_c == mIicState) || (mIicReceivingData_c == mIicState))
+  0026 ce0000   [4]             LDX   mIicState
+  0029 510213   [4]             CBEQX #2,L3F ;abs = 003f
+  002c 510310   [4]             CBEQX #3,L3F ;abs = 003f
+  182:    {
+  183:      return gIicErrModuleBusy_c; 
+  184:    }
+  185:    else if(mIicTransactionInProcess_c == mIicState)
+  002f a304     [2]             CPX   #4
+  0031 2610     [3]             BNE   L43 ;abs = 0043
+  186:    {
+  187:      if(gu8IicStarterAddress == u8SlaveAddress)
+  0033 ce0000   [4]             LDX   gu8IicStarterAddress
+  0036 9ee308   [4]             CPX   8,SP
+  0039 2604     [3]             BNE   L3F ;abs = 003f
+  188:      {
+  189:          IICC |= mIicRepeatStartMask_c;
+  003b 1400     [5]             BSET  2,_IIC1C1
+  190:      }
+  003d 2012     [3]             BRA   L51 ;abs = 0051
+  003f          L3F:    
+  191:      else
+  192:      {
+  193:        return gIicErrModuleBusy_c; 
+  003f a602     [2]             LDA   #2
+  0041 2034     [3]             BRA   L77 ;abs = 0077
+  0043          L43:    
+  194:      }
+  195:    }
+  196:    else /*mIicIdle_c*/
+  197:    {
+  198:      gu8IicStarterAddress = u8SlaveAddress;
+  0043 95       [2]             TSX   
+  0044 ee07     [3]             LDX   7,X
+  0046 cf0000   [4]             STX   gu8IicStarterAddress
+  199:      IICC |= (mIicInterruptEnableMask_c|mIicMasterModeSelectMask_c|mIicTransmitModeSelectMask_c);
+  0049 87       [2]             PSHA  
+  004a b600     [3]             LDA   _IIC1C1
+  004c aa70     [2]             ORA   #112
+  004e b700     [3]             STA   _IIC1C1
+  0050 86       [3]             PULA  
+  0051          L51:    
+  200:    }
+  201:    
+  202:    mu8IicDataCounter  = u8StringLenght;
+  0051 c70000   [4]             STA   mu8IicDataCounter
+  203:    mpu8IicTxRxPointer = pu8RxString; 
+  0054 9efe06   [5]             LDHX  6,SP
+  0057 960000   [5]             STHX  mpu8IicTxRxPointer
+  204:    mpfIicCallback     = pfUserCallBack;
+  005a 9efe01   [5]             LDHX  1,SP
+  005d 960000   [5]             STHX  mpfIicCallback
+  205:    bIicDeviceAddressFlag = TRUE;
+  0060 a601     [2]             LDA   #1
+  0062 c70000   [4]             STA   bIicDeviceAddressFlag
+  206:    
+  207:    mIicState = mIicReceivingData_c;
+  0065 a603     [2]             LDA   #3
+  0067 c70000   [4]             STA   mIicState
+  208:    mIicEnableInterrupt();
+  006a 1200     [5]             BSET  1,_IIC1S
+  006c 1c00     [5]             BSET  6,_IIC1C1
+  209:    IICD = (gu8IicStarterAddress<<1) | 0x01;
+  006e c60000   [4]             LDA   gu8IicStarterAddress
+  0071 48       [1]             LSLA  
+  0072 aa01     [2]             ORA   #1
+  0074 b700     [3]             STA   _IIC1D
+  210:    
+  211:    return gIicErrNoError_c;  
+  0076 4f       [1]             CLRA  
+  0077          L77:    
+  212:  }
+  0077 a702     [2]             AIS   #2
+  0079 8d       [7]             RTC   
+  213:  
+  214:  #else  //FALSE == gIicSupported_d
+  215:  
+  216:  iicErr_t IIC_Read(uint8_t u8SlaveAddress,uint8_t* pu8RxString,uint8_t u8StringLenght,iicCallback_t   pfUserCallBack) 
+  217:  {
+  218:    (void)u8SlaveAddress;
+  219:    (void)pu8RxString;
+  220:    (void)u8StringLenght;
+  221:    (void)pfUserCallBack;
+  222:    return gIicErrNoError_c;
+  223:  }
+  224:  #endif
+  225:  
+  226:  /************************************************************************************
+  227:  *
+  228:  * IIC_WriteBlocking
+  229:  *
+  230:  ************************************************************************************/
+  231:  #if TRUE == gIicSupported_d
+  232:  iicErr_t IIC_WriteBlocking
+  233:  (
+  234:    uint8_t         u8SlaveAddress,  //IN, Address of one slave on the IIC bus on which 
+  235:                                     //    the Master device has a transaction.
+  236:    uint8_t*        pu8TxString,     //IN, Pointer to the string to be transmitted.
+  237:    uint8_t         u8StringLenght   //IN, String Lenght 
+  238:  )
+  239:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  0003 8b       [2]             PSHH  
+  240:    iicErr_t iicErr;  
+  241:    bool_t bStartingTx;
+  242:  #if (TRUE == gIicParamAndInitValidation_d)
+  243:    if(mIicNoInit_c == mIicState)
+  0004 c60000   [4]             LDA   mIicState
+  0007 2604     [3]             BNE   LD ;abs = 000d
+  244:    {
+  245:      return  gIicErrInvalidCondition_c;
+  0009 a603     [2]             LDA   #3
+  000b 206b     [3]             BRA   L78 ;abs = 0078
+  000d          LD:     
+  246:    }
+  247:    if((mIicMaxSlaveAddres_c <= u8SlaveAddress) || (NULL == pu8TxString) || 
+  000d 95       [2]             TSX   
+  000e ee07     [3]             LDX   7,X
+  0010 a37f     [2]             CPX   #127
+  0012 240a     [3]             BCC   L1E ;abs = 001e
+  0014 9efe03   [5]             LDHX  3,SP
+  0017 2705     [3]             BEQ   L1E ;abs = 001e
+  248:       (0 == u8StringLenght))
+  0019 95       [2]             TSX   
+  001a 6d01     [4]             TST   1,X
+  001c 2604     [3]             BNE   L22 ;abs = 0022
+  001e          L1E:    
+  249:    {
+  250:      return gIicErrInvalidParameter_c; 
+  001e a601     [2]             LDA   #1
+  0020 2056     [3]             BRA   L78 ;abs = 0078
+  0022          L22:    
+  251:    }
+  252:  #endif 
+  253:    if((mIicTransmittingData_c == mIicState) || (mIicReceivingData_c == mIicState))
+  0022 410204   [4]             CBEQA #2,L29 ;abs = 0029
+  0025 a103     [2]             CMP   #3
+  0027 2604     [3]             BNE   L2D ;abs = 002d
+  0029          L29:    
+  254:    {
+  255:      return gIicErrModuleBusy_c; 
+  256:    }
+  257:    else if(mIicTransactionInProcess_c == mIicState)
+  258:    {
+  259:      if(gu8IicStarterAddress == u8SlaveAddress)
+  260:      {
+  261:          bStartingTx = FALSE;
+  262:      }
+  263:      else
+  264:      {
+  265:        return gIicErrModuleBusy_c; 
+  0029 a602     [2]             LDA   #2
+  002b 204b     [3]             BRA   L78 ;abs = 0078
+  002d          L2D:    
+  002d a104     [2]             CMP   #4
+  002f 2609     [3]             BNE   L3A ;abs = 003a
+  0031 c60000   [4]             LDA   gu8IicStarterAddress
+  0034 e107     [3]             CMP   7,X
+  0036 272f     [3]             BEQ   L67 ;abs = 0067
+  0038 20ef     [3]             BRA   L29 ;abs = 0029
+  003a          L3A:    
+  266:      }
+  267:    }
+  268:    else /*mIicIdle_c*/
+  269:    {
+  270:      gu8IicStarterAddress = u8SlaveAddress;
+  003a e607     [3]             LDA   7,X
+  003c c70000   [4]             STA   gu8IicStarterAddress
+  271:      IICC |= (mIicMasterModeSelectMask_c|mIicTransmitModeSelectMask_c);
+  003f b600     [3]             LDA   _IIC1C1
+  0041 aa30     [2]             ORA   #48
+  0043 b700     [3]             STA   _IIC1C1
+  272:      bStartingTx = TRUE;
+  0045 a601     [2]             LDA   #1
+  0047 f7       [2]             STA   ,X
+  273:    }
+  274:    
+  275:    if(bStartingTx)
+  0048 271d     [3]             BEQ   L67 ;abs = 0067
+  276:    {
+  277:      iicErr = iicSendNextByte((gu8IicStarterAddress<<1) & 0xFE);
+  004a c60000   [4]             LDA   gu8IicStarterAddress
+  004d 48       [1]             LSLA  
+  004e ac000000 [8]             CALL  iicSendNextByte
+  278:      if(iicErr) return iicErr;
+  0052 4d       [1]             TSTA  
+  0053 2623     [3]             BNE   L78 ;abs = 0078
+  0055 2010     [3]             BRA   L67 ;abs = 0067
+  0057          L57:    
+  279:    }
+  280:    
+  281:    while(u8StringLenght--)
+  282:    {
+  283:      iicErr = iicSendNextByte(*pu8TxString++);    
+  0057 9efe03   [5]             LDHX  3,SP
+  005a f6       [3]             LDA   ,X
+  005b af01     [2]             AIX   #1
+  005d 9eff03   [5]             STHX  3,SP
+  0060 ac000000 [8]             CALL  iicSendNextByte
+  284:      if(iicErr) return iicErr;
+  0064 4d       [1]             TSTA  
+  0065 2611     [3]             BNE   L78 ;abs = 0078
+  0067          L67:    
+  0067 95       [2]             TSX   
+  0068 e601     [3]             LDA   1,X
+  006a 97       [1]             TAX   
+  006b 4a       [1]             DECA  
+  006c 9ee702   [4]             STA   2,SP
+  006f 5d       [1]             TSTX  
+  0070 26e5     [3]             BNE   L57 ;abs = 0057
+  285:    }
+  286:  
+  287:    mIicState = mIicTransactionInProcess_c;
+  0072 a604     [2]             LDA   #4
+  0074 c70000   [4]             STA   mIicState
+  288:    return gIicErrNoError_c;  
+  0077 4f       [1]             CLRA  
+  0078          L78:    
+  289:  }
+  0078 a704     [2]             AIS   #4
+  007a 8d       [7]             RTC   
+  290:  
+  291:  #else  //FALSE == gIicSupported_d
+  292:  
+  293:  iicErr_t IIC_WriteBlocking(uint8_t u8SlaveAddress,uint8_t* pu8TxString,uint8_t u8StringLenght) 
+  294:  {
+  295:    (void)u8SlaveAddress;
+  296:    (void)pu8TxString;
+  297:    (void)u8StringLenght;
+  298:    return gIicErrNoError_c;
+  299:  }
+  300:  #endif
+  301:  
+  302:  /************************************************************************************
+  303:  *
+  304:  * IIC_ReadBlocking
+  305:  *
+  306:  ************************************************************************************/
+  307:  #if TRUE == gIicSupported_d
+  308:  iicErr_t IIC_ReadBlocking
+  309:  (
+  310:    uint8_t         u8SlaveAddress,  //IN, Address of one slave on the IIC bus on which 
+  311:                                     //    the Master device has a transaction.
+  312:    uint8_t*        pu8RxString,     //OUT, Pointer to the string to be received.
+  313:    uint8_t         u8StringLenght   //IN, String Lenght 
+  314:  )
+  315:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  316:    iicErr_t iicErr;  
+  317:  #if (TRUE == gIicParamAndInitValidation_d)
+  318:    if(mIicNoInit_c == mIicState)
+  0003 c60000   [4]             LDA   mIicState
+  0006 2604     [3]             BNE   LC ;abs = 000c
+  319:    {
+  320:      return  gIicErrInvalidCondition_c;
+  0008 a603     [2]             LDA   #3
+  000a 202e     [3]             BRA   L3A ;abs = 003a
+  000c          LC:     
+  321:    }
+  322:    if((mIicMaxSlaveAddres_c <= u8SlaveAddress) || (NULL == pu8RxString) || 
+  000c 9ee607   [4]             LDA   7,SP
+  000f a17f     [2]             CMP   #127
+  0011 2409     [3]             BCC   L1C ;abs = 001c
+  0013 650000   [3]             CPHX  #0
+  0016 2704     [3]             BEQ   L1C ;abs = 001c
+  323:       (0 == u8StringLenght))
+  0018 95       [2]             TSX   
+  0019 7d       [3]             TST   ,X
+  001a 2604     [3]             BNE   L20 ;abs = 0020
+  001c          L1C:    
+  324:    {
+  325:      return gIicErrInvalidParameter_c; 
+  001c a601     [2]             LDA   #1
+  001e 206b     [3]             BRA   L8B ;abs = 008b
+  0020          L20:    
+  326:    }
+  327:  #endif 
+  328:    if((mIicTransmittingData_c == mIicState) || (mIicReceivingData_c == mIicState))
+  0020 c60000   [4]             LDA   mIicState
+  0023 410212   [4]             CBEQA #2,L38 ;abs = 0038
+  0026 41030f   [4]             CBEQA #3,L38 ;abs = 0038
+  329:    {
+  330:      return gIicErrModuleBusy_c; 
+  331:    }
+  332:    else if(mIicTransactionInProcess_c == mIicState)
+  0029 a104     [2]             CMP   #4
+  002b 260f     [3]             BNE   L3C ;abs = 003c
+  333:    {
+  334:      if(gu8IicStarterAddress == u8SlaveAddress)
+  002d c60000   [4]             LDA   gu8IicStarterAddress
+  0030 e106     [3]             CMP   6,X
+  0032 2604     [3]             BNE   L38 ;abs = 0038
+  335:      {
+  336:          IICC |= mIicRepeatStartMask_c;
+  0034 1400     [5]             BSET  2,_IIC1C1
+  337:      }
+  0036 200f     [3]             BRA   L47 ;abs = 0047
+  0038          L38:    
+  338:      else
+  339:      {
+  340:        return gIicErrModuleBusy_c; 
+  0038 a602     [2]             LDA   #2
+  003a          L3A:    
+  003a 204f     [3]             BRA   L8B ;abs = 008b
+  003c          L3C:    
+  341:      }
+  342:    }
+  343:    else /*mIicIdle_c*/
+  344:    {
+  345:      gu8IicStarterAddress = u8SlaveAddress;
+  003c e606     [3]             LDA   6,X
+  003e c70000   [4]             STA   gu8IicStarterAddress
+  346:      IICC |= (mIicMasterModeSelectMask_c|mIicTransmitModeSelectMask_c);
+  0041 b600     [3]             LDA   _IIC1C1
+  0043 aa30     [2]             ORA   #48
+  0045 b700     [3]             STA   _IIC1C1
+  0047          L47:    
+  347:    }
+  348:   
+  349:    iicErr = iicSendNextByte((gu8IicStarterAddress<<1) | 0x01);
+  0047 c60000   [4]             LDA   gu8IicStarterAddress
+  004a 48       [1]             LSLA  
+  004b aa01     [2]             ORA   #1
+  004d ac000000 [8]             CALL  iicSendNextByte
+  350:    if(iicErr) return iicErr;
+  0051 4d       [1]             TSTA  
+  0052 2637     [3]             BNE   L8B ;abs = 008b
+  351:    
+  352:    if(1 == u8StringLenght) IICC |= mIicNoAckMask_c;
+  0054 95       [2]             TSX   
+  0055 f6       [3]             LDA   ,X
+  0056 a101     [2]             CMP   #1
+  0058 2603     [3]             BNE   L5D ;abs = 005d
+  005a 1600     [5]             BSET  3,_IIC1C1
+  005c 65       [3]             SKIP2 L5F ;abs = 005f
+  005d          L5D:    
+  353:    else IICC &= ~mIicNoAckMask_c;
+  005d 1700     [5]             BCLR  3,_IIC1C1
+  005f          L5F:    
+  354:    IICC &= ~mIicTransmitModeSelectMask_c;
+  005f 1900     [5]             BCLR  4,_IIC1C1
+  355:    (void)IICD;   /*Starts the first reception*/
+  0061 b600     [3]             LDA   _IIC1D
+  356:    while(u8StringLenght){
+  0063 201d     [3]             BRA   L82 ;abs = 0082
+  0065          L65:    
+  357:      while(!(mIicInterruptFlagMask_c & IICS));              
+  0065 0300fd   [5]             BRCLR 1,_IIC1S,L65 ;abs = 0065
+  358:      IICS |= mIicInterruptFlagMask_c; 
+  0068 1200     [5]             BSET  1,_IIC1S
+  359:      u8StringLenght--;                      
+  006a 95       [2]             TSX   
+  006b 7a       [4]             DEC   ,X
+  360:      if(1 == u8StringLenght) IICC |= mIicNoAckMask_c;
+  006c f6       [3]             LDA   ,X
+  006d 4b02     [4]             DBNZA L71 ;abs = 0071
+  006f 1600     [5]             BSET  3,_IIC1C1
+  0071          L71:    
+  361:      if(0 == u8StringLenght) IICC |= mIicTransmitModeSelectMask_c;
+  0071 7d       [3]             TST   ,X
+  0072 2602     [3]             BNE   L76 ;abs = 0076
+  0074 1800     [5]             BSET  4,_IIC1C1
+  0076          L76:    
+  362:      *pu8RxString++ = IICD;
+  0076 9efe02   [5]             LDHX  2,SP
+  0079 5e00     [5]             MOV   _IIC1D,X+
+  007b 95       [2]             TSX   
+  007c 6c02     [5]             INC   2,X
+  007e 2602     [3]             BNE   L82 ;abs = 0082
+  0080 6c01     [5]             INC   1,X
+  0082          L82:    
+  0082 7d       [3]             TST   ,X
+  0083 26e0     [3]             BNE   L65 ;abs = 0065
+  363:    }
+  364:   
+  365:    mIicState = mIicTransactionInProcess_c;
+  0085 a604     [2]             LDA   #4
+  0087 c70000   [4]             STA   mIicState
+  366:    return gIicErrNoError_c;  
+  008a 4f       [1]             CLRA  
+  008b          L8B:    
+  367:  }
+  008b a703     [2]             AIS   #3
+  008d 8d       [7]             RTC   
+  368:  
+  369:  #else  //FALSE == gIicSupported_d
+  370:  
+  371:  iicErr_t IIC_ReadBlocking(uint8_t u8SlaveAddress,uint8_t* pu8RxString,uint8_t u8StringLenght) 
+  372:  {
+  373:    (void)u8SlaveAddress;
+  374:    (void)pu8RxString;
+  375:    (void)u8StringLenght;
+  376:    return gIicErrNoError_c;
+  377:  }
+  378:  #endif
+  379:  
+  380:  /************************************************************************************
+  381:  *
+  382:  * IIC_StopTransaction
+  383:  *
+  384:  ************************************************************************************/
+  385:  #if TRUE == gIicSupported_d
+  386:  iicErr_t IIC_StopTransaction
+  387:  (
+  388:    uint8_t         u8SlaveAddress  //IN, Address of one slave on the IIC bus on which 
+  389:                                     //    the Master device has a transaction.
+  390:  )
+  391:  {
+  392:  #if (TRUE == gIicParamAndInitValidation_d)
+  393:    if(mIicNoInit_c == mIicState)
+  0000 ce0000   [4]             LDX   mIicState
+  0003 2603     [3]             BNE   L8 ;abs = 0008
+  394:    {
+  395:      return  gIicErrInvalidCondition_c;
+  0005 a603     [2]             LDA   #3
+  0007 8d       [7]             RTC   
+  0008          L8:     
+  396:    }
+  397:    if(mIicMaxSlaveAddres_c <= u8SlaveAddress)
+  0008 a17f     [2]             CMP   #127
+  000a 2503     [3]             BCS   LF ;abs = 000f
+  398:    {
+  399:      return gIicErrInvalidParameter_c; 
+  000c a601     [2]             LDA   #1
+  000e 8d       [7]             RTC   
+  000f          LF:     
+  400:    }
+  401:  #endif 
+  402:    if((mIicTransmittingData_c == mIicState) || (mIicReceivingData_c == mIicState))
+  000f 51020c   [4]             CBEQX #2,L1E ;abs = 001e
+  0012 510309   [4]             CBEQX #3,L1E ;abs = 001e
+  403:    {
+  404:      return gIicErrModuleBusy_c; 
+  405:    }
+  406:    else if(mIicTransactionInProcess_c == mIicState)
+  0015 a304     [2]             CPX   #4
+  0017 2608     [3]             BNE   L21 ;abs = 0021
+  407:    {
+  408:      if(gu8IicStarterAddress != u8SlaveAddress)
+  0019 c10000   [4]             CMP   gu8IicStarterAddress
+  001c 2703     [3]             BEQ   L21 ;abs = 0021
+  001e          L1E:    
+  409:      {
+  410:        return gIicErrModuleBusy_c; 
+  001e a602     [2]             LDA   #2
+  0020 8d       [7]             RTC   
+  0021          L21:    
+  411:      }
+  412:    }
+  413:  
+  414:    IICC &= ~(mIicInterruptEnableMask_c|mIicMasterModeSelectMask_c|mIicTransmitModeSelectMask_c);
+  0021 b600     [3]             LDA   _IIC1C1
+  0023 a48f     [2]             AND   #-113
+  0025 b700     [3]             STA   _IIC1C1
+  415:  
+  416:    mIicState = mIicIdle_c;
+  0027 a601     [2]             LDA   #1
+  0029 c70000   [4]             STA   mIicState
+  417:    return gIicErrNoError_c;  
+  002c 4f       [1]             CLRA  
+  418:  
+  419:  }
+  002d 8d       [7]             RTC   
+  420:  #else  //FALSE == gIicSupported_d
+  421:  
+  422:  iicErr_t IIC_StopTransaction(uint8_t u8SlaveAddress) 
+  423:  {
+  424:    (void)u8SlaveAddress;
+  425:    return gIicErrNoError_c;
+  426:  }
+  427:  #endif
+  428:  
+  429:  /************************************************************************************
+  430:  *
+  431:  * IIC Interrupt service function
+  432:  *
+  433:  ************************************************************************************/
+  434:  #if TRUE == gIicSupported_d
+  435:  
+  436:  #if gIicMode_d == gIicInterrupt_c  
+  437:  
+  438:  /* Place it in NON_BANKED memory */
+  439:  #pragma CODE_SEG ISR_SEGMENT
+  440:  
+  441:  INTERRUPT_KEYWORD void IIC_Isr(void)
+  442:  {
+  0000 8b       [2]             PSHH  
+  443:  #else
+  444:  void IIC_Task(void)
+  445:  {
+  446:  #endif
+  447:    IICS |= mIicInterruptFlagMask_c; 
+  0001 1200     [5]             BSET  1,_IIC1S
+  448:    if(mIicTransmitModeSelectMask_c & IICC)
+  0003 090007   [5]             BRCLR 4,_IIC1C1,LD ;abs = 000d
+  449:    {
+  450:      if(mIicReceiveAckMask_c & IICS)
+  0006 010004   [5]             BRCLR 0,_IIC1S,LD ;abs = 000d
+  451:      {
+  452:        iicFinishReadWrite(gIicTxNoAck_c);
+  0009 a601     [2]             LDA   #1
+  453:        return;
+  000b 2066     [3]             BRA   L73 ;abs = 0073
+  000d          LD:     
+  454:      }
+  455:    }
+  456:    
+  457:    if(mIicTransmittingData_c == mIicState)
+  000d c60000   [4]             LDA   mIicState
+  0010 a102     [2]             CMP   #2
+  0012 261b     [3]             BNE   L2F ;abs = 002f
+  458:    {
+  459:      if(mu8IicDataCounter--)
+  0014 c60000   [4]             LDA   mu8IicDataCounter
+  0017 97       [1]             TAX   
+  0018 4a       [1]             DECA  
+  0019 c70000   [4]             STA   mu8IicDataCounter
+  001c 5d       [1]             TSTX  
+  001d 2753     [3]             BEQ   L72 ;abs = 0072
+  460:      {
+  461:        IICD = *mpu8IicTxRxPointer++;
+  001f 320000   [5]             LDHX  mpu8IicTxRxPointer
+  0022 f6       [3]             LDA   ,X
+  0023 b700     [3]             STA   _IIC1D
+  0025 450000   [3]             LDHX  @mpu8IicTxRxPointer
+  0028 6c01     [5]             INC   1,X
+  002a 2657     [3]             BNE   L83 ;abs = 0083
+  002c 7c       [4]             INC   ,X
+  462:      }
+  463:      else
+  464:      {
+  465:        iicFinishReadWrite(gIicTxRxSuccess_c);
+  466:      }
+  467:    }
+  468:    else if(mIicReceivingData_c == mIicState)
+  469:    {
+  470:      if(mu8IicDataCounter)
+  471:      {
+  472:        if(1 == mu8IicDataCounter) IICC |= mIicNoAckMask_c;
+  473:        else IICC &= ~mIicNoAckMask_c;
+  474:        mu8IicDataCounter--;
+  475:        if(bIicDeviceAddressFlag)
+  476:        {
+  477:          bIicDeviceAddressFlag = FALSE;
+  478:          IICC &= ~mIicTransmitModeSelectMask_c;
+  479:          (void)IICD;   /*Starts the first reception*/
+  480:        }
+  481:        else
+  482:        {
+  483:          *mpu8IicTxRxPointer++ = IICD;         
+  484:        }
+  485:      }
+  486:      else
+  487:      {
+  488:        IICC |= mIicTransmitModeSelectMask_c;
+  489:        *mpu8IicTxRxPointer++ = IICD;   
+  490:        iicFinishReadWrite(gIicTxRxSuccess_c);
+  491:      }
+  492:    }
+  493:    else
+  494:    {
+  495:      IICC &= ~(mIicInterruptEnableMask_c|mIicMasterModeSelectMask_c|mIicTransmitModeSelectMask_c);
+  496:      mIicState = mIicIdle_c;
+  497:    }
+  498:  }
+  002d 8a       [3]             PULH  
+  002e 80       [9]             RTI   
+  002f          L2F:    
+  002f a103     [2]             CMP   #3
+  0031 2645     [3]             BNE   L78 ;abs = 0078
+  0033 c60000   [4]             LDA   mu8IicDataCounter
+  0036 272a     [3]             BEQ   L62 ;abs = 0062
+  0038 4b03     [4]             DBNZA L3D ;abs = 003d
+  003a 1600     [5]             BSET  3,_IIC1C1
+  003c 65       [3]             SKIP2 L3F ;abs = 003f
+  003d          L3D:    
+  003d 1700     [5]             BCLR  3,_IIC1C1
+  003f          L3F:    
+  003f 450000   [3]             LDHX  @mu8IicDataCounter
+  0042 7a       [4]             DEC   ,X
+  0043 c60000   [4]             LDA   bIicDeviceAddressFlag
+  0046 270a     [3]             BEQ   L52 ;abs = 0052
+  0048 4f       [1]             CLRA  
+  0049 c70000   [4]             STA   bIicDeviceAddressFlag
+  004c 1900     [5]             BCLR  4,_IIC1C1
+  004e b600     [3]             LDA   _IIC1D
+  0050 8a       [3]             PULH  
+  0051 80       [9]             RTI   
+  0052          L52:    
+  0052 b600     [3]             LDA   _IIC1D
+  0054 320000   [5]             LDHX  mpu8IicTxRxPointer
+  0057 f7       [2]             STA   ,X
+  0058 450000   [3]             LDHX  @mpu8IicTxRxPointer
+  005b 6c01     [5]             INC   1,X
+  005d 2624     [3]             BNE   L83 ;abs = 0083
+  005f 7c       [4]             INC   ,X
+  0060 8a       [3]             PULH  
+  0061 80       [9]             RTI   
+  0062          L62:    
+  0062 1800     [5]             BSET  4,_IIC1C1
+  0064 b600     [3]             LDA   _IIC1D
+  0066 320000   [5]             LDHX  mpu8IicTxRxPointer
+  0069 f7       [2]             STA   ,X
+  006a 450000   [3]             LDHX  @mpu8IicTxRxPointer
+  006d 6c01     [5]             INC   1,X
+  006f 2601     [3]             BNE   L72 ;abs = 0072
+  0071 7c       [4]             INC   ,X
+  0072          L72:    
+  0072 4f       [1]             CLRA  
+  0073          L73:    
+  0073 cd0000   [6]             JSR   iicFinishReadWrite
+  0076 8a       [3]             PULH  
+  0077 80       [9]             RTI   
+  0078          L78:    
+  0078 b600     [3]             LDA   _IIC1C1
+  007a a48f     [2]             AND   #-113
+  007c b700     [3]             STA   _IIC1C1
+  007e a601     [2]             LDA   #1
+  0080 c70000   [4]             STA   mIicState
+  0083          L83:    
+  0083 8a       [3]             PULH  
+  0084 80       [9]             RTI   
+  499:  
+  500:  #pragma CODE_SEG DEFAULT
+  501:  
+  502:  #endif 
+  503:  
+  504:  /************************************************************************************
+  505:  *************************************************************************************
+  506:  * private functions
+  507:  *************************************************************************************
+  508:  ************************************************************************************/
+  509:  /***********************************************************************************/
+  510:  #if TRUE == gIicSupported_d
+  511:  iicErr_t iicSendNextByte(uint8_t NextByte)
+  512:  {
+  513:    IICD = NextByte;                                       
+  0000 b700     [3]             STA   _IIC1D
+  0002          L2:     
+  514:    while(!(mIicInterruptFlagMask_c & IICS));             
+  0002 0300fd   [5]             BRCLR 1,_IIC1S,L2 ;abs = 0002
+  515:    IICS |= mIicInterruptFlagMask_c;                       
+  0005 1200     [5]             BSET  1,_IIC1S
+  516:    if(mIicReceiveAckMask_c & IICS) return gIicErrNoAck_c;
+  0007 010003   [5]             BRCLR 0,_IIC1S,LD ;abs = 000d
+  000a a604     [2]             LDA   #4
+  000c 8d       [7]             RTC   
+  000d          LD:     
+  517:    else return gIicErrNoError_c;
+  000d 4f       [1]             CLRA  
+  518:  }
+  000e 8d       [7]             RTC   
+  519:  
+  520:  #if gIicMode_d == gIicInterrupt_c   
+  521:  #pragma CODE_SEG ISR_SEGMENT
+  522:  #endif
+  523:  void iicFinishReadWrite(iicResult_t rwResult)
+  524:  {
+  525:    mIicState = mIicTransactionInProcess_c;
+  0000 ae04     [2]             LDX   #4
+  0002 cf0000   [4]             STX   mIicState
+  526:    mIicDisableInterrupt();
+  0005 1d00     [5]             BCLR  6,_IIC1C1
+  527:    mpfIicCallback(rwResult);
+  0007 320000   [5]             LDHX  mpfIicCallback
+  000a fc       [3]             JMP   ,X
+  528:  }
+  529:  #pragma CODE_SEG DEFAULT
+  530:  
+  531:  #endif
+  532:  

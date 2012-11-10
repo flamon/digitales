@@ -1,0 +1,538 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * Flash driver implementation. 
+    3:  *
+    4:  * (c) Copyright 2010, Freescale, Inc.  All rights reserved.
+    5:  *
+    6:  * Freescale Semiconductor Confidential Proprietary
+    7:  *
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  ************************************************************************************/
+   13:  
+   14:  
+   15:  #include "Flash.h"
+   16:  
+   17:  #pragma MESSAGE DISABLE C1805
+   18:  
+   19:  /************************************************************************************
+   20:  *************************************************************************************
+   21:  * Private memory declarations
+   22:  *************************************************************************************
+   23:  ************************************************************************************/
+   24:  #if TRUE == gFlashSupported_d   
+   25:  #pragma DATA_SEG FLASH_ROUTINES_RAM 
+   26:  volatile uint8_t FlashRamDummyData = 0; //It is just to avoid Linker warning                                    
+   27:  #pragma DATA_SEG DEFAULT
+   28:              
+   29:                                            
+   30:  extern uint8_t __SEG_START_FLASH_ROUTINES_RAM[];
+   31:  extern uint8_t __SEG_SIZE_FLASH_ROUTINES_RAM[];
+   32:  
+   33:  #endif
+   34:  /************************************************************************************
+   35:  *************************************************************************************
+   36:  * Public functions
+   37:  *************************************************************************************
+   38:  ************************************************************************************/
+   39:  
+   40:  /************************************************************************************
+   41:  *
+   42:  * Flash_CmdHandler
+   43:  *
+   44:  ************************************************************************************/
+   45:  
+   46:  #pragma CODE_SEG FLASH_ROUTINES  
+   47:  
+   48:  #if TRUE == gFlashSupported_d
+   49:  
+   50:  FlashErr_t Flash_CmdHandler
+   51:  (
+   52:    uint32_t u32FlashAddress,  
+   53:    uint8_t* pu8FlashData, 
+   54:    uint16_t u16FlashDataSize, 
+   55:    uint8_t u8FlashCmd
+   56:  )
+   57:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  0003 a7fe     [2]             AIS   #-2
+   58:      uint16_t u16LocalAddress;
+   59:    
+   60:      #ifdef gMcs08Gt60Platform_d       
+   61:          u16LocalAddress = (uint16_t)(u32FlashAddress);  
+   62:      #else // gMcs08qe128Platform_d || gMc1323xPlatform_d      
+   63:          PPAGE = ((u32FlashAddress & 0x0001C000)>>14);
+  0005 95       [2]             TSX   
+  0006 af0a     [2]             AIX   #10
+  0008 cd0000   [6]             JSR   _LAND_RC
+  000b 0001c000         DC.L  114688
+  000f 95       [2]             TSX   
+  0010 a60e     [2]             LDA   #14
+  0012 cd0000   [6]             JSR   _LLSR
+  0015 95       [2]             TSX   
+  0016 e603     [3]             LDA   3,X
+  0018 b700     [3]             STA   _PPAGE
+   64:          u16LocalAddress = ((uint16_t)(u32FlashAddress & 0x00003FFF)+0x8000);     
+  001a e615     [3]             LDA   21,X
+  001c 87       [2]             PSHA  
+  001d e614     [3]             LDA   20,X
+  001f a43f     [2]             AND   #63
+  0021 ab80     [2]             ADD   #-128
+  0023 88       [3]             PULX  
+  0024 87       [2]             PSHA  
+  0025 8a       [3]             PULH  
+  0026 9eff09   [5]             STHX  9,SP
+   65:      #endif
+   66:      #if (TRUE == gFlashParamAndInitValidation_d)
+   67:          if(!u16FlashDataSize)   // DataSize may not be 0.
+  0029 9efe0c   [5]             LDHX  12,SP
+  002c a708     [2]             AIS   #8
+  002e 2711     [3]             BEQ   L41 ;abs = 0041
+   68:          {
+   69:            return gFlashErrInvalidParam_c;
+   70:          } 
+   71:          if(((u8FlashCmd == gFlashCmdProgram_c)||(u8FlashCmd == gFlashCmdBurst_c)) && ((&pu8FlashData) == NULL)) 
+  0030 95       [2]             TSX   
+  0031 e602     [3]             LDA   2,X
+  0033 412004   [4]             CBEQA #32,L3A ;abs = 003a
+  0036 a125     [2]             CMP   #37
+  0038 260b     [3]             BNE   L45 ;abs = 0045
+  003a          L3A:    
+  003a af08     [2]             AIX   #8
+  003c 650000   [3]             CPHX  #0
+  003f 2604     [3]             BNE   L45 ;abs = 0045
+  0041          L41:    
+   72:          {
+   73:            return gFlashErrInvalidParam_c;
+  0041 a601     [2]             LDA   #1
+  0043 2077     [3]             BRA   LBC ;abs = 00bc
+  0045          L45:    
+   74:          }
+   75:      #endif
+   76:         
+   77:       if (FSTAT & (FSTAT_FACCERR_MASK | FSTAT_FACCERR_MASK | FSTAT_FBLANK_MASK))
+  0045 c60000   [4]             LDA   _FSTAT
+  0048 a514     [2]             BIT   #20
+  004a 2707     [3]             BEQ   L53 ;abs = 0053
+   78:      {     
+   79:      // Clear Access Error and Write Protection Error Flags
+   80:      FSTAT |= (FSTAT_FACCERR_MASK | FSTAT_FPVIOL_MASK | FSTAT_FBLANK_MASK);
+  004c 450000   [3]             LDHX  @_FSTAT
+  004f f6       [3]             LDA   ,X
+  0050 aa34     [2]             ORA   #52
+  0052 f7       [2]             STA   ,X
+  0053          L53:    
+   81:      }
+   82:      do
+   83:      {
+   84:          // Wait for the Last Burst Command to complete 
+   85:          while(!(FSTAT & FSTAT_FCBEF_MASK));
+  0053 c60000   [4]             LDA   _FSTAT
+  0056 2afb     [3]             BPL   L53 ;abs = 0053
+   86:           
+   87:          // Dummy write before setting the Flash command
+   88:          (*((volatile uint8_t *)(u16LocalAddress++))) = *pu8FlashData; 
+  0058 9efe09   [5]             LDHX  9,SP
+  005b f6       [3]             LDA   ,X
+  005c 9efe01   [5]             LDHX  1,SP
+  005f f7       [2]             STA   ,X
+  0060 af01     [2]             AIX   #1
+  0062 9eff01   [5]             STHX  1,SP
+   89:  
+   90:          pu8FlashData++;     
+  0065 95       [2]             TSX   
+  0066 6c09     [5]             INC   9,X
+  0068 2602     [3]             BNE   L6C ;abs = 006c
+  006a 6c08     [5]             INC   8,X
+  006c          L6C:    
+   91:      
+   92:          FCMD = u8FlashCmd;            // Configures the Flash command          
+  006c e602     [3]             LDA   2,X
+  006e c70000   [4]             STA   _FCMD
+   93:          FSTAT |= FSTAT_FCBEF_MASK;    // Clears FCBEF to Start the command 
+  0071 c60000   [4]             LDA   _FSTAT
+  0074 aa80     [2]             ORA   #-128
+  0076 c70000   [4]             STA   _FSTAT
+   94:          
+   95:          // Wait at least 4 cycles to read the Error Flags 
+   96:          _asm NOP;
+  0079 9d       [1]             NOP   
+   97:          _asm NOP;
+  007a 9d       [1]             NOP   
+   98:          _asm NOP;
+  007b 9d       [1]             NOP   
+   99:          _asm NOP;
+  007c 9d       [1]             NOP   
+  100:          
+  101:  
+  102:          if (FSTAT & FSTAT_FACCERR_MASK)
+  007d c60000   [4]             LDA   _FSTAT
+  0080 a510     [2]             BIT   #16
+  0082 2704     [3]             BEQ   L88 ;abs = 0088
+  103:          {
+  104:            return gFlashErrAccess_c;
+  0084 a606     [2]             LDA   #6
+  0086 2034     [3]             BRA   LBC ;abs = 00bc
+  0088          L88:    
+  105:          }
+  106:          if (FSTAT & FSTAT_FPVIOL_MASK) 
+  0088 c60000   [4]             LDA   _FSTAT
+  008b a520     [2]             BIT   #32
+  008d 2704     [3]             BEQ   L93 ;abs = 0093
+  107:          {
+  108:            return gFlashErrWriteProtection_c;
+  008f a603     [2]             LDA   #3
+  0091 2029     [3]             BRA   LBC ;abs = 00bc
+  0093          L93:    
+  109:          }
+  110:          
+  111:      }while (--u16FlashDataSize);
+  0093 6d04     [4]             TST   4,X
+  0095 2602     [3]             BNE   L99 ;abs = 0099
+  0097 6a03     [5]             DEC   3,X
+  0099          L99:    
+  0099 6a04     [5]             DEC   4,X
+  009b 9efe04   [5]             LDHX  4,SP
+  009e 650000   [3]             CPHX  #0
+  00a1 26b0     [3]             BNE   L53 ;abs = 0053
+  00a3          LA3:    
+  112:     
+  113:      
+  114:      while ((FSTAT  & FSTAT_FCCF_MASK)==0);  // Wait for the last command to complete  
+  00a3 c60000   [4]             LDA   _FSTAT
+  00a6 a540     [2]             BIT   #64
+  00a8 27f9     [3]             BEQ   LA3 ;abs = 00a3
+  115:      
+  116:      if (u8FlashCmd == gFlashCmdBlankCheck_c)  
+  00aa 95       [2]             TSX   
+  00ab e602     [3]             LDA   2,X
+  00ad a105     [2]             CMP   #5
+  00af 260a     [3]             BNE   LBB ;abs = 00bb
+  117:      {
+  118:         if (!(FSTAT & FSTAT_FBLANK_MASK))      
+  00b1 c60000   [4]             LDA   _FSTAT
+  00b4 a504     [2]             BIT   #4
+  00b6 2603     [3]             BNE   LBB ;abs = 00bb
+  119:         {
+  120:            return gFlashErrBlankCheck_c;       
+  00b8 a602     [2]             LDA   #2
+  00ba 21       [3]             SKIP1 LBC ;abs = 00bc
+  00bb          LBB:    
+  121:         }
+  122:      
+  123:      } 
+  124:          
+  125:      return gFlashNoErr_c;                           
+  00bb 4f       [1]             CLRA  
+  00bc          LBC:    
+  126:  }
+  00bc a705     [2]             AIS   #5
+  00be 8d       [7]             RTC   
+  127:  
+  128:  #else // FALSE == gFlashSupported_d 
+  129:   
+  130:   FlashErr_t Flash_CmdHandler (uint32_t u32FlashAddress, uint8_t* pu8FlashData, uint16_t u16FlashDataSize, uint8_t u8FlashCmd)
+  131:   {
+  132:     (void)u32FlashAddress;
+  133:     (void)pu8FlashData;
+  134:     (void)u16FlashDataSize;
+  135:     (void)u8FlashCmd;
+  136:     return gFlashNoErr_c;
+  137:   }
+  138:   
+  139:   #endif
+  140:  
+  141:  
+  142:  #pragma CODE_SEG DEFAULT
+  143:  
+  144:  /************************************************************************************
+  145:  *
+  146:  * Flash_Init
+  147:  *
+  148:  ************************************************************************************/
+  149:  
+  150:  #if TRUE == gFlashSupported_d 
+  151:  
+  152:  FlashErr_t Flash_Init
+  153:    (
+  154:      FlashClkValues_t FlashClkValue
+  155:    )
+  156:  { 
+  157:      #if (TRUE == gFlashParamAndInitValidation_d)
+  158:     
+  159:        if(FlashClkValue > gFlashClkMax_c)
+  0000 a109     [2]             CMP   #9
+  0002 2303     [3]             BLS   L7 ;abs = 0007
+  160:        {
+  161:          return gFlashErrInvalidParam_c;
+  0004 a601     [2]             LDA   #1
+  0006 8d       [7]             RTC   
+  0007          L7:     
+  162:        }
+  163:          
+  164:        if (FCDIV & FCDIV_FDIVLD_MASK) // Check if the FDIV register was written before
+  0007 97       [1]             TAX   
+  0008 c60000   [4]             LDA   _FCDIV
+  000b 2a03     [3]             BPL   L10 ;abs = 0010
+  165:        {
+  166:          return gFlashErrOncePerRst_c;
+  000d a604     [2]             LDA   #4
+  000f 8d       [7]             RTC   
+  0010          L10:    
+  167:        }
+  168:      
+  169:      #endif 
+  170:     
+  171:      // Clear FACCERR and FPVIOL Flags 
+  172:      FSTAT = FSTAT | 0x30;  
+  0010 c60000   [4]             LDA   _FSTAT
+  0013 aa30     [2]             ORA   #48
+  0015 c70000   [4]             STA   _FSTAT
+  173:      
+  174:      switch (FlashClkValue)
+  0018 a308     [2]             CPX   #8
+  001a 2238     [3]             BHI   L54 ;abs = 0054
+  001c 5d       [1]             TSTX  
+  001d 271b     [3]             BEQ   L3A ;abs = 003a
+  001f 51011c   [4]             CBEQX #1,L3E ;abs = 003e
+  0022 51021d   [4]             CBEQX #2,L42 ;abs = 0042
+  0025 51031e   [4]             CBEQX #3,L46 ;abs = 0046
+  0028 510429   [4]             CBEQX #4,L54 ;abs = 0054
+  002b 51051c   [4]             CBEQX #5,L4A ;abs = 004a
+  002e 51061d   [4]             CBEQX #6,L4E ;abs = 004e
+  0031 51071e   [4]             CBEQX #7,L52 ;abs = 0052
+  0034 a308     [2]             CPX   #8
+  0036 261c     [3]             BNE   L54 ;abs = 0054
+  0038 2018     [3]             BRA   L52 ;abs = 0052
+  003a          L3A:    
+  175:      {
+  176:        case gFlashClk20MHz_c:  FCDIV = 0x4C; break;
+  003a a64c     [2]             LDA   #76
+  003c 2018     [3]             BRA   L56 ;abs = 0056
+  003e          L3E:    
+  177:        case gFlashClk16MHz_c:  FCDIV = 0x49; break;
+  003e a649     [2]             LDA   #73
+  0040 2014     [3]             BRA   L56 ;abs = 0056
+  0042          L42:    
+  178:        case gFlashClk10MHz_c:  FCDIV = 0x31; break;
+  0042 a631     [2]             LDA   #49
+  0044 2010     [3]             BRA   L56 ;abs = 0056
+  0046          L46:    
+  179:        case gFlashClk8MHz_c:   FCDIV = 39; break; 
+  0046 a627     [2]             LDA   #39
+  0048 200c     [3]             BRA   L56 ;abs = 0056
+  004a          L4A:    
+  180:        case gFlashClk4MHz_c:   FCDIV = 20; break;  // 19 for QE and 1323x
+  181:        case gFlashClk2MHz_c:   FCDIV = 9; break;
+  004a a609     [2]             LDA   #9
+  004c 2008     [3]             BRA   L56 ;abs = 0056
+  004e          L4E:    
+  182:        case gFlashClk1MHz_c:   FCDIV = 4; break;
+  004e a604     [2]             LDA   #4
+  0050 2004     [3]             BRA   L56 ;abs = 0056
+  0052          L52:    
+  183:        case gFlashClk200kHz_c: FCDIV = 0; break;
+  184:        case gFlashClk100kHz_c: FCDIV = 0; break;
+  0052 4f       [1]             CLRA  
+  0053 65       [3]             SKIP2 L56 ;abs = 0056
+  0054          L54:    
+  185:        
+  186:        default:  FCDIV = 20;break;
+  0054 a614     [2]             LDA   #20
+  0056          L56:    
+  0056 c70000   [4]             STA   _FCDIV
+  187:      }
+  188:      
+  189:      // A new command may be written in the command buffer.   
+  190:      FSTAT |= FSTAT_FCBEF_MASK;   
+  0059 450000   [3]             LDHX  @_FSTAT
+  005c f6       [3]             LDA   ,X
+  005d aa80     [2]             ORA   #-128
+  005f f7       [2]             STA   ,X
+  191:  
+  192:       
+  193:      if (FSTAT & FSTAT_FACCERR_MASK)
+  0060 f6       [3]             LDA   ,X
+  0061 a510     [2]             BIT   #16
+  0063 2703     [3]             BEQ   L68 ;abs = 0068
+  194:      {
+  195:        return gFlashErrAccess_c;
+  0065 a606     [2]             LDA   #6
+  0067 8d       [7]             RTC   
+  0068          L68:    
+  196:      }
+  197:      if (FSTAT & FSTAT_FPVIOL_MASK) 
+  0068 c60000   [4]             LDA   _FSTAT
+  006b a520     [2]             BIT   #32
+  006d 2703     [3]             BEQ   L72 ;abs = 0072
+  198:      {
+  199:        return gFlashErrWriteProtection_c;
+  006f a603     [2]             LDA   #3
+  0071 8d       [7]             RTC   
+  0072          L72:    
+  200:      }
+  201:      
+  202:      FlashRamDummyData = 0; //It is just to avoid Linker warning                                    
+  0072 4f       [1]             CLRA  
+  0073 c70000   [4]             STA   FlashRamDummyData
+  203:      
+  204:      FlashCopyInRAM();
+  0076 ac000000 [8]             CALL  FlashCopyInRAM
+  205:     
+  206:      return gFlashNoErr_c;
+  007a 4f       [1]             CLRA  
+  207:   }
+  007b 8d       [7]             RTC   
+  208:   
+  209:  #else  // FALSE == gFlashSupported_d 
+  210:    
+  211:   FlashErr_t Flash_Init (FlashClkValues_t FlashClkValue)
+  212:   {
+  213:     (void)FlashClkValue;
+  214:     return gFlashNoErr_c;
+  215:   }
+  216:   #endif
+  217:   
+  218:   /************************************************************************************
+  219:  *
+  220:  * Flash_Read
+  221:  *
+  222:  ************************************************************************************/
+  223:  
+  224:   #if TRUE == gFlashSupported_d 
+  225:   
+  226:   FlashErr_t Flash_Read (uint32_t u32FlashAddress,uint8_t* pu8FlashData)
+  227:   {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  228:  
+  229:      #if (TRUE == gFlashParamAndInitValidation_d)
+  230:        if((u32FlashAddress > mMaxFlashAddress_c) || (NULL == pu8FlashData))
+  0002 95       [2]             TSX   
+  0003 af05     [2]             AIX   #5
+  0005 cd0000   [6]             JSR   _LCMP_RC
+  0008 0001ffff         DC.L  131071
+  000c 2205     [3]             BHI   L13 ;abs = 0013
+  000e 9efe01   [5]             LDHX  1,SP
+  0011 2604     [3]             BNE   L17 ;abs = 0017
+  0013          L13:    
+  231:        {
+  232:          return gFlashErrInvalidParam_c;
+  0013 a601     [2]             LDA   #1
+  0015 2014     [3]             BRA   L2B ;abs = 002b
+  0017          L17:    
+  233:        }
+  234:      #endif
+  235:      
+  236:      #ifdef gMcs08Gt60Platform_d         
+  237:          *pu8FlashData = *(uint8_t*)(u32FlashAddress & 0x0000FFFF);      
+  238:      #else // gMcs08qe128Platform_d || gMc1323xPlatform_d      
+  239:          LAP0 =  (uint8_t)(u32FlashAddress & 0x000000FF);
+  0017 9ee609   [4]             LDA   9,SP
+  001a b700     [3]             STA   _LAP0
+  240:          LAP1 =  (uint8_t)((u32FlashAddress >> 8) & 0x000000FF);
+  001c 9ee608   [4]             LDA   8,SP
+  001f b700     [3]             STA   _LAP1
+  241:          LAP2 =  (uint8_t)((u32FlashAddress >> 16)& 0x00000001);
+  0021 9ee607   [4]             LDA   7,SP
+  0024 a401     [2]             AND   #1
+  0026 b700     [3]             STA   _LAP2
+  242:          *pu8FlashData = LB;
+  0028 5e00     [5]             MOV   _LB,X+
+  243:      #endif
+  244:      
+  245:     return gFlashNoErr_c;
+  002a 4f       [1]             CLRA  
+  002b          L2B:    
+  246:   }
+  002b a702     [2]             AIS   #2
+  002d 8d       [7]             RTC   
+  247:   
+  248:  #else   // FALSE == gFlashSupported_d 
+  249:  
+  250:   FlashErr_t Flash_Read (uint32_t u32FlashAddress,uint8_t* pu8FlashData)
+  251:   {
+  252:  
+  253:     (void)u32FlashAddress;
+  254:     (void)pu8FlashData;
+  255:     return gFlashNoErr_c;
+  256:   }
+  257:   #endif
+  258:   
+  259:  
+  260:  /************************************************************************************
+  261:  *************************************************************************************
+  262:  * Private functions
+  263:  *************************************************************************************
+  264:  ************************************************************************************/
+  265:  
+  266:  
+  267:  /************************************************************************************
+  268:  *
+  269:  * FlashCopyInRAM
+  270:  *
+  271:  ************************************************************************************/
+  272:  
+  273:  #if TRUE == gFlashSupported_d 
+  274:   
+  275:  void FlashCopyInRAM(void) 
+  276:  {                                  
+  0000 a7fa     [2]             AIS   #-6
+  277:    uint8_t *srcPtr, *dstPtr;
+  278:    uint16_t count;
+  279:    srcPtr = (uint8_t *)StartCopyInRAM;
+  0002 450000   [3]             LDHX  @__SEG_START_FLASH_ROUTINES_RAM
+  0005 9eff03   [5]             STHX  3,SP
+  280:    dstPtr = (uint8_t *)&Flash_CmdHandler;
+  0008 450000   [3]             LDHX  @Flash_CmdHandler
+  000b 9eff05   [5]             STHX  5,SP
+  281:    for (count = 0; count < (uint16_t) SizeCopyInRAM;  count++, dstPtr++, srcPtr++) 
+  000e 95       [2]             TSX   
+  000f 6f01     [5]             CLR   1,X
+  0011 7f       [4]             CLR   ,X
+  0012 201a     [3]             BRA   L2E ;abs = 002e
+  0014          L14:    
+  282:    {
+  283:      *dstPtr = *srcPtr;
+  0014 9efe03   [5]             LDHX  3,SP
+  0017 f6       [3]             LDA   ,X
+  0018 9efe05   [5]             LDHX  5,SP
+  001b f7       [2]             STA   ,X
+  001c 95       [2]             TSX   
+  001d 6c01     [5]             INC   1,X
+  001f 2601     [3]             BNE   L22 ;abs = 0022
+  0021 7c       [4]             INC   ,X
+  0022          L22:    
+  0022 6c05     [5]             INC   5,X
+  0024 2602     [3]             BNE   L28 ;abs = 0028
+  0026 6c04     [5]             INC   4,X
+  0028          L28:    
+  0028 6c03     [5]             INC   3,X
+  002a 2602     [3]             BNE   L2E ;abs = 002e
+  002c 6c02     [5]             INC   2,X
+  002e          L2E:    
+  002e 9efe01   [5]             LDHX  1,SP
+  0031 650000   [3]             CPHX  @__SEG_SIZE_FLASH_ROUTINES_RAM
+  0034 25de     [3]             BCS   L14 ;abs = 0014
+  284:    }
+  285:  }
+  0036 a706     [2]             AIS   #6
+  0038 8d       [7]             RTC   
+  286:  
+  287:  #endif
+  288:  
+  289:  /************************************************************************************
+  290:  *************************************************************************************
+  291:  * Private Debug stuff
+  292:  *************************************************************************************
+  293:  ************************************************************************************/
+  294:  
+  295:  
+  296:  
+  297:  /* End of Flash.c */
+  298:  

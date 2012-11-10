@@ -1,0 +1,184 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  #include "derivative.h"
+    2:  #include "EmbeddedTypes.h"
+    3:  #include "LVD.h"
+    4:  
+    5:  #if TRUE == gLvdSupported_d  
+    6:  static lvCallback_t LvwCllbk;
+    7:  static lvCallback_t LvdCllbk;
+    8:  #endif //gLvdSupported_d
+    9:  
+   10:  /************************************************************************************
+   11:  *  Lvd_Init
+   12:  *
+   13:  * The purpose of this function is to configure the posible options of the LVD moduel 
+   14:  * 
+   15:  *
+   16:  ************************************************************************************/ 
+   17:  
+   18:  #if TRUE == gLvdSupported_d  
+   19:  lvdError_t Lvd_Init
+   20:  (
+   21:  lvCallback_t LvwCallback,
+   22:  lvCallback_t LvdCallback,
+   23:  LvdControl1_t LvdControlConfig1,
+   24:  LvdControl2_t LvdControlConfig2
+   25:  )
+   26:  
+   27:  {
+  0000 89       [2]             PSHX  
+  0001 87       [2]             PSHA  
+   28:  
+   29:    if((LvwCallback == NULL) || (LvdCallback == NULL)){
+  0002 9efe08   [5]             LDHX  8,SP
+  0005 2705     [3]             BEQ   LC ;abs = 000c
+  0007 9efe06   [5]             LDHX  6,SP
+  000a 2604     [3]             BNE   L10 ;abs = 0010
+  000c          LC:     
+   30:      
+   31:      return gLvdErrorInvalidParameter_c;
+  000c a601     [2]             LDA   #1
+  000e 2017     [3]             BRA   L27 ;abs = 0027
+  0010          L10:    
+   32:    
+   33:    }
+   34:  
+   35:    LvdReg1 =  LvdControlConfig1.Port;
+  0010 95       [2]             TSX   
+  0011 e601     [3]             LDA   1,X
+  0013 c70000   [4]             STA   _SPMSC1
+   36:    LvdReg2 =  LvdControlConfig2.Port;
+  0016 f6       [3]             LDA   ,X
+  0017 c70000   [4]             STA   _SPMSC3
+   37:  
+   38:    LvwCllbk = LvwCallback;
+  001a 9efe08   [5]             LDHX  8,SP
+  001d 960000   [5]             STHX  LvwCllbk
+   39:    LvdCllbk = LvdCallback;
+  0020 9efe06   [5]             LDHX  6,SP
+  0023 960000   [5]             STHX  LvdCllbk
+   40:  
+   41:    return gLvdErrorNoError_c;
+  0026 4f       [1]             CLRA  
+  0027          L27:    
+   42:  
+   43:  }
+  0027 a702     [2]             AIS   #2
+  0029 8d       [7]             RTC   
+   44:  #else
+   45:  lvdError_t Lvd_Init (lvCallback_t LvwCallback, lvCallback_t LvdCallback, LvdControl1_t LvdControlConfig1, LvdControl2_t LvdControlConfig2)
+   46:  {     
+   47:    (void)LvwCallback;
+   48:    (void)LvdCallback;
+   49:    (void)LvdControlConfig1;
+   50:    (void)LvdControlConfig2;
+   51:    return gLvdErrorNoError_c;
+   52:  }
+   53:  
+   54:  #endif //gLvdSupported_d 
+   55:   
+   56:   
+   57:  /************************************************************************************
+   58:  *  Lvd_VoltageStatus
+   59:  *
+   60:  * The purpose of this function is to return the current status of the voltage values  
+   61:  *
+   62:  *
+   63:  ************************************************************************************/ 
+   64:  #if TRUE == gLvdSupported_d   
+   65:  lvdVoltage_t Lvd_VoltageStatus(void){
+   66:  
+   67:      
+   68:    if (gLowVoltageDetectFlag){
+  0000 c60000   [4]             LDA   _SPMSC1
+  0003 2a02     [3]             BPL   L7 ;abs = 0007
+   69:          
+   70:        return gLvdVoltageDetetcFlagActive_c;
+  0005 4f       [1]             CLRA  
+  0006 8d       [7]             RTC   
+  0007          L7:     
+   71:    
+   72:    } 
+   73:  
+   74:    if (gLowVoltageWarningFlag){
+  0007 c60000   [4]             LDA   _SPMSC3
+  000a 2a03     [3]             BPL   LF ;abs = 000f
+   75:      
+   76:        return gLvdVoltageWarningFlagActive_c;
+  000c a601     [2]             LDA   #1
+  000e 8d       [7]             RTC   
+  000f          LF:     
+   77:  
+   78:    }
+   79:    
+   80:    return gLvdVoltageNoFlagsActive_c;
+  000f a602     [2]             LDA   #2
+   81:    
+   82:  }
+  0011 8d       [7]             RTC   
+   83:  #else
+   84:  lvdVoltage_t Lvd_VoltageStatus(void)
+   85:  {     
+   86:    return gLvdErrorNoError_c;
+   87:  }
+   88:  
+   89:  #endif //gLvdSupported_d 
+   90:    
+   91:    
+   92:  /************************************************************************************
+   93:  *  LowVoltageDetect and  LowVoltageWarning Interrupt / Lvd_Task
+   94:  *
+   95:  *
+   96:  ************************************************************************************/ 
+   97:  #if TRUE == gLvdSupported_d
+   98:  #if gLvdMode_d == gInterruption_c 
+   99:   #pragma CODE_SEG ISR_SEGMENT
+  100:   INTERRUPT_KEYWORD void LowVoltageDetectIsr(void){
+  0000 8b       [2]             PSHH  
+  101:  #else
+  102:    #pragma CODE_SEG DEFAULT
+  103:    void Lvd_Task(void){
+  104:  #endif  
+  105:    
+  106:    if(gLowVoltageDetectFlag){
+  0001 c60000   [4]             LDA   _SPMSC1
+  0004 2a0b     [3]             BPL   L11 ;abs = 0011
+  107:      
+  108:      Lvd_Acknowledge();
+  0006 450000   [3]             LDHX  @_SPMSC1
+  0009 f6       [3]             LDA   ,X
+  000a aa40     [2]             ORA   #64
+  000c f7       [2]             STA   ,X
+  109:  
+  110:      LvdCllbk();
+  000d 320000   [5]             LDHX  LvdCllbk
+  0010 fd       [5]             JSR   ,X
+  0011          L11:    
+  111:    }
+  112:    
+  113:    
+  114:    if(gLowVoltageWarningFlag){
+  0011 c60000   [4]             LDA   _SPMSC3
+  0014 2a0b     [3]             BPL   L21 ;abs = 0021
+  115:    
+  116:      Lvw_Acknowledge();
+  0016 450000   [3]             LDHX  @_SPMSC3
+  0019 f6       [3]             LDA   ,X
+  001a aa40     [2]             ORA   #64
+  001c f7       [2]             STA   ,X
+  117:  
+  118:      LvwCllbk();
+  001d 320000   [5]             LDHX  LvwCllbk
+  0020 fd       [5]             JSR   ,X
+  0021          L21:    
+  119:    }
+  120:  
+  121:  }
+  0021 8a       [3]             PULH  
+  0022 80       [9]             RTI   
+  122:  
+  123:   #pragma CODE_SEG DEFAULT
+  124:  
+  125:  #endif //gLvdSupported_d 
+  126:  

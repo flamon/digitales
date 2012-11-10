@@ -1,0 +1,281 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * Source file for Real Time Interrupt driver.
+    3:  *
+    4:  *
+    5:  * (c) Copyright 2009, Freescale, Inc.  All rights reserved.
+    6:  *
+    7:  * Freescale Confidential Proprietary
+    8:  *
+    9:  * No part of this document must be reproduced in any form - including copied,
+   10:  * transcribed, printed or by any electronic means - without specific written
+   11:  * permission from Freescale.
+   12:  ************************************************************************************/
+   13:  
+   14:  #include "RTI.h"
+   15:  
+   16:  #pragma MESSAGE DISABLE C2705
+   17:  
+   18:  
+   19:  /************************************************************************************
+   20:  *************************************************************************************
+   21:  * Private type definitions
+   22:  *************************************************************************************
+   23:  ************************************************************************************/
+   24:  
+   25:  /************************************************************************************
+   26:  *************************************************************************************
+   27:  * Private defines and macros
+   28:  *************************************************************************************
+   29:  ************************************************************************************/
+   30:  
+   31:  /************************************************************************************
+   32:  *************************************************************************************
+   33:  * Private constants
+   34:  *************************************************************************************
+   35:  ************************************************************************************/
+   36:  
+   37:  /************************************************************************************
+   38:  *************************************************************************************
+   39:  * Private prototypes
+   40:  *************************************************************************************
+   41:  ************************************************************************************/
+   42:  
+   43:  
+   44:  /************************************************************************************
+   45:  *************************************************************************************
+   46:  * Public memory declarations
+   47:  *************************************************************************************
+   48:  ************************************************************************************/
+   49:  
+   50:  /************************************************************************************
+   51:  *************************************************************************************
+   52:  * Private memory declarations
+   53:  *************************************************************************************
+   54:  ************************************************************************************/
+   55:  #if TRUE == gRtiSupported_d
+   56:  static  rtiCallbackFunc_t mpRtiCallback;
+   57:  #endif //gRtiSupported_d
+   58:  /************************************************************************************
+   59:  *************************************************************************************
+   60:  * Public functions
+   61:  *************************************************************************************
+   62:  ************************************************************************************/
+   63:  
+   64:  
+   65:  /************************************************************************************/
+   66:  #if TRUE == gRtiSupported_d
+   67:  rtiErr_t Rti_Init(rtiCallbackFunc_t pCallback){
+   68:    
+   69:    if( NULL == pCallback ){
+  0000 650000   [3]             CPHX  #0
+  0003 2603     [3]             BNE   L8 ;abs = 0008
+   70:      return gRtiErrNullPointer_c;
+  0005 a602     [2]             LDA   #2
+  0007 8d       [7]             RTC   
+  0008          L8:     
+   71:    } 
+   72:    else{
+   73:      mpRtiCallback = pCallback;
+  0008 960000   [5]             STHX  mpRtiCallback
+   74:  #if  gRtiMode_d == gInterruption_c
+   75:      mRtiStatCntlReg |= mRtiInterrupEnBit_c;
+   76:  #else
+   77:      mRtiStatCntlReg = mNoneConfig_c;
+  000b 4f       [1]             CLRA  
+  000c c70000   [4]             STA   _RTCSC
+   78:  #endif
+   79:    }
+   80:    
+   81:    return gRtiErrNoError_c;
+   82:  } 
+  000f 8d       [7]             RTC   
+   83:  #else
+   84:  
+   85:  rtiErr_t Rti_Init(rtiCallbackFunc_t pCallback)
+   86:  {
+   87:    (void)pCallback;
+   88:    return gRtiErrNoError_c;
+   89:  }
+   90:  
+   91:  #endif //gRtiSupported_d
+   92:  
+   93:  /************************************************************************************/
+   94:  #if TRUE == gRtiSupported_d
+   95:  rtiErr_t Rti_SetConfig(rtiConfig_t * pRtiConfig){
+   96:  
+   97:    uint8_t u8TempReg;
+   98:      
+   99:    if(NULL != pRtiConfig){
+  0000 650000   [3]             CPHX  #0
+  0003 2729     [3]             BEQ   L2E ;abs = 002e
+  100:      if((pRtiConfig->rtiClockSrc < gRtiMaxClkSrc_c) &&
+  0005 f6       [3]             LDA   ,X
+  0006 a104     [2]             CMP   #4
+  0008 2421     [3]             BCC   L2B ;abs = 002b
+  101:         (pRtiConfig->rtiTimePeriod.rti1kHzIntClkPeriod < gRti1kHzIntClkMaxPeriod_c)){
+  000a e601     [3]             LDA   1,X
+  000c a110     [2]             CMP   #16
+  000e 241b     [3]             BCC   L2B ;abs = 002b
+  102:        
+  103:        u8TempReg = mRtiStatCntlReg;
+  0010 c60000   [4]             LDA   _RTCSC
+  104:        u8TempReg &= mRtiConfigMask_c;
+  0013 a490     [2]             AND   #-112
+  105:        u8TempReg |= (uint8_t)(pRtiConfig->rtiClockSrc << mRtiClkSrcShiftBits_c);
+  0015 87       [2]             PSHA  
+  0016 f6       [3]             LDA   ,X
+  0017 62       [1]             NSA   
+  0018 a4f0     [2]             AND   #-16
+  001a 48       [1]             LSLA  
+  001b 9eea01   [4]             ORA   1,SP
+  106:        u8TempReg |= (uint8_t)(pRtiConfig->rtiTimePeriod.rti1kHzIntClkPeriod);
+  001e ea01     [3]             ORA   1,X
+  107:        mRtiStatCntlReg = u8TempReg;
+  0020 c70000   [4]             STA   _RTCSC
+  108:  
+  109:  #ifndef gMcs08Gt60Platform_d
+  110:        mRtiModuleReg = pRtiConfig->rtiCntMod;
+  0023 e602     [3]             LDA   2,X
+  0025 c70000   [4]             STA   _RTCMOD
+  111:  #endif
+  112:        return gRtiErrNoError_c;
+  0028 4f       [1]             CLRA  
+  0029 8a       [3]             PULH  
+  002a 8d       [7]             RTC   
+  002b          L2B:    
+  113:      } 
+  114:      
+  115:      else{
+  116:        return gRtiErrInvalidParameter_c;
+  002b a603     [2]             LDA   #3
+  002d 8d       [7]             RTC   
+  002e          L2E:    
+  117:      }
+  118:    } 
+  119:    
+  120:    else{
+  121:      return gRtiErrNullPointer_c;
+  002e a602     [2]             LDA   #2
+  122:    }
+  123:  }
+  0030 8d       [7]             RTC   
+  124:  #else
+  125:  
+  126:  rtiErr_t Rti_SetConfig(rtiConfig_t * pRtiConfig)
+  127:  {
+  128:    (void)pRtiConfig;
+  129:    return gRtiErrNoError_c;
+  130:  }
+  131:  
+  132:  #endif //gRtiSupported_d  
+  133:  
+  134:  
+  135:  /************************************************************************************/
+  136:  #if TRUE == gRtiSupported_d
+  137:  rtiErr_t Rti_GetConfig(rtiConfig_t * pRtiConfig){
+  0000 8b       [2]             PSHH  
+  138:  
+  139:    uint8_t u8TempReg;
+  140:      
+  141:    if(NULL != pRtiConfig ){
+  0001 650000   [3]             CPHX  #0
+  0004 2722     [3]             BEQ   L28 ;abs = 0028
+  142:      
+  143:      u8TempReg = mRtiStatCntlReg;
+  0006 c60000   [4]             LDA   _RTCSC
+  0009 9ee701   [4]             STA   1,SP
+  144:      pRtiConfig->rtiTimePeriod.rti1kHzIntClkPeriod = (u8TempReg & mRtiPeriodMask_c);
+  000c a40f     [2]             AND   #15
+  000e e701     [3]             STA   1,X
+  145:      
+  146:      if(mNoneConfig_c == pRtiConfig->rtiTimePeriod.rti1kHzIntClkPeriod){
+  0010 2604     [3]             BNE   L16 ;abs = 0016
+  147:        return  gRtiErrRtiIsNotConfig_c;
+  0012 a601     [2]             LDA   #1
+  148:      } 
+  149:      else{
+  150:        pRtiConfig->rtiClockSrc = ((u8TempReg & mRtiClockSrcMask_c) >> mRtiClkSrcShiftBits_c);
+  151:  
+  152:  #ifndef gMcs08Gt60Platform_d
+  153:        pRtiConfig->rtiCntMod = mRtiModuleReg;
+  154:  #endif      
+  155:        
+  156:        return gRtiErrNoError_c;
+  157:      }
+  158:    } 
+  159:    
+  160:    else{
+  161:      return gRtiErrNullPointer_c;
+  162:    }
+  163:  }
+  0014 8a       [3]             PULH  
+  0015 8d       [7]             RTC   
+  0016          L16:    
+  0016 9ee601   [4]             LDA   1,SP
+  0019 a460     [2]             AND   #96
+  001b 62       [1]             NSA   
+  001c a40f     [2]             AND   #15
+  001e 44       [1]             LSRA  
+  001f f7       [2]             STA   ,X
+  0020 c60000   [4]             LDA   _RTCMOD
+  0023 e702     [3]             STA   2,X
+  0025 4f       [1]             CLRA  
+  0026 8a       [3]             PULH  
+  0027 8d       [7]             RTC   
+  0028          L28:    
+  0028 a602     [2]             LDA   #2
+  002a 8a       [3]             PULH  
+  002b 8d       [7]             RTC   
+  164:  #else
+  165:  
+  166:  rtiErr_t Rti_GetConfig(rtiConfig_t * pRtiConfig)
+  167:  {
+  168:    (void)pRtiConfig;
+  169:    return gRtiErrNoError_c;
+  170:  }
+  171:  
+  172:  #endif //gRtiSupported_d    
+  173:  
+  174:  
+  175:  /************************************************************************************/
+  176:  #if TRUE == gRtiSupported_d
+  177:  
+  178:  #if  gRtiMode_d == gInterruption_c
+  179:  
+  180:  #pragma CODE_SEG ISR_SEGMENT
+  181:  INTERRUPT_KEYWORD void Rti_Isr(void){
+  182:  
+  183:  #else if gRtiMode_d == gRtiPoll_c
+  184:  
+  185:  void Rti_Task(void){
+  186:    
+  187:   if(mRtiStatCntlReg & mRtiInterruptFlag_c){
+  0000 c60000   [4]             LDA   _RTCSC
+  0003 2a07     [3]             BPL   LC ;abs = 000c
+  188:  #endif
+  189:    
+  190:      mRtiStatCntlReg |=  mRtiInterruptAck_c;
+  0005 450000   [3]             LDHX  @_RTCSC
+  0008 f6       [3]             LDA   ,X
+  0009 aa80     [2]             ORA   #-128
+  000b f7       [2]             STA   ,X
+  000c          LC:     
+  191:  #if gRtiMode_d == gPolling_c
+  192:    }
+  193:  #endif
+  194:  
+  195:     mpRtiCallback();
+  000c 320000   [5]             LDHX  mpRtiCallback
+  000f fd       [5]             JSR   ,X
+  196:    
+  197:  } 
+  0010 8d       [7]             RTC   
+  198:  
+  199:  #endif //gRtiSupported_d  
+  200:  
+  201:  #pragma CODE_SEG DEFAULT
+  202:  /************************************************************************************/
+  203:  
+  204:  

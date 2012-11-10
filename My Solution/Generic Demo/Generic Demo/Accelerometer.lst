@@ -1,0 +1,478 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * Accelerometer driver implementation. 
+    3:  *
+    4:  * (c) Copyright 2010, Freescale, Inc.  All rights reserved.
+    5:  *
+    6:  * Freescale Semiconductor Confidential Proprietary
+    7:  *
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  ************************************************************************************/
+   13:  
+   14:  
+   15:  #include "Accelerometer.h"
+   16:  
+   17:  
+   18:  /************************************************************************************
+   19:  *************************************************************************************
+   20:  * Private memory declarations
+   21:  *************************************************************************************
+   22:  ************************************************************************************/
+   23:  
+   24:  #if TRUE == gAccelerometerSupported_d
+   25:  
+   26:  static accelCallback_t    mgAccelCallback = NULL;
+   27:  static accelComStatus_t   mgAccelCurrentStatus = gAccelComStatusNoInit_c;
+   28:  
+   29:  #if gTargetBoard_c == gMc1323xRcm_c
+   30:  static uint8_t            mgReadBuffer[3];
+   31:  static accelData_t*       mgXYZValues;
+   32:  #endif
+   33:  
+   34:  #endif //gAccelerometerSupported_d
+   35:  
+   36:  /************************************************************************************
+   37:  *************************************************************************************
+   38:  * Public memory declarations
+   39:  *************************************************************************************
+   40:  ************************************************************************************/
+   41:  
+   42:  #if TRUE == gAccelerometerSupported_d
+   43:  
+   44:   accelData_t   gAccelCalibrationValues;
+   45:   
+   46:  #endif //gAccelerometerSupported_d
+   47:  
+   48:  /************************************************************************************
+   49:  *************************************************************************************
+   50:  * Public functions
+   51:  *************************************************************************************
+   52:  ************************************************************************************/
+   53:  
+   54:  
+   55:  /************************************************************************************
+   56:  *
+   57:  *  Accel_Init
+   58:  *
+   59:  ************************************************************************************/
+   60:  #if TRUE == gAccelerometerSupported_d
+   61:  
+   62:  #if gTargetBoard_c == gMc1323xRcm_c     /* Only for MC1323xRCM board */
+   63:  accelErr_t  Accel_Init (void)
+   64:  {
+   65:    iicErr_t SerialComError = gIicErrNoError_c; 
+   66:    uint8_t au8TempBuffer[2] ={0};
+   67:    uint8_t u8TempCounter;
+   68:    
+   69:    
+   70:    au8TempBuffer[0] = mAccelModeReg_c;
+   71:    au8TempBuffer[1] = mAccelConfigValue4ActiveMode_c;
+   72:    
+   73:    SerialComError = IIC_WriteBlocking(mAccelmma7660fcI2cAddress_c,&au8TempBuffer[0], 2); 
+   74:    SerialComError = IIC_StopTransaction(mAccelmma7660fcI2cAddress_c);
+   75:    
+   76:    
+   77:    DelayMs(15);   //Delay ~ 12ms + 1/ODR 
+   78:    
+   79:    // Initalize calibration values
+   80:    gAccelCalibrationValues.XValue.AxisByte = 0;
+   81:    gAccelCalibrationValues.YValue.AxisByte = 0;
+   82:    gAccelCalibrationValues.ZValue.AxisByte = 0;
+   83:    
+   84:    // Read initial X value
+   85:    do
+   86:    {  
+   87:      u8TempCounter = 0;
+   88:      au8TempBuffer[0] = mAccelXValueReg_c;
+   89:      SerialComError = IIC_WriteBlocking(mAccelmma7660fcI2cAddress_c,&au8TempBuffer[0], 1);   
+   90:      SerialComError = IIC_ReadBlocking(mAccelmma7660fcI2cAddress_c,&au8TempBuffer[0], 1);
+   91:      SerialComError = IIC_StopTransaction(mAccelmma7660fcI2cAddress_c);
+   92:      gAccelCalibrationValues.XValue.AxisByte = au8TempBuffer[0];
+   93:      u8TempCounter++;
+   94:    }while((au8TempBuffer[0] & mAccelRegAlertmask_c) && (u8TempCounter != 3)); 
+   95:    
+   96:    if(4 <= u8TempCounter)
+   97:    {
+   98:      return gAccelErrInterfComError_c;
+   99:    }
+  100:    
+  101:    DelayMs(1);
+  102:    // Read initial Y value
+  103:    do
+  104:    {  
+  105:      u8TempCounter = 0;
+  106:      au8TempBuffer[0] = mAccelYValueReg_c;
+  107:      SerialComError = IIC_WriteBlocking(mAccelmma7660fcI2cAddress_c,&au8TempBuffer[0], 1);   
+  108:      SerialComError = IIC_ReadBlocking(mAccelmma7660fcI2cAddress_c,&au8TempBuffer[0], 1);
+  109:      SerialComError = IIC_StopTransaction(mAccelmma7660fcI2cAddress_c);
+  110:      gAccelCalibrationValues.YValue.AxisByte = au8TempBuffer[0];
+  111:      u8TempCounter++;
+  112:    }while((au8TempBuffer[0] & mAccelRegAlertmask_c) && (u8TempCounter != 3));
+  113:    
+  114:    if(4 <= u8TempCounter)
+  115:    {
+  116:      return gAccelErrInterfComError_c;
+  117:    }
+  118:    
+  119:    DelayMs(1);
+  120:    // Read initial Z value
+  121:    do
+  122:    {  
+  123:      u8TempCounter = 0;
+  124:      au8TempBuffer[0] = mAccelZValueReg_c;
+  125:      SerialComError = IIC_WriteBlocking(mAccelmma7660fcI2cAddress_c,&au8TempBuffer[0], 1);   
+  126:      SerialComError = IIC_ReadBlocking(mAccelmma7660fcI2cAddress_c,&au8TempBuffer[0], 1);
+  127:      SerialComError = IIC_StopTransaction(mAccelmma7660fcI2cAddress_c);
+  128:      gAccelCalibrationValues.ZValue.AxisByte = au8TempBuffer[0];
+  129:      u8TempCounter++;
+  130:    }while((au8TempBuffer[0] & mAccelRegAlertmask_c) && (u8TempCounter != 3));
+  131:    
+  132:    if(4 <= u8TempCounter)
+  133:    {
+  134:      return gAccelErrInterfComError_c;
+  135:    }
+  136:      
+  137:      
+  138:    if(gIicErrNoError_c != SerialComError) 
+  139:    {
+  140:      return gAccelErrInterfComError_c;
+  141:    }
+  142:  
+  143:    mgAccelCurrentStatus = gAccelComStatusIdle_c;
+  144:    return gAccelNoError_c;
+  145:  }
+  146:  #endif
+  147:  
+  148:  #if gTargetBoard_c == gMc1321xSrb_c       /* Only for MC1321xSRB board */
+  149:  accelErr_t  Accel_Init (void)
+  150:  {
+  151:    adcErrors_t TempInterfaceErr;
+  152:    uint16_t u16TempBuffer = 0;
+  153:    
+  154:    mAccel_PowerSaveOFF();
+  155:    
+  156:    (void) Accel_ConfigGravity (gAccelGRange1p5g_c);
+  157:    
+  158:    DelayMs(1);
+  159:    
+  160:    TempInterfaceErr = ADC_SetSingleConversionBlocking (mAccelXoutAdc_c, &u16TempBuffer); 
+  161:    gAccelCalibrationValues.XValue = (uint8_t) (u16TempBuffer);
+  162:    
+  163:    DelayMs(1);
+  164:    
+  165:    TempInterfaceErr = ADC_SetSingleConversionBlocking (mAccelYoutAdc_c, &u16TempBuffer);
+  166:    gAccelCalibrationValues.YValue = (uint8_t) (u16TempBuffer);
+  167:    
+  168:    DelayMs(1);
+  169:    
+  170:    TempInterfaceErr = ADC_SetSingleConversionBlocking (mAccelZoutAdc_c, &u16TempBuffer);
+  171:    gAccelCalibrationValues.ZValue = (uint8_t) (u16TempBuffer);
+  172:    
+  173:    if(gAdcErrNoError_c != TempInterfaceErr)
+  174:    {
+  175:      return gAccelErrInterfComError_c;
+  176:    }
+  177:    
+  178:    return gAccelNoError_c;
+  179:  }
+  180:  #endif
+  181:  
+  182:  #else  // FALSE == gAccelerometerSupported_d
+  183:  
+  184:  accelErr_t  Accel_Init (void)
+  185:  {
+  186:     return gAccelNoError_c;
+  0000 4f       [1]             CLRA  
+  187:  }
+  0001 8d       [7]             RTC   
+  188:  
+  189:  #endif //gAccelerometerSupported_d
+  190:   
+  191:  /************************************************************************************
+  192:  *
+  193:  *  Accel_GetXYZMeasurements
+  194:  *
+  195:  ************************************************************************************/
+  196:  #if TRUE == gAccelerometerSupported_d
+  197:  
+  198:  #if gTargetBoard_c == gMc1323xRcm_c         /* Only for MC1323xRCM board */
+  199:  accelErr_t Accel_GetXYZMeasurements (accelData_t* XYZValues, accelCallback_t AccelCallback) 
+  200:  {
+  201:    iicErr_t SerialComError = gIicErrNoError_c;
+  202:    uint8_t au8TempBuffer = 0;
+  203:  
+  204:    #if(TRUE == gAccelParameterValidation_d) 
+  205:    if((NULL == XYZValues) || (NULL == AccelCallback))
+  206:    {
+  207:      return gAccelErrInvalidParam_c;
+  208:    }
+  209:    #endif  
+  210:    
+  211:    if( gAccelComStatusIdle_c != mgAccelCurrentStatus) 
+  212:    {
+  213:      return gAccelErrDriverBusy_c;  
+  214:    }
+  215:    
+  216:    mgXYZValues = XYZValues;
+  217:    mgAccelCallback = AccelCallback;     
+  218:    au8TempBuffer = mAccelXValueReg_c;
+  219:    
+  220:    SerialComError = IIC_Write (mAccelmma7660fcI2cAddress_c,&au8TempBuffer, 1,AccelWrite_IicCallback);
+  221:  
+  222:    if(gIicErrNoError_c != SerialComError) 
+  223:    {
+  224:      (void)IIC_StopTransaction(mAccelmma7660fcI2cAddress_c);
+  225:      return gAccelErrInterfComError_c;
+  226:    } 
+  227:    else                                
+  228:    {
+  229:      mgAccelCurrentStatus = gAccelComStatusWrtAddress_c; 
+  230:    }
+  231:    
+  232:    return gAccelNoError_c;
+  233:  }
+  234:  #endif
+  235:  
+  236:  #if gTargetBoard_c == gMc1321xSrb_c     /* Only for MC1321xSRB board */
+  237:  accelErr_t Accel_GetXYZMeasurements (accelData_t* XYZValues, accelCallback_t AccelCallback)
+  238:  {
+  239:    adcErrors_t TempInterfaceErr;
+  240:    uint16_t    u16TempBuffer;    
+  241:      
+  242:    TempInterfaceErr = ADC_SetSingleConversionBlocking (mAccelXoutAdc_c, &u16TempBuffer); 
+  243:    XYZValues->XValue = (uint8_t) (u16TempBuffer);
+  244:    
+  245:    TempInterfaceErr = ADC_SetSingleConversionBlocking (mAccelYoutAdc_c, &u16TempBuffer);
+  246:    XYZValues->YValue = (uint8_t) (u16TempBuffer);
+  247:    
+  248:    TempInterfaceErr = ADC_SetSingleConversionBlocking (mAccelZoutAdc_c, &u16TempBuffer);
+  249:    XYZValues->ZValue = (uint8_t) (u16TempBuffer);
+  250:    
+  251:    if(gAdcErrNoError_c != TempInterfaceErr)
+  252:    {
+  253:      return gAccelErrInterfComError_c;
+  254:    }
+  255:    else
+  256:    {
+  257:      AccelCallback(gAccelNoError_c);
+  258:      return gAccelNoError_c;
+  259:    }
+  260:   
+  261:  }
+  262:  #endif
+  263:  
+  264:  #else  // FALSE == gAccelerometerSupported_d
+  265:  
+  266:  accelErr_t Accel_GetXYZMeasurements (accelData_t* XYZValues, accelCallback_t AccelCallback)
+  267:  {
+  268:     (void)XYZValues;
+  269:     (void)AccelCallback;
+  270:     return gAccelNoError_c;
+  0000 4f       [1]             CLRA  
+  271:  }
+  0001 8d       [7]             RTC   
+  272:  
+  273:  #endif //gAccelerometerSupported_d
+  274:   
+  275:   
+  276:   /************************************************************************************
+  277:  *
+  278:  *  Accel_ConfigGravity
+  279:  *
+  280:  ************************************************************************************/
+  281:  #if TRUE == gAccelerometerSupported_d
+  282:  
+  283:  #if gTargetBoard_c == gMc1321xSrb_c      /* Only for MC1321xSRB board */
+  284:  accelErr_t Accel_ConfigGravity (accelGRange_t AccelGRange)
+  285:  {
+  286:    #if(TRUE == gAccelParameterValidation_d) 
+  287:    if(gAccelGRangeMax_c <= AccelGRange)
+  288:    {
+  289:      return gAccelErrInvalidParam_c;
+  290:    }
+  291:    #endif
+  292:    
+  293:    switch (AccelGRange)
+  294:    {
+  295:      case gAccelGRange1p5g_c:
+  296:        mAccel_ClearGSel1pin();
+  297:        mAccel_ClearGSel2pin();
+  298:      break;
+  299:      case gAccelGRange2g_c:
+  300:        mAccel_SetGSel1pin();
+  301:        mAccel_ClearGSel2pin();
+  302:      break;
+  303:      case gAccelGRange4g_c:
+  304:        mAccel_ClearGSel1pin();
+  305:        mAccel_SetGSel2pin();
+  306:      break;
+  307:      case gAccelGRange6g_c:
+  308:        mAccel_SetGSel1pin();
+  309:        mAccel_SetGSel2pin();
+  310:      break;
+  311:      case gAccelGRangeMax_c:
+  312:        mAccel_ClearGSel1pin();
+  313:        mAccel_ClearGSel2pin();
+  314:      break;
+  315:    }
+  316:  
+  317:    return gAccelNoError_c;
+  318:  }
+  319:  #endif 
+  320:  
+  321:  #else  // FALSE == gAccelerometerSupported_d
+  322:  
+  323:  accelErr_t Accel_ConfigGravity (accelGRange_t AccelGRange)
+  324:  {
+  325:     (void)AccelGRange;
+  326:     return gAccelNoError_c;
+  0000 4f       [1]             CLRA  
+  327:  }
+  0001 8d       [7]             RTC   
+  328:  
+  329:  #endif //gAccelerometerSupported_d
+  330:  
+  331:  /************************************************************************************
+  332:  *************************************************************************************
+  333:  * Private functions
+  334:  *************************************************************************************
+  335:  ************************************************************************************/
+  336:  #if TRUE == gAccelerometerSupported_d
+  337:  
+  338:   #ifdef MEMORY_MODEL_BANKED
+  339:      #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  340:    #else
+  341:      #pragma CODE_SEG DEFAULT
+  342:    #endif
+  343:  
+  344:   /************************************************************************************
+  345:  *
+  346:  *  AccelWrite_IicCallback
+  347:  *
+  348:  ************************************************************************************/
+  349:  
+  350:  // Callback function for Target Board MC1323xRCM
+  351:  #if gTargetBoard_c == gMc1323xRcm_c         /* Only for MC1323xRCM board */
+  352:  void  AccelWrite_IicCallback (iicResult_t IicWriteResult) 
+  353:  {
+  354:     bool_t  fTempErr = 0;
+  355:     iicErr_t SerialComError = gIicErrNoError_c;
+  356:  
+  357:     
+  358:     if(gIicTxRxSuccess_c == IicWriteResult) 
+  359:     {
+  360:      switch (mgAccelCurrentStatus) 
+  361:      {
+  362:        case gAccelComStatusWrtAddress_c:
+  363:          SerialComError = IIC_Read (mAccelmma7660fcI2cAddress_c,&mgReadBuffer[0], 3,AccelRead_IicCallback);
+  364:          mgAccelCurrentStatus = gAccelComStatusReadBusy_c;
+  365:          if(gIicErrNoError_c != SerialComError)
+  366:          {
+  367:            fTempErr = 1;
+  368:          }
+  369:        break;
+  370:        case gAccelComStatusReadBusy_c:
+  371:        case gAccelComStatusNoInit_c:
+  372:        case gAccelComStatusIdle_c:
+  373:        case gAccelComStatusMax_c:
+  374:          // ERROR
+  375:          fTempErr = 1;
+  376:        break;
+  377:      }
+  378:     }
+  379:     else 
+  380:     {
+  381:      fTempErr = 1;
+  382:     }
+  383:     
+  384:     if(fTempErr)
+  385:     {
+  386:        mgAccelCurrentStatus = gAccelComStatusIdle_c;
+  387:        (void)IIC_StopTransaction(mAccelmma7660fcI2cAddress_c);
+  388:        mgAccelCallback(gAccelErrInterfComError_c);
+  389:     }
+  390:     
+  391:     
+  392:  }
+  393:  
+  394:   /************************************************************************************
+  395:  *
+  396:  *  AccelRead_IicCallback
+  397:  *
+  398:  ************************************************************************************/
+  399:  
+  400:  void  AccelRead_IicCallback (iicResult_t IicWriteResult) 
+  401:  {
+  402:     bool_t  fTempErr = 0;
+  403:     iicErr_t SerialComError = gIicErrNoError_c;
+  404:  
+  405:     
+  406:     if(gIicTxRxSuccess_c == IicWriteResult) 
+  407:     {
+  408:      switch (mgAccelCurrentStatus) 
+  409:      {
+  410:        case gAccelComStatusReadBusy_c:
+  411:          if((mgReadBuffer[0] | mgReadBuffer[1] | mgReadBuffer[2]) & mAccelRegAlertmask_c) 
+  412:          {
+  413:            // Measurement with errors, generate error so the user try the measurement again
+  414:            mgAccelCurrentStatus = gAccelComStatusIdle_c;
+  415:            mgAccelCallback(gAccelErrDataCorrupted_c);
+  416:            return; 
+  417:          }
+  418:          mgXYZValues->XValue.AxisByte = mgReadBuffer[0];
+  419:          mgXYZValues->YValue.AxisByte = mgReadBuffer[1];
+  420:          mgXYZValues->ZValue.AxisByte = mgReadBuffer[2];
+  421:          SerialComError = IIC_StopTransaction(mAccelmma7660fcI2cAddress_c);
+  422:          mgAccelCurrentStatus = gAccelComStatusIdle_c;
+  423:          if(gIicErrNoError_c != SerialComError)
+  424:          {
+  425:            fTempErr = 1;
+  426:          }  
+  427:          else
+  428:          {
+  429:            mgAccelCallback(gAccelNoError_c);
+  430:          }
+  431:        break; 
+  432:        
+  433:        case gAccelComStatusNoInit_c:
+  434:        case gAccelComStatusIdle_c:
+  435:        case gAccelComStatusWrtAddress_c:
+  436:        case gAccelComStatusMax_c: 
+  437:          //ERROR
+  438:          fTempErr = 1;
+  439:        break;
+  440:      }
+  441:     }
+  442:     else 
+  443:     {
+  444:      fTempErr = 1;
+  445:     }
+  446:     
+  447:     if(fTempErr)
+  448:     {
+  449:        mgAccelCurrentStatus = gAccelComStatusIdle_c;
+  450:        (void)IIC_StopTransaction(mAccelmma7660fcI2cAddress_c);
+  451:        //Callback with error as parameter
+  452:        mgAccelCallback(gAccelErrInterfComError_c);
+  453:     }
+  454:     
+  455:  }
+  456:  #endif 
+  457:  #pragma CODE_SEG DEFAULT 
+  458:  
+  459:  #endif
+  460:  
+  461:  /************************************************************************************
+  462:  *************************************************************************************
+  463:  * Private Debug stuff
+  464:  *************************************************************************************
+  465:  ************************************************************************************/
+  466:  
+  467:  
+  468:  
+  469:  /* End of Accelerometer.c */
+  470:  

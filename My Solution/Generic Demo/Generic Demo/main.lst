@@ -1,0 +1,667 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*****************************************************************************
+    2:  * Generic App demo main file.
+    3:  * 
+    4:  * Copyright (c) 2010, Freescale, Inc. All rights reserved.
+    5:  *
+    6:  * 
+    7:  * No part of this document must be reproduced in any form - including copied,
+    8:  * transcribed, printed or by any electronic means - without specific written
+    9:  * permission from Freescale Semiconductor.
+   10:  *
+   11:  *  The Generic App demo may be used as template to develop proprietary solutions.
+   12:  *  This applications shows all the basic initialization required to start the 
+   13:  *  Radio, run SMAC, and the commonly used peripherals such as UART, LEDs, and 
+   14:  *  KBIs.
+   15:  *
+   16:  *****************************************************************************/
+   17:  
+   18:  
+   19:  #include <hidef.h>                  /*EnableInterrupts macro*/
+   20:  #include "McuInit.h"                /*CPU and System Clock related functions*/
+   21:  #include "derivative.h"             /*System Clock related declarations*/
+   22:  #include "EmbeddedTypes.h"          /*Include special data types*/             
+   23:  #include "Utilities_Interface.h"    /*Include Blocking Delays and data conversion functions*/
+   24:  #include "PLM_config.h"
+   25:  #include "SMAC_Interface.h"         /*Include all OTA functionality*/
+   26:  #include "Radio_Interface.h"        /*Include all Radio functionality*/
+   27:  #include "app_config.h"
+   28:  #include "OTAP_Interface.h"
+   29:  
+   30:  
+   31:  /************************************************************************************
+   32:  *************************************************************************************
+   33:  * Private prototypes
+   34:  *************************************************************************************
+   35:  ************************************************************************************/
+   36:  void InitProject(void);
+   37:  void InitSmac(void);
+   38:  
+   39:  /* Place it in NON_BANKED memory */
+   40:  #ifdef MEMORY_MODEL_BANKED
+   41:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+   42:  #else
+   43:  #pragma CODE_SEG DEFAULT
+   44:  #endif /* MEMORY_MODEL_BANKED */
+   45:  
+   46:  
+   47:  void MLMEScanComfirm(channels_t ClearestChann);
+   48:  void MLMEResetIndication(void);
+   49:  void MLMEWakeComfirm(void);
+   50:  void UartRxCallback(uint8_t u8UartFlags);
+   51:  void UartTxCallback(void);
+   52:  #if (TRUE == gKeyboardSupported_d) || (TRUE == gTouchpadSupported_d) || (TRUE == gKbiSupported_d)
+   53:    void KbiCallback(kbiPressed_t PressedKey);
+   54:  #endif
+   55:  #if (gTargetBoard_c == gMc1323xRcm_c) || (gTargetBoard_c == gMc1323xRem_c)
+   56:    void KeyboardCallback (keyboardButton_t keyPressed);
+   57:  #endif
+   58:  #if gTargetBoard_c == gMc1323xRcm_c
+   59:    void TouchpadCallback(touchpadEvent_t * event);
+   60:  #endif
+   61:  void LCDCallback(lcdErrors_t lcdError);
+   62:  
+   63:  void MCPSDataComfirm(txStatus_t TransmissionResult);
+   64:  void MCPSDataIndication(rxPacket_t *gsRxPacket);
+   65:  
+   66:  
+   67:  /* Place your callbacks prototypes declarations here */
+   68:  
+   69:  #pragma CODE_SEG DEFAULT
+   70:  
+   71:  
+   72:  
+   73:  /************************************************************************************
+   74:  *************************************************************************************
+   75:  * Public memory declarations
+   76:  *************************************************************************************
+   77:  ************************************************************************************/
+   78:  
+   79:  bool_t           KeyPressed;
+   80:  
+   81:  bool_t bUartDataInFlag;
+   82:  bool_t bUartTxDone;  
+   83:  uint8_t UartData;
+   84:  uartPortNumber_t portNumber;  
+   85:  uartConfigSet_t uartSettings;
+   86:  
+   87:  kbiConfig_t gKbiConfiguration; 
+   88:  
+   89:  
+   90:  /************************************************************************************
+   91:  *************************************************************************************
+   92:  * Main application functions
+   93:  *************************************************************************************
+   94:  ************************************************************************************/
+   95:  
+   96:  void main(void) 
+   97:  {
+   98:  
+   99:    MCUInit();
+  0000 ac000000 [8]             CALL  MCUInit
+  100:    EnableInterrupts; /* Enable interrupts */  
+  0004 9a       [1]             CLI   
+  101:    
+  102:    InitProject();
+  0005 ac000000 [8]             CALL  InitProject
+  103:    InitSmac();
+  0009 ac000000 [8]             CALL  InitSmac
+  104:   
+  105:    (void)Uart_BlockingStringTx("\f\r\n\r\n\t Generic Demonstration Application", gDefaultUartPort_c);
+  000d 450000   [3]             LDHX  @"\014\015\012\015\012\011 Generic Demonstration Application"
+  0010 4f       [1]             CLRA  
+  0011 ac000000 [8]             CALL  Uart_BlockingStringTx
+  0015          L15:    
+  106:   
+  107:    for(;;) 
+  108:    {
+  109:      Otap_OpcMain();
+  0015 ac000000 [8]             CALL  Otap_OpcMain
+  110:       
+  111:      /* Put your own code here */
+  112:        
+  113:      __RESET_WATCHDOG();
+  0019 c70000   [4]             STA   _SRS
+  001c 20f7     [3]             BRA   L15 ;abs = 0015
+  114:      
+  115:    } 
+  116:   
+  117:  }
+  118:  
+  119:  
+  120:  /************************************************************************************
+  121:  *
+  122:  * InitProject
+  123:  *
+  124:  ************************************************************************************/
+  125:  void InitProject(void)
+  126:  {
+  127:    /* GPIO Initialization */ 
+  128:    Gpio_Init();
+  0000 ac000000 [8]             CALL  Gpio_Init
+  129:      
+  130:    /* UART Initialization */
+  131:  #if TRUE == gUartSupported_d   
+  132:    portNumber = gDefaultUartPort_c; 
+  0004 4f       [1]             CLRA  
+  0005 c70000   [4]             STA   portNumber
+  133:    uartSettings.baudRate = gUartDefaultBaud_c;
+  0008 ae0d     [2]             LDX   #13
+  000a 8c       [1]             CLRH  
+  000b 960000   [5]             STHX  uartSettings
+  134:    uartSettings.dataBits = g8DataBits_c;
+  000e a608     [2]             LDA   #8
+  0010 c70002   [4]             STA   uartSettings:2
+  135:    uartSettings.parity = gUartParityNone_c;
+  0013 4f       [1]             CLRA  
+  0014 c70003   [4]             STA   uartSettings:3
+  136:    (void)Uart_Init();
+  0017 ac000000 [8]             CALL  Uart_Init
+  137:    (void)Uart_Configure(portNumber, &uartSettings);
+  001b c60000   [4]             LDA   portNumber
+  001e 450000   [3]             LDHX  @uartSettings
+  0021 ac000000 [8]             CALL  Uart_Configure
+  138:    (void)Uart_RegisterRxCallBack(UartRxCallback, gUartRxCbCodeNewByte_c, portNumber);
+  0025 450000   [3]             LDHX  @UartRxCallback
+  0028 89       [2]             PSHX  
+  0029 8b       [2]             PSHH  
+  002a ae04     [2]             LDX   #4
+  002c c60000   [4]             LDA   portNumber
+  002f ac000000 [8]             CALL  Uart_RegisterRxCallBack
+  0033 a702     [2]             AIS   #2
+  139:    (void)Uart_RegisterTxCallBack(UartTxCallback, portNumber);
+  0035 450000   [3]             LDHX  @UartTxCallback
+  0038 c60000   [4]             LDA   portNumber
+  003b ac000000 [8]             CALL  Uart_RegisterTxCallBack
+  140:    
+  141:    
+  142:  #endif
+  143:  
+  144:    
+  145:   /* Timer Initialization */    
+  146:    (void)Tmr_Init(); 
+  003f cd0000   [6]             JSR   Tmr_Init
+  147:    
+  148:   /* KBI Initialization */
+  149:    #if gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c  
+  150:    #if (gKeyboardSupported_d || gTouchpadSupported_d)    
+  151:      gKbiConfiguration.Control.bit.TriggerByLevel = 0;
+  152:      gKbiConfiguration.Control.bit.Interrupt = 1;
+  153:      gKbiConfiguration.Control.bit.Acknowledge = 1;
+  154:      gKbiConfiguration.InterruptPin.Port = gSwitchColmnMask_c|gTouchpadAttnPinMask_c;
+  155:      gKbiConfiguration.EdgeSelect.Port = gSwitchColmnMask_c;
+  156:      (void)Kbi_Init((kbiCallback_t)KbiCallback, &gKbiConfiguration, gSwitchKbiModule_c);
+  157:      (void)Keyboard_InitKeyboard(KeyboardCallback);
+  158:    #endif
+  159:    #else
+  160:      gKbiConfiguration.Control.bit.TriggerByLevel = 0;
+  0042 450000   [3]             LDHX  @gKbiConfiguration
+  0045 f6       [3]             LDA   ,X
+  0046 a4fe     [2]             AND   #-2
+  0048 f7       [2]             STA   ,X
+  161:      gKbiConfiguration.Control.bit.Interrupt = 1;
+  0049 aa02     [2]             ORA   #2
+  004b f7       [2]             STA   ,X
+  162:      gKbiConfiguration.Control.bit.Acknowledge = 1;
+  004c aa04     [2]             ORA   #4
+  004e f7       [2]             STA   ,X
+  163:      gKbiConfiguration.InterruptPin.Port = gSwitchMask;
+  004f a60f     [2]             LDA   #15
+  0051 e701     [3]             STA   1,X
+  164:      gKbiConfiguration.EdgeSelect.Port = 0;
+  0053 4f       [1]             CLRA  
+  0054 e702     [3]             STA   2,X
+  165:      (void)Kbi_Init((kbiCallback_t)KbiCallback, &gKbiConfiguration, gSwitchKbiModule_c);
+  0056 450000   [3]             LDHX  @KbiCallback
+  0059 89       [2]             PSHX  
+  005a 8b       [2]             PSHH  
+  005b 450000   [3]             LDHX  @gKbiConfiguration
+  005e 4c       [1]             INCA  
+  005f ac000000 [8]             CALL  Kbi_Init
+  0063 a702     [2]             AIS   #2
+  166:    #endif 
+  167:  
+  168:    /* SPI Initialization */ 
+  169:    SPI1_Init(gSpiBaudDivisor_2_c); 
+  0065 4f       [1]             CLRA  
+  0066 cd0000   [6]             JSR   SPI1_Init
+  170:  
+  171:    #if gTargetBoard_c == gMc1321xSrb_c || gTargetBoard_c == gMc1321xNcb_c || gTargetBoard_c == gMc1320xS08qe128Evb_c 
+  172:      IRQ_Init(NULL);
+  0069 5f       [1]             CLRX  
+  006a 8c       [1]             CLRH  
+  006b ac000000 [8]             CALL  IRQ_Init
+  173:    #endif
+  174:    
+  175:    /* Touchpad Initialization */ 
+  176:    #if gTargetBoard_c == gMc1323xRcm_c
+  177:    (void)IIC_Init(mIic100KhzBaudInitParameters_c);
+  178:    (void)Touchpad_DriverInit(TouchpadCallback, gGpioPortB_c, gGpioPin6Mask_c);
+  179:    #endif
+  180:    
+  181:    /*LCD configuration*/
+  182:    (void)Lcd_Init(LCDCallback);
+  006f 450000   [3]             LDHX  @LCDCallback
+  0072 ac000000 [8]             CALL  Lcd_Init
+  183:    (void)Lcd_Config(TRUE,TRUE,FALSE);
+  0076 ae01     [2]             LDX   #1
+  0078 89       [2]             PSHX  
+  0079 4f       [1]             CLRA  
+  007a ac000000 [8]             CALL  Lcd_Config
+  007e 8a       [3]             PULH  
+  184:  
+  185:  
+  186:     /* OTAP Initialization */
+  187:    Otap_OpcInit();
+  007f ac000000 [8]             CALL  Otap_OpcInit
+  188:      
+  189:    /* Place your app initialization here */
+  190:  
+  191:  
+  192:  }
+  0083 8d       [7]             RTC   
+  193:  
+  194:  /************************************************************************************
+  195:  *
+  196:  * InitSmac
+  197:  *
+  198:  ************************************************************************************/
+  199:  
+  200:  /* Place it in NON_BANKED memory */
+  201:  #ifdef MEMORY_MODEL_BANKED
+  202:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  203:  #else
+  204:  #pragma CODE_SEG DEFAULT
+  205:  #endif /* MEMORY_MODEL_BANKED */
+  206:  
+  207:  /************************************************************************************
+  208:  * User's Callbacks
+  209:  ************************************************************************************/
+  210:  
+  211:  /* Place your callbacks here */
+  212:  
+  213:  
+  214:  
+  215:  
+  216:  
+  217:  
+  218:  
+  219:  /************************************************************************************
+  220:  *
+  221:  * TouchpadCallback
+  222:  *
+  223:  ************************************************************************************/
+  224:  #if gTargetBoard_c == gMc1323xRcm_c
+  225:  void TouchpadCallback(touchpadEvent_t * event)
+  226:  {
+  227:    switch(event->EventType)
+  228:    {
+  229:      case gTouchpadBusError_c:
+  230:           /* Place your implementation here */ 
+  231:      break;
+  232:      case gTouchpadGpioEvent_c:
+  233:           /* Place your implementation here */
+  234:      break;
+  235:      case gTouchpadFingerPositionEvent_c:
+  236:           /* Place your implementation here */
+  237:      break;
+  238:      case gTouchpadPinchGestureEvent_c:
+  239:           /* Place your implementation here */ 
+  240:      break;
+  241:      case gTouchpadFlickGestureEvent_c:  
+  242:           /* Place your implementation here */
+  243:      break;
+  244:      case gTouchpadEarlyTapGestureEvent_c:
+  245:           /* Place your implementation here */
+  246:      break;
+  247:      case gTouchpadDoubleTapGestureEvent_c:
+  248:           /* Place your implementation here */
+  249:      break;
+  250:      case gTouchpadTapAndHoldGestureEvent_c:
+  251:           /* Place your implementation here */
+  252:      break;
+  253:      case gTouchpadSingleTapGestureEvent_c:
+  254:           /* Place your implementation here */
+  255:      break;
+  256:      case gTouchpadDevStatusEvent_c:
+  257:           /* Place your implementation here */
+  258:      break;
+  259:      case gTouchpadFlashEvent_c:
+  260:           /* Place your implementation here */
+  261:      break;
+  262:      default:
+  263:           /* Place your implementation here */ 
+  264:      break;
+  265:    }
+  266:  }
+  267:  #endif
+  268:  
+  269:  
+  270:  /************************************************************************************
+  271:  * UartTxCallback
+  272:  * 
+  273:  *
+  274:  *
+  275:  ************************************************************************************/
+  276:  void UartTxCallback(void)
+  277:  {
+  278:      bUartTxDone = TRUE;  
+  0000 a601     [2]             LDA   #1
+  0002 c70000   [4]             STA   bUartTxDone
+  279:  }
+  0005 81       [6]             RTS   
+  280:  
+  281:  /************************************************************************************
+  282:  * UartRxCallback
+  283:  * 
+  284:  *
+  285:  *
+  286:  ************************************************************************************/
+  287:  void UartRxCallback(uint8_t u8UartFlags)
+  288:  {
+  0000 8b       [2]             PSHH  
+  289:    uint8_t iByteNumber;
+  290:    (void)u8UartFlags;
+  291:    
+  292:    iByteNumber = 1;
+  0001 a601     [2]             LDA   #1
+  0003 95       [2]             TSX   
+  0004 f7       [2]             STA   ,X
+  293:    
+  294:    (void)Uart_GetBytesFromRxBuffer(&UartData, &iByteNumber, portNumber);
+  0005 450000   [3]             LDHX  @UartData
+  0008 89       [2]             PSHX  
+  0009 8b       [2]             PSHH  
+  000a 95       [2]             TSX   
+  000b af02     [2]             AIX   #2
+  000d c60000   [4]             LDA   portNumber
+  0010 ac000000 [8]             CALL  Uart_GetBytesFromRxBuffer
+  0014 a702     [2]             AIS   #2
+  295:    bUartDataInFlag = TRUE;
+  0016 a601     [2]             LDA   #1
+  0018 c70000   [4]             STA   bUartDataInFlag
+  296:   
+  297:  }
+  001b 8a       [3]             PULH  
+  001c 81       [6]             RTS   
+  298:  
+  299:  #if (TRUE == gKeyboardSupported_d) || (TRUE == gTouchpadSupported_d) || (TRUE == gKbiSupported_d)
+  300:  /************************************************************************************
+  301:  * KbiCallback
+  302:  * 
+  303:  *  This function should be set as the Kbi callback function in Kbi_Init
+  304:  *
+  305:  ************************************************************************************/
+  306:  #if gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c
+  307:  void KbiCallback(kbiPressed_t PressedKey)
+  308:  {  
+  309:    (void)PressedKey;
+  310:    if(gKbiPressedKey0_c == PressedKey || gKbiPressedKey1_c == PressedKey || gKbiPressedKey2_c == PressedKey || gKbiPressedKey3_c == PressedKey \
+  311:       || gKbiPressedKey4_c == PressedKey || gKbiPressedKey5_c == PressedKey)
+  312:    {
+  313:       Keyboard_KbiEvent(PressedKey);
+  314:    }
+  315:    else if (gKbiPressedKey6_c == PressedKey)
+  316:    {
+  317:       #if gTargetBoard_c == gMc1323xRcm_c
+  318:       Touchpad_EventHandler();
+  319:       #endif
+  320:    }
+  321:     
+  322:  } 
+  323:  #else
+  324:  void KbiCallback(kbiPressed_t PressedKey)
+  325:  {  
+  326:    KeyPressed = TRUE;
+  0000 a601     [2]             LDA   #1
+  0002 c70000   [4]             STA   KeyPressed
+  327:    switch(PressedKey)
+  328:    {
+  329:      case gKbiPressedKey0_c:
+  330:        /* Place your implementation here */ 
+  331:      break;
+  332:      case gKbiPressedKey1_c:
+  333:        /* Place your implementation here */ 
+  334:      break;
+  335:      case gKbiPressedKey2_c:
+  336:        /* Place your implementation here */
+  337:      break;
+  338:      case gKbiPressedKey3_c:
+  339:        /* Place your implementation here */
+  340:      break;
+  341:      default:
+  342:      break;
+  343:    }
+  344:     
+  345:  }
+  0005 81       [6]             RTS   
+  346:  
+  347:  
+  348:  #endif 
+  349:        
+  350:  #endif
+  351:  
+  352:  /************************************************************************************
+  353:  * KeyboardCallback
+  354:  * 
+  355:  *
+  356:  *
+  357:  ************************************************************************************/
+  358:  #if (gTargetBoard_c == gMc1323xRcm_c) || (gTargetBoard_c == gMc1323xRem_c)
+  359:  
+  360:  void KeyboardCallback(keyboardButton_t keyPressed)
+  361:  {
+  362:     KeyPressed = TRUE;
+  363:     switch(keyPressed)
+  364:     {
+  365:      case gSw1_c:
+  366:        /* Place your implementation here */ 
+  367:      break;
+  368:      
+  369:      case gSw2_c:
+  370:        /* Place your implementation here */
+  371:      break;
+  372:      
+  373:      case gSw3_c:
+  374:        /* Place your implementation here */ 
+  375:      break;
+  376:      
+  377:      case gSw4_c:
+  378:        /* Place your implementation here */ 
+  379:      break;
+  380:      
+  381:      case gSw5_c:
+  382:        /* Place your implementation here */ 
+  383:      break;
+  384:      
+  385:      case gSw6_c:
+  386:        /* Place your implementation here */ 
+  387:      break;
+  388:      
+  389:      case gSw7_c:
+  390:        /* Place your implementation here */ 
+  391:      break;
+  392:      
+  393:      case gSw8_c:
+  394:        /* Place your implementation here */ 
+  395:      break;
+  396:  
+  397:  #if gTargetBoard_c == gMc1323xRcm_c     
+  398:      case gSw9_c:
+  399:        /* Place your implementation here */ 
+  400:      break;
+  401:      
+  402:      case gSw10_c:
+  403:        /* Place your implementation here */ 
+  404:      break;
+  405:      
+  406:      case gSw11_c:
+  407:        /* Place your implementation here */
+  408:      break;
+  409:      
+  410:      case gSw12_c:
+  411:        /* Place your implementation here */ 
+  412:      break;
+  413:      
+  414:      case gSw13_c:
+  415:        /* Place your implementation here */ 
+  416:      break;
+  417:      
+  418:      case gSw14_c:
+  419:        /* Place your implementation here */
+  420:      break;
+  421:      
+  422:      case gSw15_c:
+  423:        /* Place your implementation here */
+  424:      break;
+  425:      
+  426:      case gSw16_c:
+  427:        /* Place your implementation here */ 
+  428:      break;
+  429:      
+  430:      case gSw17_c:
+  431:        /* Place your implementation here */ 
+  432:      break;
+  433:      
+  434:      case gSw18_c:
+  435:        /* Place your implementation here */
+  436:      break;
+  437:      
+  438:      case gSw19_c:
+  439:        /* Place your implementation here */
+  440:      break;
+  441:      
+  442:      case gSw20_c:
+  443:        /* Place your implementation here */ 
+  444:      break;
+  445:      
+  446:      case gSw21_c:
+  447:        /* Place your implementation here */ 
+  448:      break;
+  449:      
+  450:      case gSw22_c:
+  451:        /* Place your implementation here */ 
+  452:      break;
+  453:      
+  454:      case gSw23_c:
+  455:        /* Place your implementation here */
+  456:      break;
+  457:      
+  458:      case gSw24_c:
+  459:        /* Place your implementation here */ 
+  460:      break;
+  461:      
+  462:      case gSw25_c:
+  463:        /* Place your implementation here */ 
+  464:      break;
+  465:      
+  466:      case gSw26_c:
+  467:        /* Place your implementation here */ 
+  468:      break;
+  469:      
+  470:      case gSw27_c:
+  471:        /* Place your implementation here */ 
+  472:      break;
+  473:      
+  474:      case gSw28_c:
+  475:        /* Place your implementation here */ 
+  476:      break;
+  477:      
+  478:      case gSw29_c:
+  479:        /* Place your implementation here */ 
+  480:      break;
+  481:      
+  482:      case gSk1_c:
+  483:        /* Place your implementation here */ 
+  484:      break;
+  485:      
+  486:      case gSk2_c:
+  487:        /* Place your implementation here */ 
+  488:      break;
+  489:      
+  490:      case gSk3_c:
+  491:        /* Place your implementation here */ 
+  492:      break;
+  493:      
+  494:      case gSk4_c:
+  495:        /* Place your implementation here */ 
+  496:      break;
+  497:      
+  498:  #endif    
+  499:      
+  500:      default:
+  501:        /* Place your implementation here */ 
+  502:      break;
+  503:     }
+  504:         
+  505:  }
+  506:  #endif
+  507:  
+  508:  /************************************************************************************
+  509:  * LCDCallback
+  510:  * 
+  511:  *
+  512:  *
+  513:  ************************************************************************************/
+  514:  void LCDCallback(lcdErrors_t lcdError)
+  515:  {
+  516:    (void)lcdError;
+  517:  }
+  0000 81       [6]             RTS   
+  518:  
+  519:  
+  520:  /************************************************************************************
+  521:  * SMAC Callbacks
+  522:  ************************************************************************************/
+  523:  
+  524:  /************************************************************************************
+  525:  * MCPSDataComfirm
+  526:  * 
+  527:  *
+  528:  *
+  529:  ************************************************************************************/
+  530:   
+  531:  
+  532:  /************************************************************************************
+  533:  * MCPSDataIndication
+  534:  * 
+  535:  *
+  536:  *
+  537:  ************************************************************************************/
+  538:  
+  539:  
+  540:  
+  541:  /************************************************************************************
+  542:  * MLMEScanComfirm
+  543:  * 
+  544:  *
+  545:  *
+  546:  ************************************************************************************/
+  547:  
+  548:  
+  549:  /************************************************************************************
+  550:  * MLMEResetIndication
+  551:  * 
+  552:  *
+  553:  *
+  554:  ************************************************************************************/
+  555:  
+  556:  
+  557:  /************************************************************************************
+  558:  * MLMEWakeComfirm
+  559:  * 
+  560:  *
+  561:  *
+  562:  ************************************************************************************/
+  563:  
+  564:  
+  565:  
+  566:  
+  567:  #pragma CODE_SEG DEFAULT
+  568:  
+  569:  
+  570:  
+  571:  
+  572:  
+  573:  

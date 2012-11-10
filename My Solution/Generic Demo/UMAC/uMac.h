@@ -2,7 +2,6 @@
  * uMac.h
  *
  *  Created on: Nov 1, 2012
- *      Author: Jesús
  */
 
 #ifndef UMAC_H_

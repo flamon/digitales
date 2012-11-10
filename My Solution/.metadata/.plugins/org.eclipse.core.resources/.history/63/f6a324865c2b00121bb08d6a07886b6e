@@ -1,0 +1,836 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /************************************************************************************
+    2:  * EEPROM driver implementation. 
+    3:  *
+    4:  * (c) Copyright 2010, Freescale, Inc.  All rights reserved.
+    5:  *
+    6:  * Freescale Semiconductor Confidential Proprietary
+    7:  *
+    8:  * No part of this document must be reproduced in any form - including copied,
+    9:  * transcribed, printed or by any electronic means - without specific written
+   10:  * permission from Freescale Semiconductor.
+   11:  *
+   12:  ************************************************************************************/
+   13:  
+   14:  
+   15:  #include "Eeprom.h"
+   16:  
+   17:  
+   18:  /************************************************************************************
+   19:  *************************************************************************************
+   20:  * Private memory declarations
+   21:  *************************************************************************************
+   22:  ************************************************************************************/
+   23:  
+   24:  #if TRUE == gEepromSupported_d                                          
+   25:  
+   26:  static EepromStateMachine_t mEepromActualState = mEepromStateIdle_c;
+   27:  static eepromCallback_t mpfEepromCallback = NULL;
+   28:  static uint8_t*  mpu8Data;
+   29:  static uint8_t	 mu8DataSize;
+   30:  static uint8_t   mu8EepromAddress[8] = {0};
+   31:  
+   32:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+   33:  static uint8_t   mu8DeviceAddress;
+   34:  #endif
+   35:  
+   36:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+   37:  static uint16_t	 mu16EepromPageNumber = 0;
+   38:  #endif
+   39:  
+   40:  #endif //gEepromSupported_d
+   41:  
+   42:  /************************************************************************************
+   43:  *************************************************************************************
+   44:  * Public functions
+   45:  *************************************************************************************
+   46:  ************************************************************************************/
+   47:  
+   48:  
+   49:  /************************************************************************************
+   50:  *
+   51:  *  Eeprom_Init
+   52:  *
+   53:  ************************************************************************************/
+   54:  
+   55:  #if TRUE == gEepromSupported_d  
+   56:  
+   57:  // Eeprom_Init function for Target Board 1320xQE128EVB, which has AT24C1024B eeprom  
+   58:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c 
+   59:   eepromErr_t  Eeprom_Init (void) 
+   60:   {
+   61:      uint8_t au8TestMemAddress[2] = {0x00, 0x00};
+   62:      uint8_t au8TestMemBuffer[5] = {0};
+   63:      iicErr_t SerialComError = gIicErrNoError_c;    
+   64:   
+   65:      // Check if I2C is previously initialized     
+   66:      /*
+   67:      if(FALSE == mEepromSerialComEnableRegister) 
+   68:      {  
+   69:        return gEepromErrSerialComNoInit_c; 
+   70:      }
+   71:      // Not implemented for this version. User must initilize before using this driver. 
+   72:      */
+   73:      
+   74:      mEepromActualState = mEepromStateIdle_c;
+   75:      SerialComError = IIC_WriteBlocking(mEepromAt24C1024bwI2cAddress_c,&au8TestMemAddress[0], 2); 
+   76:      SerialComError = IIC_ReadBlocking(mEepromAt24C1024bwI2cAddress_c,&au8TestMemBuffer[0], 5);
+   77:      SerialComError = IIC_StopTransaction(mEepromAt24C1024bwI2cAddress_c);
+   78:  
+   79:      if(gIicErrNoError_c != SerialComError) 
+   80:      {
+   81:        return gEepromErrNoEepromInBus_c;
+   82:      }
+   83:      
+   84:      return gEepromNoErr_c;
+   85:   
+   86:   }
+   87:  #endif
+   88:  
+   89:  // Eeprom_Init function for Target Board based on 1323xMRB, which has 
+   90:  // AT45DB021D eeprom
+   91:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)    
+   92:   eepromErr_t  Eeprom_Init (void) 
+   93:   {
+   94:      uint8_t au8TestMemBuffer[8] = {0};
+   95:      uint8_t au8Pwr2PageSizeBuffer[] = {mEepromCmdPwrTwoPageSizeSeq_c};
+   96:      spiErr_t SerialComError = gSpiErrNoError_c;
+   97:    
+   98:      // Check if SPI is previously initialized     
+   99:      /*
+  100:      if(FALSE == mEepromSerialComEnableRegister) 
+  101:      {  
+  102:        return gEepromErrSerialComNoInit_c; 
+  103:      }
+  104:      // Not implemented for this version. User must initilize before using this driver.
+  105:      */
+  106:       
+  107:      mEepromActualState = mEepromStateIdle_c;
+  108:  
+  109:      au8TestMemBuffer[0] = mEepromCmdReadStatusReg_c; 
+  110:      SerialComError = SPI1_AssertPeripheralSsPin(1,NULL);  
+  111:      SerialComError = SPI1_WriteStringBlocking(au8TestMemBuffer,1);
+  112:      SerialComError = SPI1_ReadStringBlocking(au8TestMemBuffer,1);
+  113:      SerialComError = SPI1_DeassertPeripheralSsPin();
+  114:      
+  115:      if(gSpiErrNoError_c != SerialComError) 
+  116:      {
+  117:        return gEepromErrNoEepromInBus_c;
+  118:      } 
+  119:      
+  120:      if(!(au8TestMemBuffer[0] & mEepromStatusBusyMask_c)) // Eeprom BUSY
+  121:      {   
+  122:        return gEepromErrBusBusy_c;
+  123:      }
+  124:      
+  125:      if(!(au8TestMemBuffer[0] & mEepromPageSize264Mask_c)) // if Eeprom Page Size = 264 
+  126:      { 
+  127:        // This will be done once per every Eeprom device, because this procedure is 
+  128:        // one-time programmable. After starting this procedure the Eeprom will be 
+  129:        // busy during 2 to 4 ms. This will program the Eeprom to work with 
+  130:        // Page size = 256 bytes    
+  131:        
+  132:        SerialComError = SPI1_AssertPeripheralSsPin(1,NULL);
+  133:        SerialComError = SPI1_WriteStringBlocking(au8Pwr2PageSizeBuffer,4);
+  134:        SerialComError = SPI1_DeassertPeripheralSsPin();
+  135:      } 
+  136:    
+  137:      SerialComError = SPI1_AssertPeripheralSsPin(1,NULL); 
+  138:      au8TestMemBuffer[0] = mEepromCmdMainMemRead_c;
+  139:      SerialComError = SPI1_WriteStringBlocking(au8TestMemBuffer,8); 
+  140:      SerialComError = SPI1_ReadStringBlocking(au8TestMemBuffer,5);
+  141:      SerialComError = SPI1_DeassertPeripheralSsPin();
+  142:      
+  143:      if(gSpiErrNoError_c != SerialComError) 
+  144:      {  
+  145:        return gEepromErrNoEepromInBus_c;
+  146:      }  
+  147:   
+  148:      return gEepromNoErr_c;    
+  149:   }
+  150:  #endif 
+  151:  
+  152:  #else // gEepromSupported_d == FALSE
+  153:  
+  154:  eepromErr_t  Eeprom_Init (void) 
+  155:   {
+  156:      return gEepromNoErr_c;
+  0000 4f       [1]             CLRA  
+  157:   }
+  0001 8d       [7]             RTC   
+  158:  
+  159:  #endif
+  160:  
+  161:   
+  162:  /************************************************************************************
+  163:  *
+  164:  *  Eeprom_Write
+  165:  *
+  166:  ************************************************************************************/
+  167:  
+  168:  #if TRUE == gEepromSupported_d 
+  169:  
+  170:  // Eeprom_Write function for Target Board 1320xQE128EVB, which uses I2C interface with
+  171:  // the external eeprom   
+  172:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c 
+  173:  eepromErr_t  Eeprom_Write (eepromDataPackage_t* pDataPackage)
+  174:  {
+  175:      iicErr_t SerialComError = gIicErrNoError_c;    
+  176:      #if(TRUE == mEepromParameterValidation_d) 
+  177:      {
+  178:      if((mEepromMaxAddress_c < pDataPackage->EepromAddress.u32Address) || \
+  179:         (0 == pDataPackage->u8DataSize) || \
+  180:         (NULL == pDataPackage->pfEepromCallback))   
+  181:      {
+  182:        return gEepromErrInvalidParam_c;
+  183:      }  
+  184:      }
+  185:      #endif
+  186:  
+  187:      if(mEepromStateIdle_c != mEepromActualState) 
+  188:      {
+  189:      return gEepromErrBusBusy_c;
+  190:      }
+  191:  
+  192:      mpfEepromCallback = pDataPackage->pfEepromCallback;
+  193:      mpu8Data = pDataPackage->pu8Data;
+  194:      mu8DataSize = pDataPackage->u8DataSize; 
+  195:  
+  196:  
+  197:      if(mEepromAt24C1024bwPageOffset_c <= pDataPackage->EepromAddress.u32Address)
+  198:      {
+  199:      mu8DeviceAddress = (mEepromAt24C1024bwI2cAddress_c | mEepromAt24C1024bwPageMask_c) ; 
+  200:      mu8EepromAddress[0] = (uint8_t)((pDataPackage->EepromAddress.u32Address - mEepromAt24C1024bwPageOffset_c) >> 8);
+  201:      mu8EepromAddress[1] = (uint8_t)(pDataPackage->EepromAddress.u32Address - mEepromAt24C1024bwPageOffset_c);
+  202:      } 
+  203:      else
+  204:      {
+  205:      if(mEepromAt24C1024bwPageOffset_c <= (pDataPackage->EepromAddress.u32Address + mu8DataSize)) 
+  206:      {
+  207:         return gEepromErrAddrOverflow_c; 
+  208:      }
+  209:  
+  210:      mu8DeviceAddress = mEepromAt24C1024bwI2cAddress_c;
+  211:      }
+  212:  
+  213:      mEepromActualState = mEepromStateDeviceAddr_c;
+  214:      mu8EepromAddress[0] = (uint8_t)((pDataPackage->EepromAddress.u32Address) >> 8);
+  215:      mu8EepromAddress[1] = (uint8_t)(pDataPackage->EepromAddress.u32Address);
+  216:  
+  217:      SerialComError = IIC_Write (mu8DeviceAddress, \
+  218:                                mu8EepromAddress, \
+  219:                                2, EepromWrite_Callback); 
+  220:  
+  221:       if(gIicErrNoError_c != SerialComError) 
+  222:      {
+  223:        (void)IIC_StopTransaction (mu8DeviceAddress);
+  224:        mEepromActualState = mEepromStateIdle_c;
+  225:         return gEepromErrNoEepromInBus_c; 
+  226:      }
+  227:     
+  228:      return gEepromNoErr_c; 
+  229:  }
+  230:  #endif
+  231:   
+  232:  // Eeprom_Write function for Target Board based on 1323xMRB, which uses SPI Interface 
+  233:  // with the external eeprom
+  234:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c) 
+  235:  eepromErr_t  Eeprom_Write (eepromDataPackage_t* pDataPackage)
+  236:   {
+  237:      spiErr_t SerialComError = gSpiErrNoError_c;
+  238:      uint8_t u8EepromStatusRegister = 0;
+  239:       
+  240:      
+  241:      #if(TRUE == mEepromParameterValidation_d) 
+  242:      {
+  243:      if((mEepromMaxAddress_c < pDataPackage->EepromAddress.u32Address) || \
+  244:         (0 == pDataPackage->u8DataSize) || \
+  245:         (NULL == pDataPackage->pfEepromCallback))   
+  246:      {
+  247:        return gEepromErrInvalidParam_c;
+  248:      }  
+  249:      }
+  250:      #endif
+  251:      
+  252:      if(mEepromStateIdle_c != mEepromActualState) 
+  253:      {
+  254:        return gEepromErrBusBusy_c;
+  255:      }
+  256:      
+  257:      u8EepromStatusRegister = mEepromCmdReadStatusReg_c;
+  258:      
+  259:      SerialComError = SPI1_AssertPeripheralSsPin(1,NULL);  
+  260:      SerialComError = SPI1_WriteStringBlocking(&u8EepromStatusRegister,1);
+  261:      SerialComError = SPI1_ReadStringBlocking(&u8EepromStatusRegister,1);
+  262:      SerialComError = SPI1_DeassertPeripheralSsPin();
+  263:      
+  264:      if(gSpiErrNoError_c != SerialComError) 
+  265:      {
+  266:        return gEepromErrNoEepromInBus_c;
+  267:      } 
+  268:      
+  269:      if(!(u8EepromStatusRegister & mEepromStatusBusyMask_c)) // Eeprom BUSY
+  270:      {   
+  271:        return gEepromErrBusBusy_c;
+  272:      }
+  273:   
+  274:      mpfEepromCallback = pDataPackage->pfEepromCallback;
+  275:      mpu8Data = pDataPackage->pu8Data;
+  276:      mu8DataSize = pDataPackage->u8DataSize; 
+  277:     
+  278:  
+  279:      
+  280:      mu8EepromAddress[1] = (uint8_t)((pDataPackage->EepromAddress.u32Address >> 16) & 0x03);
+  281:      mu8EepromAddress[2] = (uint8_t) (pDataPackage->EepromAddress.u32Address >> 8);
+  282:      mu8EepromAddress[3] = (uint8_t) pDataPackage->EepromAddress.u32Address;
+  283:      
+  284:      mu16EepromPageNumber =  (uint16_t)((pDataPackage->EepromAddress.u32Address >> 8) & 0x03FF);
+  285:      
+  286:      if((mEepromAT45DB021DPageSize_c - mu8EepromAddress[3]) < mu8DataSize) 
+  287:      {
+  288:         return gEepromErrAddrOverflow_c;
+  289:      }
+  290:   
+  291:      mEepromActualState = mEepromStateWrMem2Buffer;
+  292:      mu8EepromAddress[0] = mEepromCmdMainMem2Buffer_c;
+  293:      SerialComError = SPI1_AssertPeripheralSsPin(1,NULL);
+  294:      SerialComError = SPI1_WriteStringBlocking(mu8EepromAddress, 4);
+  295:      SerialComError = SPI1_DeassertPeripheralSsPin(); 
+  296:      
+  297:      if(gSpiErrNoError_c != SerialComError) 
+  298:      {
+  299:        return gEepromErrNoEepromInBus_c;
+  300:      } 
+  301:      
+  302:      
+  303:      do
+  304:      {  
+  305:        u8EepromStatusRegister = mEepromCmdReadStatusReg_c;
+  306:        SerialComError = SPI1_AssertPeripheralSsPin(1,NULL);  
+  307:        SerialComError = SPI1_WriteStringBlocking(&u8EepromStatusRegister,1);
+  308:        SerialComError = SPI1_ReadStringBlocking(&u8EepromStatusRegister,1);
+  309:        SerialComError = SPI1_DeassertPeripheralSsPin();
+  310:        
+  311:        if(gSpiErrNoError_c != SerialComError) 
+  312:        {
+  313:          return gEepromErrNoEepromInBus_c;
+  314:        } 
+  315:      }while(!(u8EepromStatusRegister & mEepromStatusBusyMask_c));
+  316:  /*
+  317:       */  
+  318:      // Delay??
+  319:      mu8EepromAddress[0] = mEepromCmdBufferWrite_c;
+  320:      mEepromActualState = mEepromStateDeviceAddr_c;
+  321:      SerialComError = SPI1_AssertPeripheralSsPin(1,EepromWrite_Callback);
+  322:      SerialComError = SPI1_WriteString(mu8EepromAddress, 4);
+  323:   
+  324:                          
+  325:      if(gSpiErrNoError_c != SerialComError) 
+  326:      {
+  327:        (void)SPI1_DeassertPeripheralSsPin();
+  328:        mEepromActualState = mEepromStateIdle_c;    
+  329:         return gEepromErrNoEepromInBus_c; 
+  330:      }
+  331:     
+  332:      return gEepromNoErr_c;   
+  333:   }
+  334:  #endif 
+  335:     
+  336:  #else // gEepromSupported_d == FALSE
+  337:  
+  338:  eepromErr_t  Eeprom_Write (eepromDataPackage_t* pDataPackage) 
+  339:   {
+  340:      (void)pDataPackage;
+  341:      return gEepromNoErr_c;
+  0000 4f       [1]             CLRA  
+  342:   }
+  0001 8d       [7]             RTC   
+  343:  
+  344:  #endif                
+  345:   
+  346:   
+  347:   /************************************************************************************
+  348:  *
+  349:  *  Eeprom_Read
+  350:  *
+  351:  ************************************************************************************/
+  352:  
+  353:  #if TRUE == gEepromSupported_d 
+  354:  
+  355:  // Eeprom_Read function for Target Board 1320xQE128EVB, which uses I2C interface with
+  356:  // the external eeprom 
+  357:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+  358:  eepromErr_t Eeprom_Read (eepromDataPackage_t* pDataPackage)
+  359:   {    
+  360:      iicErr_t SerialComError; 
+  361:      
+  362:      #if(TRUE == mEepromParameterValidation_d) 
+  363:      {
+  364:      if((mEepromMaxAddress_c < pDataPackage->EepromAddress.u32Address) || \
+  365:         (0 == pDataPackage->u8DataSize) || \
+  366:         (NULL == pDataPackage->pfEepromCallback))   
+  367:      {
+  368:        return gEepromErrInvalidParam_c;
+  369:      }  
+  370:      }
+  371:      #endif
+  372:      
+  373:      if(mEepromStateIdle_c != mEepromActualState) 
+  374:      {
+  375:        return gEepromErrBusBusy_c;
+  376:      }
+  377:   
+  378:      mpfEepromCallback = pDataPackage->pfEepromCallback;
+  379:      mpu8Data = pDataPackage->pu8Data;
+  380:      mu8DataSize = pDataPackage->u8DataSize;
+  381:  
+  382:      if(mEepromAt24C1024bwPageOffset_c <= pDataPackage->EepromAddress.u32Address)
+  383:      {
+  384:        mu8DeviceAddress = (mEepromAt24C1024bwI2cAddress_c | mEepromAt24C1024bwPageMask_c) ; 
+  385:        mu8EepromAddress[0] = (uint8_t)((pDataPackage->EepromAddress.u32Address - mEepromAt24C1024bwPageOffset_c) >> 8);
+  386:        mu8EepromAddress[1] = (uint8_t)(pDataPackage->EepromAddress.u32Address - mEepromAt24C1024bwPageOffset_c);
+  387:      } 
+  388:      else
+  389:      {
+  390:        if(mEepromAt24C1024bwPageOffset_c <= (pDataPackage->EepromAddress.u32Address + mu8DataSize)) 
+  391:        {
+  392:           return gEepromErrAddrOverflow_c; 
+  393:        }
+  394:        
+  395:        mu8DeviceAddress = mEepromAt24C1024bwI2cAddress_c;
+  396:        mu8EepromAddress[0] = (uint8_t)((pDataPackage->EepromAddress.u32Address) >> 8);
+  397:        mu8EepromAddress[1] = (uint8_t)(pDataPackage->EepromAddress.u32Address);
+  398:      }
+  399:      
+  400:      
+  401:      mEepromActualState = mEepromStateDeviceAddr_c;
+  402:      
+  403:      SerialComError = IIC_Write (mu8DeviceAddress, \
+  404:                                  mu8EepromAddress, \
+  405:                                  2, EepromRead_Callback); 
+  406:  
+  407:      if(gIicErrNoError_c != SerialComError)
+  408:      {
+  409:         (void)IIC_StopTransaction (mu8DeviceAddress);
+  410:         mEepromActualState = mEepromStateIdle_c;
+  411:         return gEepromErrNoEepromInBus_c; 
+  412:      }
+  413:     
+  414:      return gEepromNoErr_c; 
+  415:       
+  416:   }
+  417:  #endif
+  418:   
+  419:  // Eeprom_Read function for Target Board based on 1323xMRB, which uses SPI Interface 
+  420:  // with the external eeprom 
+  421:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+  422:  eepromErr_t Eeprom_Read (eepromDataPackage_t* pDataPackage) 
+  423:  {
+  424:      spiErr_t SerialComError = gSpiErrNoError_c;
+  425:      uint8_t u8EepromStatusRegister = 0;
+  426:      
+  427:      
+  428:      #if(TRUE == mEepromParameterValidation_d) 
+  429:      {
+  430:      if((mEepromMaxAddress_c < pDataPackage->EepromAddress.u32Address) || \
+  431:         (0 == pDataPackage->u8DataSize) || \
+  432:         (NULL == pDataPackage->pfEepromCallback))   
+  433:      {
+  434:        return gEepromErrInvalidParam_c;
+  435:      }  
+  436:      }
+  437:      #endif
+  438:      
+  439:      if(mEepromStateIdle_c != mEepromActualState) 
+  440:      {
+  441:        return gEepromErrBusBusy_c;
+  442:      }
+  443:   
+  444:      u8EepromStatusRegister = mEepromCmdReadStatusReg_c;
+  445:      
+  446:      SerialComError = SPI1_AssertPeripheralSsPin(1,NULL);  
+  447:      SerialComError = SPI1_WriteStringBlocking(&u8EepromStatusRegister,1);
+  448:      SerialComError = SPI1_ReadStringBlocking(&u8EepromStatusRegister,1);
+  449:      SerialComError = SPI1_DeassertPeripheralSsPin();
+  450:      
+  451:      if(gSpiErrNoError_c != SerialComError) 
+  452:      {
+  453:        return gEepromErrNoEepromInBus_c;
+  454:      } 
+  455:      
+  456:      if(!(u8EepromStatusRegister & mEepromStatusBusyMask_c)) // Eeprom BUSY
+  457:      {   
+  458:        return gEepromErrBusBusy_c;
+  459:      }
+  460:   
+  461:      mpfEepromCallback = pDataPackage->pfEepromCallback;
+  462:      mpu8Data = pDataPackage->pu8Data;
+  463:      mu8DataSize = pDataPackage->u8DataSize; 
+  464:      
+  465:    
+  466:      mu8EepromAddress[0] = mEepromCmdMainMemRead_c;
+  467:      mu8EepromAddress[1] = (uint8_t)((pDataPackage->EepromAddress.u32Address >> 16) & 0x03);
+  468:      mu8EepromAddress[2] = (uint8_t) (pDataPackage->EepromAddress.u32Address >> 8);
+  469:      mu8EepromAddress[3] = (uint8_t) pDataPackage->EepromAddress.u32Address;
+  470:      
+  471:      if((mEepromAT45DB021DPageSize_c - mu8EepromAddress[3]) < mu8DataSize) 
+  472:      {
+  473:         return gEepromErrAddrOverflow_c;
+  474:      }
+  475:      
+  476:      mEepromActualState = mEepromStateDeviceAddr_c;
+  477:      SerialComError = SPI1_AssertPeripheralSsPin(1,EepromRead_Callback);
+  478:      SerialComError = SPI1_WriteString(mu8EepromAddress, 8);
+  479:        
+  480:                  
+  481:      if(gSpiErrNoError_c != SerialComError)  
+  482:      {
+  483:         (void)SPI1_DeassertPeripheralSsPin();
+  484:         mEepromActualState = mEepromStateIdle_c;
+  485:         return gEepromErrNoEepromInBus_c; 
+  486:      }
+  487:     
+  488:      return gEepromNoErr_c; 
+  489:   }
+  490:   #endif
+  491:   
+  492:  #else // gEepromSupported_d == FALSE
+  493:  
+  494:  eepromErr_t  Eeprom_Read (eepromDataPackage_t* pDataPackage) 
+  495:   {
+  496:      (void)pDataPackage;
+  497:      return gEepromNoErr_c;
+  0000 4f       [1]             CLRA  
+  498:   }
+  0001 8d       [7]             RTC   
+  499:  
+  500:  #endif  
+  501:   
+  502:   /************************************************************************************
+  503:  *
+  504:  *  Eeprom_Erase
+  505:  *
+  506:  ************************************************************************************/
+  507:  #if TRUE == gEepromSupported_d 
+  508:  
+  509:  // Eeprom_Erase function for Target Board 1320xQE128EVB
+  510:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+  511:  eepromErr_t  Eeprom_Erase (void) 
+  512:   {
+  513:      /* Eeprom At24C1024bwI2c does not require to erase before writting.
+  514:         Erase procedure may be done by writting 0xFF data in the memory.
+  515:         The user may use Eeprom_Write to achieve this. */
+  516:      return gEepromErrNotSupported_c;
+  517:   }
+  518:   #endif
+  519:  
+  520:  
+  521:  // Eeprom_Erase function for Target Board based on 1323xMRB
+  522:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+  523:  eepromErr_t  Eeprom_Erase (void) 
+  524:   {
+  525:      uint8_t au8EraseMemBuffer[] = {mEepromCmdChipEraseSeq_c};
+  526:      spiErr_t SerialComError = gSpiErrNoError_c;
+  527:      
+  528:      /* After sending the erase chip sequence, the Eeprom will be busy during
+  529:         3.6 to 6 seconds. The user must have this in mind because any other Eeprom
+  530:         API will return BusBusy error while the Eeprom finishes the erase procedure.*/
+  531:      
+  532:      SerialComError = SPI1_AssertPeripheralSsPin(1,NULL);
+  533:      SerialComError = SPI1_WriteStringBlocking(au8EraseMemBuffer,4);  
+  534:      SerialComError = SPI1_DeassertPeripheralSsPin();
+  535:      
+  536:      if(gSpiErrNoError_c != SerialComError)  
+  537:      {
+  538:         return gEepromErrNoEepromInBus_c; 
+  539:      }
+  540:      
+  541:      return gEepromNoErr_c; 
+  542:      
+  543:   }
+  544:   
+  545:   #endif 
+  546:  
+  547:  #else // gEepromSupported_d == FALSE
+  548:  
+  549:  eepromErr_t  Eeprom_Erase (void)  
+  550:   {
+  551:      return gEepromNoErr_c;
+  0000 4f       [1]             CLRA  
+  552:   }
+  0001 8d       [7]             RTC   
+  553:  
+  554:  #endif
+  555:  
+  556:  
+  557:  
+  558:  /************************************************************************************
+  559:  *************************************************************************************
+  560:  * Private functions
+  561:  *************************************************************************************
+  562:  ************************************************************************************/
+  563:  
+  564:  #if TRUE == gEepromSupported_d
+  565:  
+  566:    #ifdef MEMORY_MODEL_BANKED
+  567:      #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  568:    #else
+  569:      #pragma CODE_SEG DEFAULT
+  570:    #endif
+  571:  
+  572:   /************************************************************************************
+  573:  *
+  574:  *  EepromWrite_IicCallback
+  575:  *
+  576:  ************************************************************************************/
+  577:  
+  578:  // Callback function for Target Board 1320xQE128EVB
+  579:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+  580:  void  EepromWrite_Callback (iicResult_t IicWriteResult) 
+  581:  {
+  582:      iicErr_t SerialComError = gIicErrNoError_c;
+  583:      bool_t  fBusBusyErr = 0;
+  584:  
+  585:      if (gIicTxRxSuccess_c == IicWriteResult) 
+  586:      {
+  587:         switch (mEepromActualState) 
+  588:         {
+  589:          case mEepromStateDeviceAddr_c:
+  590:              // call to Write data
+  591:               SerialComError = IIC_Write (mu8DeviceAddress, \
+  592:                                           mpu8Data, mu8DataSize, EepromWrite_Callback);
+  593:               mEepromActualState = mEepromStateBusy_c; 
+  594:          break;
+  595:          case mEepromStateBusy_c:
+  596:               SerialComError = IIC_StopTransaction (mu8DeviceAddress);
+  597:               if(gIicErrNoError_c == SerialComError) 
+  598:               { 
+  599:                 mpfEepromCallback(gEepromNoErr_c); 
+  600:               }  
+  601:               mEepromActualState = mEepromStateIdle_c;             
+  602:          break;
+  603:  
+  604:          case mEepromStateIdle_c:
+  605:          case mEepromStateMax_c:
+  606:                // STATE MACHINE ERROR
+  607:          break;
+  608:         }
+  609:      } 
+  610:      else
+  611:      {
+  612:           fBusBusyErr = 1;
+  613:           mEepromActualState = mEepromStateIdle_c;
+  614:      } 
+  615:      
+  616:      if(gIicErrNoError_c != SerialComError)  
+  617:      {
+  618:          // EepromCallback with EepromNotInBus error as parameter 
+  619:          fBusBusyErr = 1;
+  620:      }
+  621:      
+  622:      if(fBusBusyErr) 
+  623:      {  
+  624:        SerialComError = IIC_StopTransaction (mu8DeviceAddress);
+  625:        mpfEepromCallback(gEepromErrBusBusy_c);
+  626:        mEepromActualState = mEepromStateIdle_c;
+  627:      }  
+  628:  
+  629:  }
+  630:  #endif
+  631:  
+  632:  // Callback function for Target Board 1323xMRB
+  633:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+  634:  void  EepromWrite_Callback (void)
+  635:   {  
+  636:      spiErr_t SerialComError = gSpiErrNoError_c;
+  637:  
+  638:      bool_t  fBusBusyErr = 0;
+  639:  
+  640:      switch (mEepromActualState) 
+  641:      {
+  642:        case mEepromStateWrMem2Buffer:
+  643:              /*
+  644:             mu8EepromAddress[0] = mEepromCmdBufferWrite_c;
+  645:             mEepromActualState = mEepromStateDeviceAddr_c;
+  646:             SerialComError = SPI1_AssertPeripheralSsPin(1,EepromWrite_Callback);
+  647:             SerialComError = SPI1_WriteString(mu8EepromAddress, 4);*/
+  648:        break;
+  649:        case mEepromStateDeviceAddr_c:
+  650:            // call to Write data      
+  651:             SerialComError = SPI1_WriteString(mpu8Data, mu8DataSize);
+  652:             mEepromActualState = mEepromStateBusy_c; 
+  653:        break;
+  654:        case mEepromStateBusy_c:
+  655:      
+  656:             SerialComError = SPI1_DeassertPeripheralSsPin();
+  657:             
+  658:             SerialComError = SPI1_AssertPeripheralSsPin(1,EepromWrite_Callback);
+  659:             
+  660:             mu8EepromAddress[0] = mEepromCmdMainMemWrite_c;
+  661:             mu8EepromAddress[1] = (uint8_t)((mu16EepromPageNumber >> 8) & 0x03);
+  662:             mu8EepromAddress[2] = (uint8_t)mu16EepromPageNumber;
+  663:             
+  664:             SerialComError = SPI1_WriteString(mu8EepromAddress,4);
+  665:                           
+  666:             if(gSpiErrNoError_c != SerialComError)  
+  667:             { 
+  668:                fBusBusyErr = 1; 
+  669:             }
+  670:             
+  671:             mEepromActualState = mEepromStateWrBuffer_c;
+  672:        break;
+  673:        case mEepromStateWrBuffer_c:
+  674:        
+  675:             SerialComError = SPI1_DeassertPeripheralSsPin();
+  676:             if(gSpiErrNoError_c == SerialComError)  
+  677:             { 
+  678:               mpfEepromCallback(gEepromNoErr_c); 
+  679:             }  
+  680:             mEepromActualState = mEepromStateIdle_c;
+  681:        break;
+  682:  
+  683:        case mEepromStateIdle_c:
+  684:        case mEepromStateMax_c:
+  685:              // STATE MACHINE ERROR
+  686:        break;
+  687:      }      
+  688:    
+  689:      if(gSpiErrNoError_c != SerialComError)  
+  690:      {
+  691:          // EepromCallback with EepromNotInBus error as parameter 
+  692:          fBusBusyErr = 1;
+  693:      }
+  694:      if(fBusBusyErr) 
+  695:      {  
+  696:        SerialComError = SPI1_DeassertPeripheralSsPin();
+  697:        mpfEepromCallback(gEepromErrBusBusy_c);
+  698:        mEepromActualState = mEepromStateIdle_c;
+  699:      }   
+  700:        
+  701:   }
+  702:   #endif
+  703:   
+  704:    /************************************************************************************
+  705:  *
+  706:  *  EepromRead_IicCallback
+  707:  *
+  708:  ************************************************************************************/
+  709:  
+  710:  // Callback function for Target Board 1320xQE128EVB
+  711:  #if gTargetBoard_c == gMc1320xS08qe128Evb_c
+  712:  void  EepromRead_Callback (iicResult_t IicReadResult) 
+  713:  {
+  714:  
+  715:      iicErr_t SerialComError = gIicErrNoError_c;    
+  716:      bool_t  fBusBusyErr = 0;
+  717:  
+  718:      if (gIicTxRxSuccess_c == IicReadResult) 
+  719:      {
+  720:       switch (mEepromActualState) 
+  721:       {                       
+  722:         
+  723:         case mEepromStateDeviceAddr_c:
+  724:            // call to Read data
+  725:             SerialComError = IIC_Read (mu8DeviceAddress, \
+  726:                                         mpu8Data, mu8DataSize, EepromRead_Callback);
+  727:             mEepromActualState = mEepromStateBusy_c; 
+  728:        break;
+  729:        case mEepromStateBusy_c:
+  730:             SerialComError = IIC_StopTransaction (mu8DeviceAddress);
+  731:             if(gIicErrNoError_c == SerialComError) 
+  732:             { 
+  733:               mpfEepromCallback(gEepromNoErr_c); 
+  734:             } 
+  735:             mEepromActualState = mEepromStateIdle_c; 
+  736:        break;
+  737:        
+  738:        case mEepromStateIdle_c:
+  739:        case mEepromStateMax_c:
+  740:              // STATE MACHINE ERROR 
+  741:        break;
+  742:       }
+  743:       
+  744:      } 
+  745:      else
+  746:      {
+  747:         fBusBusyErr = 1;
+  748:         mEepromActualState = mEepromStateIdle_c;
+  749:      }
+  750:  
+  751:      if(gIicErrNoError_c != SerialComError) 
+  752:      { 
+  753:          fBusBusyErr = 1;
+  754:      }
+  755:  
+  756:      if(fBusBusyErr) 
+  757:      {  
+  758:        SerialComError = IIC_StopTransaction (mu8DeviceAddress);
+  759:        mpfEepromCallback(gEepromErrBusBusy_c);
+  760:        mEepromActualState = mEepromStateIdle_c;
+  761:      } 
+  762:       
+  763:  }
+  764:  #endif
+  765:  
+  766:  // Callback function for Target Board 1323xMRB
+  767:  #if (gTargetBoard_c == gMc1323xRcm_c || gTargetBoard_c == gMc1323xRem_c)
+  768:  void  EepromRead_Callback (void)
+  769:   {    
+  770:  
+  771:      spiErr_t SerialComError = gSpiErrNoError_c;
+  772:  
+  773:      bool_t  fBusBusyErr = 0;
+  774:  
+  775:  
+  776:      switch (mEepromActualState) 
+  777:      {
+  778:      case mEepromStateDeviceAddr_c:
+  779:          // call to Write data      
+  780:           SerialComError = SPI1_ReadString(mpu8Data, mu8DataSize);
+  781:           mEepromActualState = mEepromStateBusy_c; 
+  782:      break;
+  783:      case mEepromStateBusy_c:
+  784:           SerialComError = SPI1_DeassertPeripheralSsPin();
+  785:           if(gSpiErrNoError_c == SerialComError) 
+  786:           { 
+  787:             mpfEepromCallback(gEepromNoErr_c); 
+  788:           }
+  789:           mEepromActualState = mEepromStateIdle_c;  
+  790:      break;
+  791:  
+  792:      case mEepromStateIdle_c:
+  793:      case mEepromStateMax_c:
+  794:            // STATE MACHINE ERROR
+  795:      break;
+  796:      }  
+  797:      
+  798:      if(gSpiErrNoError_c != SerialComError) 
+  799:      { 
+  800:          fBusBusyErr = 1;
+  801:      }
+  802:  
+  803:      if(fBusBusyErr) 
+  804:      {
+  805:        SerialComError = SPI1_DeassertPeripheralSsPin();
+  806:        mpfEepromCallback(gEepromErrBusBusy_c);
+  807:        mEepromActualState = mEepromStateIdle_c;
+  808:      }  
+  809:      
+  810:   }
+  811:  #endif 
+  812:  
+  813:  #pragma CODE_SEG DEFAULT 
+  814:  
+  815:  #endif // gEepromSupported_d
+  816:  
+  817:  /************************************************************************************
+  818:  *************************************************************************************
+  819:  * Private Debug stuff
+  820:  *************************************************************************************
+  821:  ************************************************************************************/
+  822:  
+  823:  
+  824:  
+  825:  /* End of EEPROM.c */
+  826:  

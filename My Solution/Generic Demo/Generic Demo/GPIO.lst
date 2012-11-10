@@ -1,0 +1,593 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /******************************************************************************
+    2:  * Source file for GPIO driver.
+    3:  *
+    4:  *
+    5:  * (c) Copyright 2009, Freescale, Inc.  All rights reserved.
+    6:  *
+    7:  * Freescale Confidential Proprietary
+    8:  *
+    9:  * No part of this document must be reproduced in any form - including copied,
+   10:  * transcribed, printed or by any electronic means - without specific written
+   11:  * permission from Freescale.
+   12:  *   
+   13:  *******************************************************************************/
+   14:  
+   15:   
+   16:   #include "GPIO.h"
+   17:  
+   18:   
+   19:  /******************************************************************************
+   20:  *******************************************************************************
+   21:  * Private type definitions
+   22:  *******************************************************************************
+   23:  *******************************************************************************/
+   24:  
+   25:  /******************************************************************************
+   26:  *******************************************************************************
+   27:  * Private defines and macros
+   28:  *******************************************************************************
+   29:  *******************************************************************************/
+   30:  
+   31:  /******************************************************************************
+   32:  *******************************************************************************
+   33:  * Private constants
+   34:  *******************************************************************************
+   35:  *******************************************************************************/
+   36:  
+   37:  /******************************************************************************
+   38:  *******************************************************************************
+   39:  * Private prototypes
+   40:  *******************************************************************************
+   41:  *******************************************************************************/
+   42:  
+   43:  /******************************************************************************
+   44:  *******************************************************************************
+   45:  * Public memory declarations
+   46:  *******************************************************************************
+   47:  *******************************************************************************/
+   48:  
+   49:  /******************************************************************************
+   50:  *******************************************************************************
+   51:  * Private memory declarations
+   52:  *******************************************************************************
+   53:  *******************************************************************************/
+   54:  
+   55:  // Init Values
+   56:  
+   57:  
+   58:  #ifdef gMcs08qe128Platform_d
+   59:  //******************************************************************************
+   60:  
+   61:  static uint8_t* gpGpioPortData[gNumberOfGpioPorts_c] = {&PTAD,&PTBD,&PTCD,&PTDD,&PTED,&PTFD,&PTGD,&PTHD,&PTJD};
+   62:  static uint8_t* gpGpioPullDown[gNumberOfGpioPorts_c] = {&PTAPE,&PTBPE,&PTCPE,&PTDPE,&PTEPE,&PTFPE,&PTGPE,&PTHPE,&PTJPE};
+   63:  static uint8_t  gGpioPortLogic[gNumberOfGpioPorts_c]; 
+   64:    
+   65:  //                                               Data   Direction
+   66:   
+   67:   gpioDataHandling_t const GpioDataHandling[] = {
+   68:                                                  {gPTADValue_c,  gPTADDValue_c},
+   69:                                                  {gPTBDValue_c,  gPTBDDValue_c},
+   70:                                                  {gPTCDValue_c,  gPTCDDValue_c},
+   71:                                                  {gPTDDValue_c,  gPTDDDValue_c},
+   72:                                                  {gPTEDValue_c,  gPTEDDValue_c},
+   73:                                                  {gPTFDValue_c,  gPTFDDValue_c},
+   74:                                                  {gPTGDValue_c,  gPTGDDValue_c},
+   75:                                                  {gPTHDValue_c,  gPTHDDValue_c},
+   76:                                                  {gPTJDValue_c,  gPTJDDValue_c}
+   77:                                                 };
+   78:   
+   79:  //                                               PullDown  SlewRate  DriveStrength
+   80:   
+   81:   gpioConfigPort_t const GpioConfigPort[] =     { 
+   82:                                                  {gPTAPEValue_c, gPTASEValue_c, gPTADSValue_c},
+   83:                                                  {gPTBPEValue_c, gPTBSEValue_c, gPTBDSValue_c},
+   84:                                                  {gPTCPEValue_c, gPTCSEValue_c, gPTCDSValue_c},
+   85:                                                  {gPTDPEValue_c, gPTDSEValue_c, gPTDDSValue_c},
+   86:                                                  {gPTEPEValue_c, gPTESEValue_c, gPTEDSValue_c},
+   87:                                                  {gPTFPEValue_c, gPTFSEValue_c, gPTFDSValue_c},
+   88:                                                  {gPTGPEValue_c, gPTGSEValue_c, gPTGDSValue_c},
+   89:                                                  {gPTHPEValue_c, gPTHSEValue_c, gPTHDSValue_c},
+   90:                                                  {gPTJPEValue_c, gPTJSEValue_c, gPTJDSValue_c}
+   91:                                                 };
+   92:       
+   93:   
+   94:  //                                               Logic    
+   95:                                              
+   96:  uint8_t const GpioLogicConfig[] =              { 
+   97:                                                  gPTALogicValue_c,
+   98:                                                  gPTBLogicValue_c,
+   99:                                                  gPTCLogicValue_c,
+  100:                                                  gPTDLogicValue_c,
+  101:                                                  gPTELogicValue_c,
+  102:                                                  gPTFLogicValue_c,
+  103:                                                  gPTGLogicValue_c,
+  104:                                                  gPTHLogicValue_c,
+  105:                                                  gPTJLogicValue_c
+  106:                                                 };  
+  107:  #endif
+  108:    
+  109:  #ifdef gMc1323xPlatform_d  
+  110:  //******************************************************************************
+  111:  
+  112:  static  uint8_t* gpGpioPortData[gNumberOfGpioPorts_c] = {&PTAD,&PTBD,&PTCD,&PTDD};
+  113:  static  uint8_t* gpGpioPullDown[gNumberOfGpioPorts_c] = {&PTAPE,&PTBPE,&PTCPE,&PTDPE};
+  114:  static  uint8_t  gGpioPortLogic[gNumberOfGpioPorts_c]; 
+  115:    
+  116:  //                                               Data   Direction
+  117:   
+  118:   gpioDataHandling_t const GpioDataHandling[] = {
+  119:                                                  {gPTADValue_c,  gPTADDValue_c},
+  120:                                                  {gPTBDValue_c,  gPTBDDValue_c},
+  121:                                                  {gPTCDValue_c,  gPTCDDValue_c},
+  122:                                                  {gPTDDValue_c,  gPTDDDValue_c}
+  123:                                                 };
+  124:   
+  125:  //                                               PullDown  SlewRate  DriveStrength
+  126:   
+  127:   gpioConfigPort_t const GpioConfigPort[] =     { 
+  128:                                                  {gPTAPEValue_c, gPTASEValue_c, gPTADSValue_c},
+  129:                                                  {gPTBPEValue_c, gPTBSEValue_c, gPTBDSValue_c},
+  130:                                                  {gPTCPEValue_c, gPTCSEValue_c, gPTCDSValue_c},
+  131:                                                  {gPTDPEValue_c, gPTDSEValue_c, gPTDDSValue_c}
+  132:                                                 };
+  133:       
+  134:   
+  135:  //                                               Logic    
+  136:                                              
+  137:  uint8_t const GpioLogicConfig[] =              { 
+  138:                                                  gPTALogicValue_c,
+  139:                                                  gPTBLogicValue_c,
+  140:                                                  gPTCLogicValue_c,
+  141:                                                  gPTDLogicValue_c
+  142:                                                 };  
+  143:  #endif
+  144:  
+  145:  
+  146:  
+  147:  
+  148:  #ifdef gMcs08Gt60Platform_d  
+  149:  //******************************************************************************
+  150:  
+  151:  static  uint8_t* gpGpioPortData[gNumberOfGpioPorts_c] = {&PTAD,&PTBD,&PTCD,&PTDD,&PTED,&PTFD,&PTGD};
+  152:  static  uint8_t* gpGpioPullDown[gNumberOfGpioPorts_c] = {&PTAPE,&PTBPE,&PTCPE,&PTDPE,&PTEPE,&PTFPE,&PTGPE};
+  153:  static  uint8_t  gGpioPortLogic[gNumberOfGpioPorts_c]; 
+  154:    
+  155:  //                                               Data   Direction
+  156:   
+  157:   gpioDataHandling_t const GpioDataHandling[] = {
+  158:                                                  {gPTADValue_c, 0x00, 0x00,  gPTADDValue_c},
+  159:                                                  {gPTBDValue_c, 0x00, 0x00,  gPTBDDValue_c},
+  160:                                                  {gPTCDValue_c, 0x00, 0x00,  gPTCDDValue_c},
+  161:                                                  {gPTDDValue_c, 0x00, 0x00,  gPTDDDValue_c},
+  162:                                                  {gPTEDValue_c, 0x00, 0x00,  gPTEDDValue_c},
+  163:                                                  {gPTFDValue_c, 0x00, 0x00,  gPTFDDValue_c},
+  164:                                                  {gPTGDValue_c, 0x00, 0x00,  gPTGDDValue_c}
+  165:                                                 };
+  166:   
+  167:  //                                               PullDown  SlewRate  
+  168:   
+  169:   gpioConfigPort_t const GpioConfigPort[] =     { 
+  170:                                                  {gPTAPEValue_c, gPTASEValue_c},
+  171:                                                  {gPTBPEValue_c, gPTBSEValue_c},
+  172:                                                  {gPTCPEValue_c, gPTCSEValue_c},
+  173:                                                  {gPTDPEValue_c, gPTDSEValue_c},
+  174:                                                  {gPTEPEValue_c, gPTESEValue_c},
+  175:                                                  {gPTFPEValue_c, gPTFSEValue_c},
+  176:                                                  {gPTGPEValue_c, gPTGSEValue_c},
+  177:                                                 
+  178:                                                 };
+  179:       
+  180:   
+  181:  //                                               Logic    
+  182:                                              
+  183:  uint8_t const GpioLogicConfig[] =              { 
+  184:                                                  gPTALogicValue_c,
+  185:                                                  gPTBLogicValue_c,
+  186:                                                  gPTCLogicValue_c,
+  187:                                                  gPTDLogicValue_c,
+  188:                                                  gPTELogicValue_c,
+  189:                                                  gPTFLogicValue_c,
+  190:                                                  gPTGLogicValue_c,
+  191:                                                 };  
+  192:  #endif 
+  193:  
+  194:  
+  195:  /******************************************************************************
+  196:  *******************************************************************************
+  197:  * Public functions
+  198:  *******************************************************************************
+  199:  *******************************************************************************/
+  200:  
+  201:  
+  202:  /************************************************************************************
+  203:  *  Gpio_ConfigPort
+  204:  *
+  205:  * The purpose of this function is to configure the posible IO options of a selected  
+  206:  * GPIO port specified as a parameter
+  207:  *
+  208:  ************************************************************************************/ 
+  209:  
+  210:  void Gpio_ConfigPort(gpioPort_t Port, gpioRuntimeConfig_t Config){
+  211:   
+  212:   gpioConfigUnion_t pTmpPortPtr;
+  213:    
+  214:   pTmpPortPtr.dataHandling = (gpioDataHandling_t*)gpGpioPortData[Port];
+  0000 95       [2]             TSX   
+  0001 ee08     [3]             LDX   8,X
+  0003 58       [1]             LSLX  
+  0004 89       [2]             PSHX  
+  0005 8c       [1]             CLRH  
+  0006 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  215:   (pTmpPortPtr.dataHandling)->Direction = Config.Direction.port;
+  000a 9ee605   [4]             LDA   5,SP
+  000d e701     [3]             STA   1,X
+  216:  
+  217:   pTmpPortPtr.configPort = (gpioConfigPort_t*)gpGpioPullDown[Port];
+  000f 88       [3]             PULX  
+  0010 8c       [1]             CLRH  
+  0011 9ebe0000 [6]             LDHX  @gpGpioPullDown,X
+  218:   (pTmpPortPtr.configPort)->PullDown = Config.PullDown.port;
+  0015 9ee605   [4]             LDA   5,SP
+  0018 f7       [2]             STA   ,X
+  219:   (pTmpPortPtr.configPort)->SlewRate = Config.SlewRate.port;
+  0019 9ee606   [4]             LDA   6,SP
+  001c e701     [3]             STA   1,X
+  220:   
+  221:   #ifndef gMcs08Gt60Platform_d
+  222:   
+  223:   (pTmpPortPtr.configPort)->DriveStrength = Config.DriveStrength.port;
+  001e 9ee607   [4]             LDA   7,SP
+  0021 e702     [3]             STA   2,X
+  224:  
+  225:   #endif
+  226:   
+  227:   gGpioPortLogic[Port] = Config.Logic.port;
+  0023 95       [2]             TSX   
+  0024 ee08     [3]             LDX   8,X
+  0026 9ee608   [4]             LDA   8,SP
+  0029 8c       [1]             CLRH  
+  002a d70000   [4]             STA   @gGpioPortLogic,X
+  228:  
+  229:   } 
+  002d 8d       [7]             RTC   
+  230:   
+  231:   
+  232:   
+  233:  /************************************************************************************
+  234:  * Gpio_Init settings
+  235:  *
+  236:  * The purpose of this function is to enable or disable GPIO settings such as port direction, 
+  237:  * pull-ups, slew rate control 
+  238:  *
+  239:  ************************************************************************************/ 
+  240:   
+  241:   void Gpio_Init()
+  242:   {
+  243:    
+  244:    uint8_t PortCount;
+  245:    gpioConfigUnion_t pTmpPortPtr;
+  246:      
+  247:    for(PortCount = gGpioPortA_c; PortCount < gGpioPortMax_c; PortCount++){  
+  0000 5f       [1]             CLRX  
+  0001          L1:     
+  248:    
+  249:      pTmpPortPtr.dataHandling = (gpioDataHandling_t*)gpGpioPortData[PortCount];
+  0001 9f       [1]             TXA   
+  0002 58       [1]             LSLX  
+  0003 8c       [1]             CLRH  
+  0004 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  250:      (pTmpPortPtr.dataHandling)->Data = GpioDataHandling[PortCount].Data;
+  0008 87       [2]             PSHA  
+  0009 48       [1]             LSLA  
+  000a 8b       [2]             PSHH  
+  000b 8c       [1]             CLRH  
+  000c 89       [2]             PSHX  
+  000d 97       [1]             TAX   
+  000e d60000   [4]             LDA   @GpioDataHandling,X
+  0011 87       [2]             PSHA  
+  0012 9ee603   [4]             LDA   3,SP
+  0015 87       [2]             PSHA  
+  0016 8a       [3]             PULH  
+  0017 86       [3]             PULA  
+  0018 89       [2]             PSHX  
+  0019 9eee02   [4]             LDX   2,SP
+  001c f7       [2]             STA   ,X
+  251:      (pTmpPortPtr.dataHandling)->Direction = GpioDataHandling[PortCount].Direction;
+  001d 8c       [1]             CLRH  
+  001e 88       [3]             PULX  
+  001f d60001   [4]             LDA   @GpioDataHandling:1,X
+  0022 95       [2]             TSX   
+  0023 ee01     [3]             LDX   1,X
+  0025 89       [2]             PSHX  
+  0026 8a       [3]             PULH  
+  0027 88       [3]             PULX  
+  0028 e701     [3]             STA   1,X
+  252:      
+  253:      pTmpPortPtr.configPort = (gpioConfigPort_t*)gpGpioPullDown[PortCount];
+  002a 95       [2]             TSX   
+  002b e601     [3]             LDA   1,X
+  002d 48       [1]             LSLA  
+  002e 8c       [1]             CLRH  
+  002f 97       [1]             TAX   
+  0030 9ebe0000 [6]             LDHX  @gpGpioPullDown,X
+  254:      (pTmpPortPtr.configPort)->PullDown = GpioConfigPort[PortCount].PullDown;
+  0034 a603     [2]             LDA   #3
+  0036 9eef01   [4]             STX   1,SP
+  0039 9eee02   [4]             LDX   2,SP
+  003c 42       [5]             MUL   
+  003d 8b       [2]             PSHH  
+  003e 8c       [1]             CLRH  
+  003f 97       [1]             TAX   
+  0040 de0000   [4]             LDX   @GpioConfigPort,X
+  0043 87       [2]             PSHA  
+  0044 9ee602   [4]             LDA   2,SP
+  0047 87       [2]             PSHA  
+  0048 8a       [3]             PULH  
+  0049 89       [2]             PSHX  
+  004a 9eee04   [4]             LDX   4,SP
+  004d 86       [3]             PULA  
+  004e f7       [2]             STA   ,X
+  255:      (pTmpPortPtr.configPort)->SlewRate = GpioConfigPort[PortCount].SlewRate;
+  004f 8c       [1]             CLRH  
+  0050 9eee01   [4]             LDX   1,SP
+  0053 d60001   [4]             LDA   @GpioConfigPort:1,X
+  0056 95       [2]             TSX   
+  0057 ee01     [3]             LDX   1,X
+  0059 89       [2]             PSHX  
+  005a 95       [2]             TSX   
+  005b ee03     [3]             LDX   3,X
+  005d 8a       [3]             PULH  
+  005e e701     [3]             STA   1,X
+  256:      
+  257:      #ifndef gMcs08Gt60Platform_d
+  258:      
+  259:      (pTmpPortPtr.configPort)->DriveStrength = GpioConfigPort[PortCount].DriveStrength;
+  0060 8c       [1]             CLRH  
+  0061 88       [3]             PULX  
+  0062 d60002   [4]             LDA   @GpioConfigPort:2,X
+  0065 8a       [3]             PULH  
+  0066 88       [3]             PULX  
+  0067 e702     [3]             STA   2,X
+  260:      
+  261:      #endif
+  262:      
+  263:      gGpioPortLogic[PortCount] = GpioLogicConfig[PortCount];
+  0069 8c       [1]             CLRH  
+  006a 88       [3]             PULX  
+  006b d60000   [4]             LDA   @GpioLogicConfig,X
+  006e d70000   [4]             STA   @gGpioPortLogic,X
+  0071 5c       [1]             INCX  
+  0072 a309     [2]             CPX   #9
+  0074 258b     [3]             BCS   L1 ;abs = 0001
+  264:    
+  265:    } 
+  266:   
+  267:   }
+  0076 8d       [7]             RTC   
+  268:   
+  269:  
+  270:  /************************************************************************************
+  271:  *  Gpio_PortValue
+  272:  *
+  273:  * The purpose of this function is to read the value of a selected GPIO port 
+  274:  * specified as a parameter
+  275:  *
+  276:  ************************************************************************************/  
+  277:   
+  278:  bitByte_t Gpio_PortValue(gpioPort_t Port){
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  279:     
+  280:     bitByte_t TempValueHandling;
+  281:     
+  282:     TempValueHandling.port = (*gpGpioPortData[Port]) ^ (gGpioPortLogic[Port]);
+  0002 87       [2]             PSHA  
+  0003 48       [1]             LSLA  
+  0004 8c       [1]             CLRH  
+  0005 97       [1]             TAX   
+  0006 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  000a f6       [3]             LDA   ,X
+  000b 8c       [1]             CLRH  
+  000c 88       [3]             PULX  
+  000d d80000   [4]             EOR   @gGpioPortLogic,X
+  283:     
+  284:     return TempValueHandling;
+  0010 9efe01   [5]             LDHX  1,SP
+  0013 f7       [2]             STA   ,X
+  285:  
+  286:   }
+  0014 a702     [2]             AIS   #2
+  0016 8d       [7]             RTC   
+  287:   
+  288:  
+  289:   /************************************************************************************
+  290:  * Gpio_ReadPort
+  291:  *
+  292:  * The purpose of this function is to read the value of a selected pin on a selected 
+  293:  * GPIO port with both values specified as a parameter.
+  294:  *
+  295:  ************************************************************************************/ 
+  296:   
+  297:   
+  298:   gpioLevel_t Gpio_PinValue(gpioPort_t Port, gpioPin_t Pin){
+  0000 89       [2]             PSHX  
+  0001 87       [2]             PSHA  
+  299:   
+  300:     uint8_t PortValue;
+  301:     
+  302:     PortValue = (*gpGpioPortData[Port]) ^ (gGpioPortLogic[Port]);
+  0002 58       [1]             LSLX  
+  0003 8c       [1]             CLRH  
+  0004 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  0008 f6       [3]             LDA   ,X
+  0009 95       [2]             TSX   
+  000a ee01     [3]             LDX   1,X
+  000c 8c       [1]             CLRH  
+  000d d80000   [4]             EOR   @gGpioPortLogic,X
+  303:     
+  304:     PortValue &= Pin;
+  0010 95       [2]             TSX   
+  0011 f4       [3]             AND   ,X
+  305:     
+  306:     if(PortValue){
+  0012 2703     [3]             BEQ   L17 ;abs = 0017
+  307:           
+  308:      return gGpioPinStateActive_c;
+  0014 a601     [2]             LDA   #1
+  0016 21       [3]             SKIP1 L18 ;abs = 0018
+  0017          L17:    
+  309:     
+  310:     } 
+  311:       
+  312:     else{
+  313:        
+  314:      return gGpioPinStateInactive_c;
+  0017 4f       [1]             CLRA  
+  0018          L18:    
+  315:       
+  316:     }
+  317:     
+  318:   }
+  0018 a702     [2]             AIS   #2
+  001a 8d       [7]             RTC   
+  319:   
+  320:   
+  321:   /************************************************************************************
+  322:  * Gpio_WritePort
+  323:  *
+  324:  * The purpose of this function is to write a value on a selected GPIO port 
+  325:  * specified as a parameter
+  326:  *
+  327:  ************************************************************************************/ 
+  328:   
+  329:   void Gpio_PortWrite(gpioPort_t Port, uint8_t Value){
+  330:      
+  331:     *gpGpioPortData[Port] = Value ^ gGpioPortLogic[Port];
+  0000 8c       [1]             CLRH  
+  0001 d80000   [4]             EOR   @gGpioPortLogic,X
+  0004 58       [1]             LSLX  
+  0005 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  0009 f7       [2]             STA   ,X
+  332:     
+  333:   }
+  000a 8d       [7]             RTC   
+  334:   
+  335:   
+  336:   /************************************************************************************
+  337:  * Gpio_SetPin
+  338:  *
+  339:  * The purpose of this function is to set a selected pin on a selected 
+  340:  * GPIO port with both values specified as a parameter.
+  341:  *
+  342:  ************************************************************************************/ 
+  343:   
+  344:   
+  345:   void Gpio_PinSet(gpioPort_t Port, gpioPin_t Pin){
+  0000 87       [2]             PSHA  
+  346:    
+  347:    if(Pin & gGpioPortLogic[Port]){
+  0001 8c       [1]             CLRH  
+  0002 d40000   [4]             AND   @gGpioPortLogic,X
+  0005 270c     [3]             BEQ   L13 ;abs = 0013
+  348:      
+  349:      (*gpGpioPortData[Port]) &= ~Pin;
+  0007 58       [1]             LSLX  
+  0008 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  000c 9ee601   [4]             LDA   1,SP
+  000f 43       [1]             COMA  
+  0010 f4       [3]             AND   ,X
+  350:     
+  351:    } else{
+  0011 2009     [3]             BRA   L1C ;abs = 001c
+  0013          L13:    
+  352:    
+  353:      (*gpGpioPortData[Port])|= Pin;
+  0013 58       [1]             LSLX  
+  0014 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  0018 9ee601   [4]             LDA   1,SP
+  001b fa       [3]             ORA   ,X
+  001c          L1C:    
+  001c f7       [2]             STA   ,X
+  354:    
+  355:    }
+  356:     
+  357:   }
+  001d 8a       [3]             PULH  
+  001e 8d       [7]             RTC   
+  358:   
+  359:   /************************************************************************************
+  360:  * Gpio_ClearPin
+  361:  *
+  362:  * The purpose of this function is to clear a selected pin on a selected 
+  363:  * GPIO port with both values specified as a parameter.
+  364:  *
+  365:  ************************************************************************************/ 
+  366:   
+  367:   
+  368:   void Gpio_PinClear(gpioPort_t Port, gpioPin_t Pin){
+  0000 87       [2]             PSHA  
+  369:     
+  370:     if(Pin & gGpioPortLogic[Port]){
+  0001 8c       [1]             CLRH  
+  0002 d40000   [4]             AND   @gGpioPortLogic,X
+  0005 270b     [3]             BEQ   L12 ;abs = 0012
+  371:      
+  372:      *gpGpioPortData[Port] |= Pin;
+  0007 58       [1]             LSLX  
+  0008 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  000c 9ee601   [4]             LDA   1,SP
+  000f fa       [3]             ORA   ,X
+  373:     
+  374:     } else{
+  0010 200a     [3]             BRA   L1C ;abs = 001c
+  0012          L12:    
+  375:    
+  376:      *gpGpioPortData[Port] &= ~Pin; 
+  0012 58       [1]             LSLX  
+  0013 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  0017 9ee601   [4]             LDA   1,SP
+  001a 43       [1]             COMA  
+  001b f4       [3]             AND   ,X
+  001c          L1C:    
+  001c f7       [2]             STA   ,X
+  377:      
+  378:     }
+  379:    
+  380:   }
+  001d 8a       [3]             PULH  
+  001e 8d       [7]             RTC   
+  381:   
+  382:   /************************************************************************************
+  383:  * Gpio_TogglePin
+  384:  *
+  385:  * The purpose of this function is to toggle a selected pin on a selected 
+  386:  * GPIO port with both values specified as a parameter.
+  387:  *
+  388:  ************************************************************************************/ 
+  389:   
+  390:   
+  391:   void Gpio_PinToggle(gpioPort_t Port, gpioPin_t Pin){
+  392:    
+  393:      *gpGpioPortData[Port] ^= Pin;
+  0000 58       [1]             LSLX  
+  0001 8c       [1]             CLRH  
+  0002 9ebe0000 [6]             LDHX  @gpGpioPortData,X
+  0006 f8       [3]             EOR   ,X
+  0007 f7       [2]             STA   ,X
+  394:   }
+  0008 8d       [7]             RTC   
+  395:    
+  396:    
+  397:  
+  398:    
+  399:    
+  400:    
+  401:      
+  402:      
+  403:      
+  404:      
+  405:      
+  406:      
+  407:      

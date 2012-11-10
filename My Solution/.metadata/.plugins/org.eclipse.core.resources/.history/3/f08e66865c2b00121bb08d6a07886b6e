@@ -1,0 +1,1882 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
+
+    1:  /*****************************************************************************
+    2:  * PhyMC1320X implementation.
+    3:  * 
+    4:  * Copyright (c) 2010, Freescale, Inc. All rights reserved.
+    5:  *
+    6:  * No part of this document must be reproduced in any form - including copied,
+    7:  * transcribed, printed or by any electronic means - without specific written
+    8:  * permission from Freescale Semiconductor.
+    9:  *
+   10:  *****************************************************************************/
+   11:  
+   12:  
+   13:  
+   14:  #include "PhyMC1320X.h"
+   15:  
+   16:  /************************************************************************************
+   17:  *************************************************************************************
+   18:  * Private memory declarations
+   19:  *************************************************************************************
+   20:  ************************************************************************************/
+   21:  static uint16_t u16HREReg;
+   22:  static handlingRadioEventStates_t hREState;
+   23:  static phyPacket_t * mDrvRxPacket;
+   24:  static phyRxParams_t *mPhyRxParams;
+   25:  
+   26:  static const uint8_t cu8ChannelRegisterValues[16][2]=
+   27:  {
+   28:    {0x95, 0x50},/*Channel 0x0B */
+   29:    {0x95, 0xA0},/*Channel 0x0C */
+   30:    {0x95, 0xF0},/*Channel 0x0D */
+   31:    {0x96, 0x40},/*Channel 0x0E */
+   32:    {0x96, 0x90},/*Channel 0x0F */
+   33:    {0x96, 0xE0},/*Channel 0x10 */
+   34:    {0x97, 0x30},/*Channel 0x11 */
+   35:    {0x97, 0x80},/*Channel 0x12 */
+   36:    {0x97, 0xD0},/*Channel 0x13 */
+   37:    {0x98, 0x20},/*Channel 0x14 */
+   38:    {0x98, 0x70},/*Channel 0x15 */
+   39:    {0x98, 0xC0},/*Channel 0x16 */
+   40:    {0x99, 0x10},/*Channel 0x17 */
+   41:    {0x99, 0x60},/*Channel 0x18 */
+   42:    {0x99, 0xB0},/*Channel 0x19 */
+   43:    {0x9A, 0x00} /*Channel 0x1A */
+   44:  };
+   45:  
+   46:  static const uint8_t u8PARegisterValues[16] =
+   47:  {
+   48:    0x0C, /*-16.2 dBm*/
+   49:    0x1C, /*-15.9 dBm*/
+   50:    0x2C, /*-15.3 dBm*/
+   51:    0x3C, /*-14.8 dBm*/
+   52:    0x4C, /* -8.5 dBm*/
+   53:    0x5C, /* -7.6 dBm*/
+   54:    0x6C, /* -7.2 dBm*/
+   55:    0x7C, /* -7.0 dBm*/
+   56:    0x9C, /* -1.6 dBm*/
+   57:    0xBC, /* -0.66 dBm*/
+   58:    0xCC, /*  0.62 dBm*/
+   59:    0xEC, /*  1.23 dBm*/
+   60:    0xFC, /*  1.42 dBm*/
+   61:    0xFD, /*  2.2 dBm*/
+   62:    0xFE, /*  2.9 dBm*/
+   63:    0xFF  /*  3.4 dBm*/
+   64:  };
+   65:  
+   66:  
+   67:  const radioRegister_t radioConfiguration[] = 
+   68:  {
+   69:    {gRadioTmrCmp1AReg_c,         0x8000},
+   70:    {gRadioTmrCmp2AReg_c,         0x8000},
+   71:    {gRadioTmrCmp3AReg_c,         0x8000},
+   72:    {gRadioTmrCmp4AReg_c,         0x8000},
+   73:    {gRadioControlBReg_c,         mControlBRegValue_c},
+   74:    {gRadioGPIODataOutReg_c,      0x0381},
+   75:    {gRadioCCAThreshReg_c,        0xA08D},
+   76:    {gRadioIRQMaskReg_c,          0x8351},
+   77:    {gRadioControlAReg_c,         0x4720},
+   78:    {gRadioGPIODirReg_c,          0xC0FE},
+   79:    {gRadioPSMModeReg_c,          0xA0C0},
+   80:    {gRadioRegister0x34_c,        0xFEC6}
+   81:  };
+   82:  
+   83:  #define mPhyRegCountIc60_c 10 
+   84:  #define mPhyRegCountIc68_c 12 
+   85:  
+   86:  
+   87:  static phyStates_t mPhyState = mPhyNoInitState_c;
+   88:  
+   89:  flagsRegister_t phyFlags;
+   90:  
+   91:  /************************************************************************************
+   92:  *************************************************************************************
+   93:  * Interface functions
+   94:  *************************************************************************************
+   95:  ************************************************************************************/
+   96:  /* Place it in NON_BANKED memory */
+   97:  #ifdef MEMORY_MODEL_BANKED
+   98:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+   99:  #else
+  100:  #pragma CODE_SEG DEFAULT
+  101:  #endif /* MEMORY_MODEL_BANKED */
+  102:  
+  103:  /************************************************************************************
+  104:  * PhyInit
+  105:  * 
+  106:  * Inits the Radio driver and Radio registers
+  107:  *
+  108:  ************************************************************************************/
+  109:  void PhyInit(void)
+  110:  {
+  0000 a7f8     [2]             AIS   #-8
+  111:    uint16_t initRegValCpy;
+  112:    uint8_t u8fCount;
+  113:    uint8_t u8fCountMax;
+  114:  
+  115:    (void)Radio_DriverInit((radioCallback_t)PhyRadioEvent);
+  0002 450000   [3]             LDHX  @PhyRadioEvent
+  0005 cd0000   [6]             JSR   Radio_DriverInit
+  116:    DelayMs(4);
+  0008 4504cc   [3]             LDHX  #1228
+  000b 9eff03   [5]             STHX  3,SP
+  000e          LE:     
+  000e 9d       [1]             NOP   
+  000f 95       [2]             TSX   
+  0010 6d03     [4]             TST   3,X
+  0012 2602     [3]             BNE   L16 ;abs = 0016
+  0014 6a02     [5]             DEC   2,X
+  0016          L16:    
+  0016 6a03     [5]             DEC   3,X
+  0018 9efe03   [5]             LDHX  3,SP
+  001b 650000   [3]             CPHX  #0
+  001e 26ee     [3]             BNE   LE ;abs = 000e
+  117:    Radio_DeassertReset();
+  0020 ae02     [2]             LDX   #2
+  0022 a601     [2]             LDA   #1
+  0024 ac000000 [8]             CALL  Gpio_PinClear
+  0028          L28:    
+  118:  
+  119:    while(mPhyResetAttnState_c != mPhyState);
+  0028 c60000   [4]             LDA   mPhyState
+  002b a109     [2]             CMP   #9
+  002d 26f9     [3]             BNE   L28 ;abs = 0028
+  120:    
+  121:    (void)Radio_ReadRegisterBlocking(gRadioChipIdReg_c, &initRegValCpy);
+  002f a62c     [2]             LDA   #44
+  0031 95       [2]             TSX   
+  0032 af05     [2]             AIX   #5
+  0034 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  122:    if(0x6800 == (initRegValCpy & 0xFF00))
+  0037 95       [2]             TSX   
+  0038 e605     [3]             LDA   5,X
+  003a 87       [2]             PSHA  
+  003b 8a       [3]             PULH  
+  003c 5f       [1]             CLRX  
+  003d 656800   [3]             CPHX  #26624
+  0040 2603     [3]             BNE   L45 ;abs = 0045
+  123:    {
+  124:      u8fCountMax = mPhyRegCountIc68_c;
+  0042 a60c     [2]             LDA   #12
+  125:    }
+  0044 65       [3]             SKIP2 L47 ;abs = 0047
+  0045          L45:    
+  126:    else
+  127:    {
+  128:      u8fCountMax = mPhyRegCountIc60_c;
+  0045 a60a     [2]             LDA   #10
+  0047          L47:    
+  0047 95       [2]             TSX   
+  0048 e707     [3]             STA   7,X
+  129:    }
+  130:    
+  131:    for(u8fCount = 0; u8fCount < u8fCountMax; u8fCount++){
+  004a 6f04     [5]             CLR   4,X
+  004c 2031     [3]             BRA   L7F ;abs = 007f
+  004e          L4E:    
+  132:      initRegValCpy = radioConfiguration[u8fCount].u16RegisterValue;
+  004e e604     [3]             LDA   4,X
+  0050 ae03     [2]             LDX   #3
+  0052 42       [5]             MUL   
+  0053 8c       [1]             CLRH  
+  0054 97       [1]             TAX   
+  0055 9ebe0001 [6]             LDHX  @radioConfiguration:1,X
+  0059 9eff06   [5]             STHX  6,SP
+  133:      (void)Radio_WriteRegisterBlocking(radioConfiguration[u8fCount].address, initRegValCpy); 
+  005c 87       [2]             PSHA  
+  005d 8b       [2]             PSHH  
+  005e 86       [3]             PULA  
+  005f 9ee702   [4]             STA   2,SP
+  0062 86       [3]             PULA  
+  0063 8c       [1]             CLRH  
+  0064 9eef02   [4]             STX   2,SP
+  0067 97       [1]             TAX   
+  0068 d60000   [4]             LDA   @radioConfiguration,X
+  006b 95       [2]             TSX   
+  006c ee01     [3]             LDX   1,X
+  006e 9ee702   [4]             STA   2,SP
+  0071 9ee601   [4]             LDA   1,SP
+  0074 87       [2]             PSHA  
+  0075 9ee603   [4]             LDA   3,SP
+  0078 8a       [3]             PULH  
+  0079 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  007c 95       [2]             TSX   
+  007d 6c04     [5]             INC   4,X
+  007f          L7F:    
+  007f e607     [3]             LDA   7,X
+  0081 e104     [3]             CMP   4,X
+  0083 22c9     [3]             BHI   L4E ;abs = 004e
+  134:    }
+  135:   
+  136:    (void)Radio_ReadRegisterBlocking(gRadioRSTIndReg_c, &initRegValCpy); 
+  0085 a625     [2]             LDA   #37
+  0087 af05     [2]             AIX   #5
+  0089 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  137:  
+  138:    mPhyState = mPhyIdleState_c;
+  008c a601     [2]             LDA   #1
+  008e c70000   [4]             STA   mPhyState
+  139:  
+  140:  }
+  0091 a708     [2]             AIS   #8
+  0093 81       [6]             RTS   
+  141:  
+  142:  /************************************************************************************
+  143:  * PhyPdDataRequest
+  144:  * 
+  145:  * 
+  146:  *
+  147:  ************************************************************************************/
+  148:  uint8_t PhyPdDataRequest
+  149:  (
+  150:  phyPacket_t *pTxPacket, 
+  151:  uint8_t phyTxMode, 
+  152:  phyRxParams_t *pRxParams
+  153:  )
+  154:  {
+  0000 a7fe     [2]             AIS   #-2
+  155:    uint16_t pktCtlRegCpy;
+  156:  
+  157:    (void)phyTxMode;
+  158:    (void)pRxParams;
+  159:    
+  160:    if(mPhyNoInitState_c == mPhyState)
+  0002 c60000   [4]             LDA   mPhyState
+  0005 2604     [3]             BNE   LB ;abs = 000b
+  161:    {
+  162:      return gPhyBusy_c;
+  0007 a601     [2]             LDA   #1
+  0009 203d     [3]             BRA   L48 ;abs = 0048
+  000b          LB:     
+  163:    }
+  164:  
+  165:    /*Writes the data length Register*/
+  166:    (void)Radio_ReadRegisterBlocking(gRadioTxPktCtlReg_c, &pktCtlRegCpy);
+  000b a603     [2]             LDA   #3
+  000d 95       [2]             TSX   
+  000e cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  167:    pktCtlRegCpy = ((0xFF80 & pktCtlRegCpy) | (pTxPacket->frameLength)); 
+  0011 9efe05   [5]             LDHX  5,SP
+  0014 f6       [3]             LDA   ,X
+  0015 87       [2]             PSHA  
+  0016 95       [2]             TSX   
+  0017 e602     [3]             LDA   2,X
+  0019 a480     [2]             AND   #-128
+  001b fa       [3]             ORA   ,X
+  001c f7       [2]             STA   ,X
+  001d e601     [3]             LDA   1,X
+  001f 87       [2]             PSHA  
+  0020 8a       [3]             PULH  
+  0021 88       [3]             PULX  
+  0022 9eff01   [5]             STHX  1,SP
+  168:    (void)Radio_WriteRegisterBlocking(gRadioTxPktCtlReg_c, pktCtlRegCpy);
+  0025 a603     [2]             LDA   #3
+  0027 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  169:  
+  170:    /*Writes the Radio's TX data Buffer*/
+  171:    (void)Radio_WriteTxBuffer(pTxPacket->data, pTxPacket->frameLength, NULL, gRadioAllowToBlock_d);
+  002a 9efe05   [5]             LDHX  5,SP
+  002d af01     [2]             AIX   #1
+  002f 89       [2]             PSHX  
+  0030 8b       [2]             PSHH  
+  0031 9efe07   [5]             LDHX  7,SP
+  0034 f6       [3]             LDA   ,X
+  0035 87       [2]             PSHA  
+  0036 5f       [1]             CLRX  
+  0037 8c       [1]             CLRH  
+  0038 a601     [2]             LDA   #1
+  003a cd0000   [6]             JSR   Radio_WriteTxBuffer
+  003d a703     [2]             AIS   #3
+  172:   
+  173:    mPhyState = mPhyTxState_c; 
+  003f a603     [2]             LDA   #3
+  0041 c70000   [4]             STA   mPhyState
+  174:  
+  175:    /*Sets the radio in transmit mode*/
+  176:    (void)PhySetTrxStateRequest(mTxMode_c);    /* transmit it */
+  0044 cd0000   [6]             JSR   PhySetTrxStateRequest
+  177:  
+  178:    return gPhySuccess_c;    
+  0047 4f       [1]             CLRA  
+  0048          L48:    
+  179:  }
+  0048 a702     [2]             AIS   #2
+  004a 81       [6]             RTS   
+  180:  
+  181:  /************************************************************************************
+  182:  * PhyPlmeDozeRequest
+  183:  * 
+  184:  * 
+  185:  *
+  186:  ************************************************************************************/
+  187:  uint8_t PhyPlmeDozeRequest
+  188:  (
+  189:  		uint32_t u32Timeout
+  190:  )
+  191:  {
+  0000 a7fa     [2]             AIS   #-6
+  192:      uint16_t u16CurrentValue;
+  193:      uint32_t u32CurrentTime;
+  194:  
+  195:      (void)Radio_ReadRegisterBlocking(gRadioControlBReg_c, &u16CurrentValue);														 /* 
+  0002 a607     [2]             LDA   #7
+  0004 95       [2]             TSX   
+  0005 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  196:  														      * Read MC13192 Doze 
+  197:                                                       	      * register. 
+  198:                                                       	      */
+  199:      if (u32Timeout == 0)        /* ACOMA mode, with clkout */
+  0008 95       [2]             TSX   
+  0009 e60b     [3]             LDA   11,X
+  000b ea0a     [3]             ORA   10,X
+  000d ea09     [3]             ORA   9,X
+  000f ea08     [3]             ORA   8,X
+  0011 261c     [3]             BNE   L2F ;abs = 002f
+  200:      {
+  201:      	(void)Radio_ReadRegisterBlocking(gRadioIRQMaskReg_c, &u16CurrentValue);
+  0013 a605     [2]             LDA   #5
+  0015 ad79     [5]             BSR   L90 ;abs = 0090
+  202:          u16CurrentValue &= 0xFE0D;   /* Change the IRQ_Mask to set Acoma en,*/
+  203:          u16CurrentValue |= 0x0100;   /* doze irq disabled and tmr2 disabled*/
+  0017 aa01     [2]             ORA   #1
+  0019 95       [2]             TSX   
+  001a f7       [2]             STA   ,X
+  204:          (void)Radio_WriteRegisterBlocking(gRadioIRQMaskReg_c, u16CurrentValue);
+  001b a605     [2]             LDA   #5
+  001d 9efe01   [5]             LDHX  1,SP
+  0020 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  205:          
+  206:          (void)Radio_ReadRegisterBlocking(gRadioControlBReg_c, &u16CurrentValue);/* 
+  0023 a607     [2]             LDA   #7
+  0025 95       [2]             TSX   
+  0026 ad51     [5]             BSR   L79 ;abs = 0079
+  207:                                                           * Read MC13192 Doze 
+  208:                                                           * register. 
+  209:                                                           */
+  210:          
+  211:          u16CurrentValue &= 0xFDFC;
+  212:          u16CurrentValue |= 0x0201;                      /* Doze (acoma) & CLKOUT enable */
+  0028 95       [2]             TSX   
+  0029 f6       [3]             LDA   ,X
+  002a aa02     [2]             ORA   #2
+  002c f7       [2]             STA   ,X
+  213:          (void)Radio_WriteRegisterBlocking(gRadioControlBReg_c, u16CurrentValue);/* 
+  214:                                                           * Write back to MC13192 to 
+  215:                                                           * enable hibernate mode. 
+  216:                                                           */
+  217:     
+  218:      } else						 /* DOZE mode with timeout, no clkout */
+  002d 203e     [3]             BRA   L6D ;abs = 006d
+  002f          L2F:    
+  219:      {
+  220:      	(void)Radio_ReadRegisterBlocking(gRadioIRQMaskReg_c, &u16CurrentValue);
+  002f a605     [2]             LDA   #5
+  0031 ad5d     [5]             BSR   L90 ;abs = 0090
+  221:      	u16CurrentValue &= 0xFE0D;   /* Change the IRQ_Mask to set Acoma dis,*/
+  222:          u16CurrentValue |= 0x0012;   /* doze enabled and tmr2 enabled*/
+  0033 95       [2]             TSX   
+  0034 e601     [3]             LDA   1,X
+  0036 aa12     [2]             ORA   #18
+  0038 e701     [3]             STA   1,X
+  223:          (void)Radio_WriteRegisterBlocking(gRadioIRQMaskReg_c, u16CurrentValue);
+  003a a605     [2]             LDA   #5
+  003c 9efe01   [5]             LDHX  1,SP
+  003f cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  224:          
+  225:          (void)PhyTimeReadClock(&u32CurrentTime);
+  0042 95       [2]             TSX   
+  0043 af02     [2]             AIX   #2
+  0045 cd0000   [6]             JSR   PhyTimeReadClock
+  226:          u32Timeout += u32CurrentTime;
+  0048 95       [2]             TSX   
+  0049 af08     [2]             AIX   #8
+  004b 89       [2]             PSHX  
+  004c 8b       [2]             PSHH  
+  004d affa     [2]             AIX   #-6
+  004f cd0000   [6]             JSR   _LADD
+  0052 af06     [2]             AIX   #6
+  0054 cd0000   [6]             JSR   _POP32
+  227:          (void)Radio_WriteRegisterBlocking(gRadioTmrCmp2AReg_c, ((uint16_t)(u32Timeout>>16)&0x00FF));
+  0057 a61d     [2]             LDA   #29
+  0059 95       [2]             TSX   
+  005a ee09     [3]             LDX   9,X
+  005c 8c       [1]             CLRH  
+  005d cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  228:          (void)Radio_WriteRegisterBlocking(gRadioTmrCmp2BReg_c, ((uint16_t)u32Timeout)&0xFFFF);  /* Enable the Timer 2 
+  0060 a61e     [2]             LDA   #30
+  0062 9efe0b   [5]             LDHX  11,SP
+  0065 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  229:                                                           * and save the timeout value
+  230:                                                           */
+  231:          (void)Radio_ReadRegisterBlocking(gRadioControlBReg_c, &u16CurrentValue);
+  0068 a607     [2]             LDA   #7
+  006a 95       [2]             TSX   
+  006b ad0c     [5]             BSR   L79 ;abs = 0079
+  006d          L6D:    
+  232:          
+  233:          u16CurrentValue &= 0xFDFC;						/* Disable CLKOinDozeand */
+  234:          u16CurrentValue |= 0x0001;                      /* enter in Doze mode */
+  235:          (void)Radio_WriteRegisterBlocking(gRadioControlBReg_c, u16CurrentValue);
+  006d a607     [2]             LDA   #7
+  006f 9efe01   [5]             LDHX  1,SP
+  0072 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  236:      }
+  237:      return gPhySuccess_c;         /* Call back to MAC layer indicating success. */
+  0075 4f       [1]             CLRA  
+  238:  }
+  0076 a706     [2]             AIS   #6
+  0078 81       [6]             RTS   
+  0079          L79:    
+  0079 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  007c 95       [2]             TSX   
+  007d e603     [3]             LDA   3,X
+  007f a4fc     [2]             AND   #-4
+  0081 e703     [3]             STA   3,X
+  0083 e602     [3]             LDA   2,X
+  0085 a4fd     [2]             AND   #-3
+  0087 e702     [3]             STA   2,X
+  0089 e603     [3]             LDA   3,X
+  008b aa01     [2]             ORA   #1
+  008d e703     [3]             STA   3,X
+  008f 81       [6]             RTS   
+  0090          L90:    
+  0090 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  0093 95       [2]             TSX   
+  0094 e603     [3]             LDA   3,X
+  0096 a40d     [2]             AND   #13
+  0098 e703     [3]             STA   3,X
+  009a e602     [3]             LDA   2,X
+  009c a4fe     [2]             AND   #-2
+  009e e702     [3]             STA   2,X
+  00a0 81       [6]             RTS   
+  239:  
+  240:  
+  241:  /************************************************************************************
+  242:  * PhyPlmeRxRequest
+  243:  * 
+  244:  * 
+  245:  *
+  246:  ************************************************************************************/
+  247:  uint8_t PhyPlmeRxRequest
+  248:  (
+  249:  phyPacket_t *pRxData, 
+  250:  phyRxParams_t *pRxParams
+  251:  )
+  252:  {
+  253:    uint8_t u8Status = 0;
+  254:  
+  255:    mPhyRxParams = pRxParams;
+  0000 960000   [5]             STHX  mPhyRxParams
+  256:    mDrvRxPacket = pRxData;    /* Assign the rx_packet to Phy global. */
+  0003 9efe03   [5]             LDHX  3,SP
+  0006 960000   [5]             STHX  mDrvRxPacket
+  257:    mPhyState = mPhyRxState_c; 
+  0009 a602     [2]             LDA   #2
+  000b c70000   [4]             STA   mPhyState
+  258:  
+  259:    /* Just enable the receiver */
+  260:    u8Status = PhySetTrxStateRequest(mRxMode_c);
+  000e cc0000   [4]             JMP   PhySetTrxStateRequest
+  261:    return u8Status;
+  262:  }
+  263:  
+  264:  /************************************************************************************
+  265:  * PhyTimeSetEventTimeout
+  266:  * 
+  267:  * 
+  268:  *
+  269:  ************************************************************************************/
+  270:  void PhyTimeSetEventTimeout
+  271:  (
+  272:  zbClock24_t *pEndTime
+  273:  )
+  274:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  275:    /* Load the timeout value into T1 with Timer disabled. */
+  276:    (void)Radio_WriteRegisterBlocking(gRadioTmrCmp1AReg_c, (mStopTimerValueA_c));
+  0002 a61b     [2]             LDA   #27
+  0004 458000   [3]             LDHX  #-32768
+  0007 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  277:    (void)Radio_WriteRegisterBlocking(gRadioTmrCmp1BReg_c, (mStopTimerValueB_c));
+  000a a61c     [2]             LDA   #28
+  000c 5f       [1]             CLRX  
+  000d 8c       [1]             CLRH  
+  000e cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  278:    /* Turn Timer1 mask on. */
+  279:    
+  280:    (void)Radio_WriteRegisterBlocking(gRadioTmrCmp1AReg_c, (uint16_t) (((*pEndTime) >> 16) & 0x000000FF));
+  0011 a61b     [2]             LDA   #27
+  0013 9efe01   [5]             LDHX  1,SP
+  0016 ee01     [3]             LDX   1,X
+  0018 8c       [1]             CLRH  
+  0019 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  281:    (void)Radio_WriteRegisterBlocking(gRadioTmrCmp1BReg_c, (uint16_t) ((*pEndTime) & 0x0000FFFF));
+  001c a61c     [2]             LDA   #28
+  001e 9efe01   [5]             LDHX  1,SP
+  0021 9ece02   [5]             LDHX  2,X
+  0024 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  282:    mPhyState = mPhyRxWtoState_c;
+  0027 a606     [2]             LDA   #6
+  0029 c70000   [4]             STA   mPhyState
+  283:  }
+  002c a702     [2]             AIS   #2
+  002e 81       [6]             RTS   
+  284:  
+  285:  /************************************************************************************
+  286:  * PhyTimeReadClock
+  287:  * 
+  288:  * 
+  289:  *
+  290:  ************************************************************************************/
+  291:  void PhyTimeReadClock
+  292:  (
+  293:  zbClock24_t *pRetClk
+  294:  )
+  295:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 a7fe     [2]             AIS   #-2
+  296:    uint16_t currentTimeCpy;
+  297:    
+  298:    *pRetClk = 0;
+  0004 7f       [4]             CLR   ,X
+  0005 6f01     [5]             CLR   1,X
+  0007 6f02     [5]             CLR   2,X
+  0009 6f03     [5]             CLR   3,X
+  299:    /* Read the current timer time*/
+  300:    (void)Radio_ReadRegisterBlocking(gRadioCurrentTimeAReg_c, &currentTimeCpy);
+  000b a626     [2]             LDA   #38
+  000d 95       [2]             TSX   
+  000e cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  301:    *pRetClk = currentTimeCpy;
+  0011 9efe03   [5]             LDHX  3,SP
+  0014 9ee602   [4]             LDA   2,SP
+  0017 e703     [3]             STA   3,X
+  0019 9ee601   [4]             LDA   1,SP
+  001c e702     [3]             STA   2,X
+  001e 6f01     [5]             CLR   1,X
+  0020 7f       [4]             CLR   ,X
+  302:    *pRetClk <<=16;
+  0021 a610     [2]             LDA   #16
+  0023 cd0000   [6]             JSR   _LLSL
+  0026 cd0000   [6]             JSR   _POP32
+  303:    (void)Radio_ReadRegisterBlocking(gRadioCurrentTimeBReg_c, &currentTimeCpy);
+  0029 a627     [2]             LDA   #39
+  002b 95       [2]             TSX   
+  002c cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  304:    *pRetClk += currentTimeCpy;
+  002f 9efe01   [5]             LDHX  1,SP
+  0032 4f       [1]             CLRA  
+  0033 89       [2]             PSHX  
+  0034 8b       [2]             PSHH  
+  0035 87       [2]             PSHA  
+  0036 87       [2]             PSHA  
+  0037 95       [2]             TSX   
+  0038 89       [2]             PSHX  
+  0039 8b       [2]             PSHH  
+  003a 9efe09   [5]             LDHX  9,SP
+  003d cd0000   [6]             JSR   _LADD
+  0040 cd0000   [6]             JSR   _POP32
+  305:    *pRetClk &=mRadioTimeMask_c;
+  0043 9efe07   [5]             LDHX  7,SP
+  0046 7f       [4]             CLR   ,X
+  306:  }
+  0047 a708     [2]             AIS   #8
+  0049 81       [6]             RTS   
+  307:  
+  308:  /************************************************************************************
+  309:  * PhyPlmeCcaEdRequest
+  310:  * 
+  311:  *
+  312:  ************************************************************************************/
+  313:  uint8_t PhyPlmeCcaEdRequest
+  314:  (
+  315:  uint8_t ccaParam
+  316:  )
+  317:  {
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  318:    uint16_t controlARegCpy;
+  319:    
+  320:    if(ccaParam >= gInvalidCcaType_c)
+  0003 a102     [2]             CMP   #2
+  0005 2504     [3]             BCS   LB ;abs = 000b
+  321:    {
+  322:      return gPhyInvalidParam_c;
+  0007 a602     [2]             LDA   #2
+  0009 2036     [3]             BRA   L41 ;abs = 0041
+  000b          LB:     
+  323:    }
+  324:  
+  325:    (void)Radio_ReadRegisterBlocking(gRadioControlAReg_c, &controlARegCpy);
+  000b a606     [2]             LDA   #6
+  000d 95       [2]             TSX   
+  000e cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  326:    controlARegCpy &= 0xFFCF;
+  0011 95       [2]             TSX   
+  0012 e601     [3]             LDA   1,X
+  0014 a4cf     [2]             AND   #-49
+  0016 e701     [3]             STA   1,X
+  327:    if(gCcaED_c == ccaParam)
+  0018 6d02     [4]             TST   2,X
+  001a 2608     [3]             BNE   L24 ;abs = 0024
+  328:    {
+  329:      controlARegCpy |= 0x0020;
+  001c aa20     [2]             ORA   #32
+  001e e701     [3]             STA   1,X
+  330:      mPhyState = mPhyEdState_c;
+  0020 a605     [2]             LDA   #5
+  331:    }  
+  0022 200c     [3]             BRA   L30 ;abs = 0030
+  0024          L24:    
+  332:    else if(gCcaCCA_MODE1_c == ccaParam)
+  0024 e602     [3]             LDA   2,X
+  0026 4b0b     [4]             DBNZA L33 ;abs = 0033
+  333:    {
+  334:      controlARegCpy |= 0x0010;
+  0028 e601     [3]             LDA   1,X
+  002a aa10     [2]             ORA   #16
+  002c e701     [3]             STA   1,X
+  335:      mPhyState = mPhyCcaState_c;
+  002e a604     [2]             LDA   #4
+  0030          L30:    
+  0030 c70000   [4]             STA   mPhyState
+  0033          L33:    
+  336:    }
+  337:    (void)Radio_WriteRegisterBlocking(gRadioControlAReg_c, controlARegCpy);
+  0033 a606     [2]             LDA   #6
+  0035 9efe01   [5]             LDHX  1,SP
+  0038 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  338:    
+  339:    (void)PhySetTrxStateRequest(mCcaMode_c);
+  003b a601     [2]             LDA   #1
+  003d cd0000   [6]             JSR   PhySetTrxStateRequest
+  340:    return gPhySuccess_c;
+  0040 4f       [1]             CLRA  
+  0041          L41:    
+  341:  }
+  0041 a703     [2]             AIS   #3
+  0043 81       [6]             RTS   
+  342:  
+  343:  /************************************************************************************
+  344:  * PhyPlmeSetCurrentChannelRequest
+  345:  * 
+  346:  *
+  347:  ************************************************************************************/
+  348:  uint8_t PhyPlmeSetCurrentChannelRequest
+  349:  (
+  350:  uint8_t channel
+  351:  )
+  352:  {
+  0000 a7fe     [2]             AIS   #-2
+  353:    uint16_t TempValue;
+  354:    
+  355:    TempValue = 0x0F00 | cu8ChannelRegisterValues[(channel-0x0B)][0];
+  0002 48       [1]             LSLA  
+  0003 8c       [1]             CLRH  
+  0004 97       [1]             TAX   
+  0005 deffea   [4]             LDX   @cu8ChannelRegisterValues:-22,X
+  0008 87       [2]             PSHA  
+  0009 a60f     [2]             LDA   #15
+  000b 87       [2]             PSHA  
+  000c 8a       [3]             PULH  
+  000d 9eff02   [5]             STHX  2,SP
+  356:    (void)Radio_WriteRegisterBlocking(gRadioLO1IntDivReg_c, TempValue);
+  0010 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  357:    TempValue = (0x0000 | cu8ChannelRegisterValues[(channel-0x0B)][1])<<8;
+  0013 8c       [1]             CLRH  
+  0014 88       [3]             PULX  
+  0015 d6ffeb   [4]             LDA   @cu8ChannelRegisterValues:-21,X
+  0018 95       [2]             TSX   
+  0019 f7       [2]             STA   ,X
+  001a 6f01     [5]             CLR   1,X
+  358:    (void)Radio_WriteRegisterBlocking(gRadioLO1NumReg_c, TempValue);
+  001c a610     [2]             LDA   #16
+  001e 9efe01   [5]             LDHX  1,SP
+  0021 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  359:     
+  360:    return gPhySuccess_c;
+  0024 4f       [1]             CLRA  
+  361:  }
+  0025 a702     [2]             AIS   #2
+  0027 81       [6]             RTS   
+  362:  
+  363:  /************************************************************************************
+  364:  * PhyPlmeSetPwrLevelRequest
+  365:  * 
+  366:  *
+  367:  *
+  368:  ************************************************************************************/
+  369:  uint8_t PhyPlmeSetPwrLevelRequest
+  370:  (
+  371:  uint8_t pwrLevel
+  372:  )
+  373:  {
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  374:    uint16_t PALvlRegCpy;
+  375:  
+  376:    (void)Radio_ReadRegisterBlocking(gRadioPALvlReg_c, &PALvlRegCpy);
+  0003 a612     [2]             LDA   #18
+  0005 95       [2]             TSX   
+  0006 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  377:    PALvlRegCpy &= 0xFF00;
+  0009 95       [2]             TSX   
+  000a 6f01     [5]             CLR   1,X
+  378:    PALvlRegCpy |= u8PARegisterValues[pwrLevel];
+  000c ee02     [3]             LDX   2,X
+  000e 8c       [1]             CLRH  
+  000f d60000   [4]             LDA   @u8PARegisterValues,X
+  0012 95       [2]             TSX   
+  0013 e701     [3]             STA   1,X
+  0015 f6       [3]             LDA   ,X
+  0016 f7       [2]             STA   ,X
+  379:    (void)Radio_WriteRegisterBlocking(gRadioPALvlReg_c, PALvlRegCpy);
+  0017 a612     [2]             LDA   #18
+  0019 9efe01   [5]             LDHX  1,SP
+  001c cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  380:    return gPhySuccess_c;
+  001f 4f       [1]             CLRA  
+  381:  }
+  0020 a703     [2]             AIS   #3
+  0022 81       [6]             RTS   
+  382:  
+  383:  /************************************************************************************
+  384:  * PhyPpSetPromiscuous
+  385:  * 
+  386:  *
+  387:  *
+  388:  ************************************************************************************/
+  389:  void PhyPpSetPromiscuous
+  390:  (
+  391:  bool_t mode
+  392:  )
+  393:  {
+  394:    (void)mode;
+  395:  }
+  0000 81       [6]             RTS   
+  396:  
+  397:  /************************************************************************************
+  398:  * PhyPlmeSetClockOutRate
+  399:  * 
+  400:  *
+  401:  *
+  402:  ************************************************************************************/
+  403:  uint8_t PhyPlmeSetClockOutRate
+  404:  (
+  405:    uint8_t u8Freq
+  406:  )
+  407:  {
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  408:    uint16_t clkoCtlRegCpy;
+  409:    
+  410:      (void)Radio_ReadRegisterBlocking(gRadioCLKOCtlReg_c, &clkoCtlRegCpy);
+  0003 a60a     [2]             LDA   #10
+  0005 95       [2]             TSX   
+  0006 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  411:      clkoCtlRegCpy &= 0xFFF8;
+  0009 95       [2]             TSX   
+  000a e601     [3]             LDA   1,X
+  000c a4f8     [2]             AND   #-8
+  000e e701     [3]             STA   1,X
+  412:      clkoCtlRegCpy |= u8Freq;
+  0010 e602     [3]             LDA   2,X
+  0012 ea01     [3]             ORA   1,X
+  0014 e701     [3]             STA   1,X
+  0016 f6       [3]             LDA   ,X
+  0017 f7       [2]             STA   ,X
+  413:      (void)Radio_WriteRegisterBlocking(gRadioCLKOCtlReg_c, clkoCtlRegCpy);
+  0018 a60a     [2]             LDA   #10
+  001a 9efe01   [5]             LDHX  1,SP
+  001d cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  414:  
+  415:      return gPhySuccess_c;
+  0020 4f       [1]             CLRA  
+  416:  }
+  0021 a703     [2]             AIS   #3
+  0023 81       [6]             RTS   
+  417:  
+  418:  /************************************************************************************
+  419:  * PhyAbort
+  420:  * 
+  421:  *
+  422:  *
+  423:  ************************************************************************************/
+  424:  void PhyAbort(void)
+  425:  {
+  426:    /* Disables the Timeout */
+  427:    (void)Radio_WriteRegisterBlocking(gRadioTmrCmp1AReg_c, (uint16_t)(0x00008000));
+  0000 a61b     [2]             LDA   #27
+  0002 458000   [3]             LDHX  #-32768
+  0005 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  428:    (void)Radio_WriteRegisterBlocking(gRadioTmrCmp1BReg_c, (uint16_t)(0x00000000));
+  0008 a61c     [2]             LDA   #28
+  000a 5f       [1]             CLRX  
+  000b 8c       [1]             CLRH  
+  000c cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  429:    /*sets the idle state on radio*/
+  430:    (void)PhySetTrxStateRequest(mIdleMode_c);
+  000f 4f       [1]             CLRA  
+  0010 cd0000   [6]             JSR   PhySetTrxStateRequest
+  431:    mPhyState = mPhyIdleState_c;
+  0013 a601     [2]             LDA   #1
+  0015 c70000   [4]             STA   mPhyState
+  432:  
+  433:  }
+  0018 81       [6]             RTS   
+  434:  
+  435:  /************************************************************************************
+  436:  * PhyTimeDisableEventTimeout
+  437:  * 
+  438:  *
+  439:  *
+  440:  ************************************************************************************/
+  441:  void PhyTimeDisableEventTimeout(void)
+  442:  {
+  443:    /* Disables the Timeout */
+  444:    (void)Radio_WriteRegisterBlocking(gRadioTmrCmp1AReg_c, (uint16_t)(0x00008000));
+  0000 a61b     [2]             LDA   #27
+  0002 458000   [3]             LDHX  #-32768
+  0005 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  445:    (void)Radio_WriteRegisterBlocking(gRadioTmrCmp1BReg_c, (uint16_t)(0x00000000));
+  0008 a61c     [2]             LDA   #28
+  000a 5f       [1]             CLRX  
+  000b 8c       [1]             CLRH  
+  000c cc0000   [4]             JMP   Radio_WriteRegisterBlocking
+  446:  }
+  447:  
+  448:  /************************************************************************************
+  449:  * PhyPpSetCcaThreshold
+  450:  * 
+  451:  *
+  452:  *
+  453:  ************************************************************************************/
+  454:  void PhyPpSetCcaThreshold(uint8_t ccaThreshold)
+  455:  {
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  456:    uint16_t ccaThresholdRegCpy;
+  457:    
+  458:    (void)Radio_ReadRegisterBlocking(gRadioCCAThreshReg_c, &ccaThresholdRegCpy);
+  0003 a604     [2]             LDA   #4
+  0005 95       [2]             TSX   
+  0006 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  459:    ccaThresholdRegCpy &= 0x00FF;
+  0009 95       [2]             TSX   
+  000a 7f       [4]             CLR   ,X
+  460:    ccaThresholdRegCpy |= ((uint16_t)ccaThreshold<<8);
+  000b e602     [3]             LDA   2,X
+  000d 87       [2]             PSHA  
+  000e 4f       [1]             CLRA  
+  000f ea01     [3]             ORA   1,X
+  0011 e701     [3]             STA   1,X
+  0013 86       [3]             PULA  
+  0014 fa       [3]             ORA   ,X
+  0015 f7       [2]             STA   ,X
+  461:    (void)Radio_WriteRegisterBlocking(gRadioCCAThreshReg_c, ccaThresholdRegCpy);
+  0016 a604     [2]             LDA   #4
+  0018 9efe01   [5]             LDHX  1,SP
+  001b cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  462:  }
+  001e a703     [2]             AIS   #3
+  0020 81       [6]             RTS   
+  463:  
+  464:  /************************************************************************************
+  465:  * PhyAdjustCcaOffsetCmp
+  466:  * 
+  467:  *   ...
+  468:  *
+  469:  ************************************************************************************/
+  470:  void PhyAdjustCcaOffsetCmp(uint8_t ccaOffset)
+  471:  {
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  472:    uint16_t ccaThresholdRegCpy;
+  473:  
+  474:    (void)Radio_ReadRegisterBlocking(gRadioCCAThreshReg_c, &ccaThresholdRegCpy);
+  0003 a604     [2]             LDA   #4
+  0005 95       [2]             TSX   
+  0006 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  475:    ccaThresholdRegCpy &= 0xFF00;
+  0009 95       [2]             TSX   
+  000a 6f01     [5]             CLR   1,X
+  476:    ccaThresholdRegCpy |= ccaOffset;
+  000c e602     [3]             LDA   2,X
+  000e e701     [3]             STA   1,X
+  0010 f6       [3]             LDA   ,X
+  0011 f7       [2]             STA   ,X
+  477:    (void)Radio_WriteRegisterBlocking(gRadioCCAThreshReg_c, ccaThresholdRegCpy);
+  0012 a604     [2]             LDA   #4
+  0014 9efe01   [5]             LDHX  1,SP
+  0017 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  478:  }
+  001a a703     [2]             AIS   #3
+  001c 81       [6]             RTS   
+  479:  
+  480:  /************************************************************************************
+  481:  * PhyXtalAdjust
+  482:  * 
+  483:  *   ...
+  484:  *
+  485:  ************************************************************************************/
+  486:  void PhyXtalAdjust(uint8_t xtalTrim)
+  487:  {
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  488:    uint16_t clkoCtlRegCpy;
+  489:  
+  490:    (void)Radio_ReadRegisterBlocking(gRadioCLKOCtlReg_c, &clkoCtlRegCpy);
+  0003 a60a     [2]             LDA   #10
+  0005 95       [2]             TSX   
+  0006 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  491:    clkoCtlRegCpy &= 0x00FF;
+  0009 95       [2]             TSX   
+  000a 7f       [4]             CLR   ,X
+  492:    clkoCtlRegCpy |= ((uint16_t)xtalTrim<<8);
+  000b e602     [3]             LDA   2,X
+  000d 87       [2]             PSHA  
+  000e 4f       [1]             CLRA  
+  000f ea01     [3]             ORA   1,X
+  0011 e701     [3]             STA   1,X
+  0013 86       [3]             PULA  
+  0014 fa       [3]             ORA   ,X
+  0015 f7       [2]             STA   ,X
+  493:    (void)Radio_WriteRegisterBlocking(gRadioCLKOCtlReg_c, clkoCtlRegCpy);
+  0016 a60a     [2]             LDA   #10
+  0018 9efe01   [5]             LDHX  1,SP
+  001b cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  494:  }
+  001e a703     [2]             AIS   #3
+  0020 81       [6]             RTS   
+  495:  
+  496:  /************************************************************************************
+  497:  * PhyEnableTxNoModulation
+  498:  * 
+  499:  *   ...
+  500:  *
+  501:  ************************************************************************************/
+  502:  void PhyEnableTxNoModulation(void)
+  503:  {
+  0000 a7fe     [2]             AIS   #-2
+  504:    uint16_t psmModeRegCpy;
+  505:    
+  506:    (void)Radio_ReadRegisterBlocking(gRadioPSMModeReg_c, &psmModeRegCpy);
+  0002 a631     [2]             LDA   #49
+  0004 95       [2]             TSX   
+  0005 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  507:    psmModeRegCpy |= 0x0008;
+  0008 95       [2]             TSX   
+  0009 e601     [3]             LDA   1,X
+  000b aa08     [2]             ORA   #8
+  000d e701     [3]             STA   1,X
+  508:    (void)Radio_WriteRegisterBlocking(gRadioPSMModeReg_c, psmModeRegCpy);
+  000f a631     [2]             LDA   #49
+  0011 9efe01   [5]             LDHX  1,SP
+  0014 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  509:  }
+  0017 a702     [2]             AIS   #2
+  0019 81       [6]             RTS   
+  510:  
+  511:  /************************************************************************************
+  512:  * PhyDisableTxNoModulation
+  513:  * 
+  514:  *   ...
+  515:  *
+  516:  ************************************************************************************/
+  517:  void PhyDisableTxNoModulation(void)
+  518:  {
+  0000 a7fe     [2]             AIS   #-2
+  519:    uint16_t psmModeRegCpy;
+  520:  
+  521:    (void)Radio_ReadRegisterBlocking(gRadioPSMModeReg_c, &psmModeRegCpy);
+  0002 a631     [2]             LDA   #49
+  0004 95       [2]             TSX   
+  0005 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  522:    psmModeRegCpy &= 0xFFC7;
+  0008 95       [2]             TSX   
+  0009 e601     [3]             LDA   1,X
+  000b a4c7     [2]             AND   #-57
+  000d e701     [3]             STA   1,X
+  523:    (void)Radio_WriteRegisterBlocking(gRadioPSMModeReg_c, psmModeRegCpy);
+  000f a631     [2]             LDA   #49
+  0011 9efe01   [5]             LDHX  1,SP
+  0014 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  524:  }
+  0017 a702     [2]             AIS   #2
+  0019 81       [6]             RTS   
+  525:  
+  526:  /************************************************************************************
+  527:  * PhyEnableContinuousTxRxMode
+  528:  * 
+  529:  *   ...
+  530:  *
+  531:  ************************************************************************************/
+  532:  void PhyEnableContinuousTxRxMode(void)
+  533:  {
+  0000 a7fe     [2]             AIS   #-2
+  534:    uint16_t berEnableRegCpy;
+  535:  
+  536:    (void)Radio_ReadRegisterBlocking(gRadioBEREnableReg_c, &berEnableRegCpy);
+  0002 a630     [2]             LDA   #48
+  0004 95       [2]             TSX   
+  0005 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  537:    berEnableRegCpy |= 0x8000;
+  0008 95       [2]             TSX   
+  0009 f6       [3]             LDA   ,X
+  000a aa80     [2]             ORA   #-128
+  000c f7       [2]             STA   ,X
+  538:    (void)Radio_WriteRegisterBlocking(gRadioBEREnableReg_c, berEnableRegCpy);
+  000d a630     [2]             LDA   #48
+  000f 9efe01   [5]             LDHX  1,SP
+  0012 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  539:  }
+  0015 a702     [2]             AIS   #2
+  0017 81       [6]             RTS   
+  540:  
+  541:  /************************************************************************************
+  542:  * PhyDisableContinuousTxRxMode
+  543:  * 
+  544:  *   ...
+  545:  *
+  546:  ************************************************************************************/
+  547:  void PhyDisableContinuousTxRxMode(void)
+  548:  {
+  0000 a7fe     [2]             AIS   #-2
+  549:    uint16_t berEnableRegCpy;
+  550:  
+  551:    (void)Radio_ReadRegisterBlocking(gRadioBEREnableReg_c, &berEnableRegCpy);
+  0002 a630     [2]             LDA   #48
+  0004 95       [2]             TSX   
+  0005 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  552:    berEnableRegCpy &= 0x7FFF;
+  0008 95       [2]             TSX   
+  0009 f6       [3]             LDA   ,X
+  000a a47f     [2]             AND   #127
+  000c f7       [2]             STA   ,X
+  553:    (void)Radio_WriteRegisterBlocking(gRadioBEREnableReg_c, berEnableRegCpy);
+  000d a630     [2]             LDA   #48
+  000f 9efe01   [5]             LDHX  1,SP
+  0012 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  554:  }
+  0015 a702     [2]             AIS   #2
+  0017 81       [6]             RTS   
+  555:  
+  556:  /************************************************************************************
+  557:  * PhySetRadioTimerPrescaler
+  558:  * 
+  559:  *   ...
+  560:  *
+  561:  ************************************************************************************/
+  562:  void PhySetRadioTimerPrescaler(uint8_t Value)
+  563:  {
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  564:    uint16_t ControlCRegCpy;
+  565:  
+  566:    (void)Radio_ReadRegisterBlocking(gRadioControlCReg_c, &ControlCRegCpy);
+  0003 a609     [2]             LDA   #9
+  0005 95       [2]             TSX   
+  0006 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  567:    ControlCRegCpy &= 0xFFF8;
+  0009 95       [2]             TSX   
+  000a e601     [3]             LDA   1,X
+  000c a4f8     [2]             AND   #-8
+  000e e701     [3]             STA   1,X
+  568:    ControlCRegCpy |= Value;
+  0010 e602     [3]             LDA   2,X
+  0012 ea01     [3]             ORA   1,X
+  0014 e701     [3]             STA   1,X
+  0016 f6       [3]             LDA   ,X
+  0017 f7       [2]             STA   ,X
+  569:    (void)Radio_WriteRegisterBlocking(gRadioControlCReg_c, ControlCRegCpy);
+  0018 a609     [2]             LDA   #9
+  001a 9efe01   [5]             LDHX  1,SP
+  001d cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  570:  }
+  0020 a703     [2]             AIS   #3
+  0022 81       [6]             RTS   
+  571:  
+  572:  /************************************************************************************
+  573:  * PhyGetRfIcVersion
+  574:  * 
+  575:  *   ...
+  576:  *
+  577:  ************************************************************************************/
+  578:  void PhyGetRfIcVersion(uint8_t * Buffer)
+  579:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 a7fe     [2]             AIS   #-2
+  580:    uint16_t RadioChipIdRegCpy;
+  581:  
+  582:    (void)Radio_ReadRegisterBlocking(gRadioChipIdReg_c, &RadioChipIdRegCpy);
+  0004 a62c     [2]             LDA   #44
+  0006 95       [2]             TSX   
+  0007 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  583:    Buffer[1] = (uint8_t)(RadioChipIdRegCpy & 0x00FF);
+  000a 9efe03   [5]             LDHX  3,SP
+  000d 9ee602   [4]             LDA   2,SP
+  0010 e701     [3]             STA   1,X
+  584:    Buffer[0] = (uint8_t)((RadioChipIdRegCpy & 0xFF00)>>8);
+  0012 9ee601   [4]             LDA   1,SP
+  0015 f7       [2]             STA   ,X
+  585:  }
+  0016 a704     [2]             AIS   #4
+  0018 81       [6]             RTS   
+  586:  
+  587:  /************************************************************************************
+  588:  * PhyHibernateRequest
+  589:  * 
+  590:  *   ...
+  591:  *
+  592:  ************************************************************************************/
+  593:  void PhyHibernateRequest(void)
+  594:  { 
+  0000 a7fe     [2]             AIS   #-2
+  595:    uint16_t controlBRegCpy;
+  596:    
+  597:    (void)Radio_ReadRegisterBlocking(gRadioControlBReg_c, &controlBRegCpy);
+  0002 a607     [2]             LDA   #7
+  0004 95       [2]             TSX   
+  0005 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  598:    controlBRegCpy |= 0x0002;
+  0008 95       [2]             TSX   
+  0009 e601     [3]             LDA   1,X
+  000b aa02     [2]             ORA   #2
+  000d e701     [3]             STA   1,X
+  599:    (void)Radio_WriteRegisterBlocking(gRadioControlBReg_c, controlBRegCpy);
+  000f a607     [2]             LDA   #7
+  0011 9efe01   [5]             LDHX  1,SP
+  0014 cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  600:    mPhyState = mPhyHibernateState_c; 
+  0017 a607     [2]             LDA   #7
+  0019 c70000   [4]             STA   mPhyState
+  601:  }
+  001c a702     [2]             AIS   #2
+  001e 81       [6]             RTS   
+  602:  
+  603:  /************************************************************************************
+  604:  * PhyWakeRequest
+  605:  * 
+  606:  *   ...
+  607:  *
+  608:  ************************************************************************************/
+  609:  void PhyWakeRequest(void)
+  610:  { 
+  611:    Radio_AssertAttentionPin();
+  0000 ae02     [2]             LDX   #2
+  0002 9f       [1]             TXA   
+  0003 ac000000 [8]             CALL  Gpio_PinSet
+  612:    Radio_DeassertAttentionPin();
+  0007 ae02     [2]             LDX   #2
+  0009 9f       [1]             TXA   
+  000a ac000000 [8]             CALL  Gpio_PinClear
+  613:  }
+  000e 81       [6]             RTS   
+  614:  
+  615:  /************************************************************************************
+  616:  * PhyEnableRadioInterrupts
+  617:  * 
+  618:  *   ...
+  619:  *
+  620:  ************************************************************************************/
+  621:  void PhyEnableRadioInterrupts(void)
+  622:  {
+  623:    Radio_EnableRadioInterrupts();
+  0000 cc0000   [4]             JMP   Radio_EnableRadioInterrupts
+  624:  }
+  625:  
+  626:  /************************************************************************************
+  627:  * PhyDisableRadioInterrupts
+  628:  * 
+  629:  *   ...
+  630:  *
+  631:  ************************************************************************************/
+  632:  void PhyDisableRadioInterrupts(void)
+  633:  {
+  634:    Radio_DisableRadioInterrupts();
+  0000 cc0000   [4]             JMP   Radio_DisableRadioInterrupts
+  635:  }
+  636:  
+  637:  /************************************************************************************
+  638:  *************************************************************************************
+  639:  * Private functions
+  640:  *************************************************************************************
+  641:  ************************************************************************************/
+  642:  /***********************************************************************************/
+  643:  static uint8_t PhySetTrxStateRequest(uint8_t u8ReqMode)
+  644:  {
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  645:    uint16_t controlARegCpy;
+  646:    if(u8ReqMode > mTxMode_c)
+  0003 a103     [2]             CMP   #3
+  0005 2304     [3]             BLS   LB ;abs = 000b
+  647:    {
+  648:      return gPhyInvalidParam_c;
+  0007 a602     [2]             LDA   #2
+  0009 2033     [3]             BRA   L3E ;abs = 003e
+  000b          LB:     
+  649:    }
+  650:    Radio_DeassertTxRxEnable();
+  000b ae02     [2]             LDX   #2
+  000d a604     [2]             LDA   #4
+  000f ac000000 [8]             CALL  Gpio_PinClear
+  651:    (void)Radio_ReadRegisterBlocking(gRadioControlAReg_c, &controlARegCpy);
+  0013 a606     [2]             LDA   #6
+  0015 95       [2]             TSX   
+  0016 cd0000   [6]             JSR   Radio_ReadRegisterBlocking
+  652:    controlARegCpy &= 0xFFF8;                           /* Clear mode. */
+  0019 95       [2]             TSX   
+  001a e601     [3]             LDA   1,X
+  001c a4f8     [2]             AND   #-8
+  001e e701     [3]             STA   1,X
+  653:    controlARegCpy |= u8ReqMode;
+  0020 e602     [3]             LDA   2,X
+  0022 ea01     [3]             ORA   1,X
+  0024 e701     [3]             STA   1,X
+  0026 f6       [3]             LDA   ,X
+  0027 f7       [2]             STA   ,X
+  654:    (void)Radio_WriteRegisterBlocking(gRadioControlAReg_c, controlARegCpy);
+  0028 a606     [2]             LDA   #6
+  002a 9efe01   [5]             LDHX  1,SP
+  002d cd0000   [6]             JSR   Radio_WriteRegisterBlocking
+  655:    if(mIdleMode_c != u8ReqMode)
+  0030 95       [2]             TSX   
+  0031 6d02     [4]             TST   2,X
+  0033 2708     [3]             BEQ   L3D ;abs = 003d
+  656:    {
+  657:      Radio_AssertTxRxEnable();
+  0035 ae02     [2]             LDX   #2
+  0037 a604     [2]             LDA   #4
+  0039 ac000000 [8]             CALL  Gpio_PinSet
+  003d          L3D:    
+  658:    }
+  659:  
+  660:    return gPhySuccess_c;
+  003d 4f       [1]             CLRA  
+  003e          L3E:    
+  661:  }
+  003e a703     [2]             AIS   #3
+  0040 81       [6]             RTS   
+  662:  
+  663:  /***********************************************************************************/
+  664:  static void  PhyHREventsReStartSequense(void)
+  665:  {
+  666:    /* Read the MC13192 trx register. Timer trigger off. */
+  667:    (void)Radio_ReadRegister(gRadioControlAReg_c, &u16HREReg, PhyHandlingRadioEvents);
+  0000 a606     [2]             LDA   #6
+  0002 87       [2]             PSHA  
+  0003 450000   [3]             LDHX  @u16HREReg
+  0006 89       [2]             PSHX  
+  0007 8b       [2]             PSHH  
+  0008 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  000b cd0000   [6]             JSR   Radio_ReadRegister
+  000e a703     [2]             AIS   #3
+  668:    hREState = mHRERxRcvdReadingControlARegState_c;
+  0010 a607     [2]             LDA   #7
+  0012 c70000   [4]             STA   hREState
+  669:  }
+  0015 81       [6]             RTS   
+  670:  
+  671:  /***********************************************************************************/
+  672:  static void PhyChangePacketEndianess(phyPacket_t * packet, uint8_t packetLength)
+  673:  {
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  674:    uint8_t u8TempByte, i;
+  675:    for (i=0; i<packetLength; i+=2) 
+  0003 4f       [1]             CLRA  
+  0004 2045     [3]             BRA   L4B ;abs = 004b
+  0006          L6:     
+  676:    { 
+  677:      u8TempByte = packet->data[i+1];
+  0006 9efe02   [5]             LDHX  2,SP
+  0009 87       [2]             PSHA  
+  000a 9eeb04   [4]             ADD   4,SP
+  000d 87       [2]             PSHA  
+  000e 8b       [2]             PSHH  
+  000f 86       [3]             PULA  
+  0010 a900     [2]             ADC   #0
+  0012 87       [2]             PSHA  
+  0013 8a       [3]             PULH  
+  0014 88       [3]             PULX  
+  0015 e602     [3]             LDA   2,X
+  678:      packet->data[i+1] = packet->data[i];
+  0017 87       [2]             PSHA  
+  0018 95       [2]             TSX   
+  0019 e604     [3]             LDA   4,X
+  001b eb01     [3]             ADD   1,X
+  001d 87       [2]             PSHA  
+  001e e603     [3]             LDA   3,X
+  0020 a900     [2]             ADC   #0
+  0022 87       [2]             PSHA  
+  0023 e604     [3]             LDA   4,X
+  0025 eb01     [3]             ADD   1,X
+  0027 87       [2]             PSHA  
+  0028 e603     [3]             LDA   3,X
+  002a a900     [2]             ADC   #0
+  002c 87       [2]             PSHA  
+  002d 8a       [3]             PULH  
+  002e 88       [3]             PULX  
+  002f ee01     [3]             LDX   1,X
+  0031 8a       [3]             PULH  
+  0032 9f       [1]             TXA   
+  0033 88       [3]             PULX  
+  0034 e702     [3]             STA   2,X
+  679:      packet->data[i] = u8TempByte;
+  0036 95       [2]             TSX   
+  0037 e604     [3]             LDA   4,X
+  0039 eb01     [3]             ADD   1,X
+  003b 87       [2]             PSHA  
+  003c e603     [3]             LDA   3,X
+  003e a900     [2]             ADC   #0
+  0040 87       [2]             PSHA  
+  0041 8a       [3]             PULH  
+  0042 88       [3]             PULX  
+  0043 86       [3]             PULA  
+  0044 e701     [3]             STA   1,X
+  0046 95       [2]             TSX   
+  0047 f6       [3]             LDA   ,X
+  0048 ab02     [2]             ADD   #2
+  004a 8a       [3]             PULH  
+  004b          L4B:    
+  004b 95       [2]             TSX   
+  004c f1       [3]             CMP   ,X
+  004d 25b7     [3]             BCS   L6 ;abs = 0006
+  680:    }
+  681:  }
+  004f a703     [2]             AIS   #3
+  0051 81       [6]             RTS   
+  682:  
+  683:  
+  684:  /***********************************************************************************/
+  685:  /**************************** Radio Callback Functions *****************************/
+  686:  /***********************************************************************************/
+  687:  static void PhyRadioEvent(void) 
+  688:  {
+  0000 a7fe     [2]             AIS   #-2
+  689:    volatile uint16_t vStatusContent;   
+  690:  
+  691:    vStatusContent = Radio_IrqStatusRegValue();
+  0002 320000   [5]             LDHX  gu16RadioIrqStatus
+  0005 9eff01   [5]             STHX  1,SP
+  692:    vStatusContent &= mUsedStatusFlagsMask_c;
+  0008 9efe01   [5]             LDHX  1,SP
+  000b 9f       [1]             TXA   
+  000c a4e3     [2]             AND   #-29
+  000e 87       [2]             PSHA  
+  000f 8b       [2]             PSHH  
+  0010 86       [3]             PULA  
+  0011 a487     [2]             AND   #-121
+  0013 87       [2]             PSHA  
+  0014 8a       [3]             PULH  
+  0015 88       [3]             PULX  
+  0016 9eff01   [5]             STHX  1,SP
+  693:    Radio_DeassertTxRxEnable();       /* Forces the MC13192 to idle. */
+  0019 ae02     [2]             LDX   #2
+  001b a604     [2]             LDA   #4
+  001d ac000000 [8]             CALL  Gpio_PinClear
+  694:  
+  695:    if (mPhyState != mPhyRxWtoState_c) 
+  0021 c60000   [4]             LDA   mPhyState
+  0024 410609   [4]             CBEQA #6,L30 ;abs = 0030
+  696:    { /* If timeout not being used, mask out timer. */
+  697:      vStatusContent &= ~(gRadioIrqFlagTmr1Irq_c);
+  0027 95       [2]             TSX   
+  0028 e601     [3]             LDA   1,X
+  002a e701     [3]             STA   1,X
+  002c f6       [3]             LDA   ,X
+  002d a4fe     [2]             AND   #-2
+  002f f7       [2]             STA   ,X
+  0030          L30:    
+  698:    }
+  699:    
+  700:    if (mDoesEventHappenedWhilePhyIdle_c) 
+  0030 c60000   [4]             LDA   mPhyState
+  0033 410154   [4]             CBEQA #1,L8A ;abs = 008a
+  701:    {   
+  702:      return;
+  703:    }
+  704:  
+  705:    if (vStatusContent & gRadioIrqFlagDozeIrq_c) 
+  0036 5f       [1]             CLRX  
+  0037 9ee601   [4]             LDA   1,SP
+  003a a402     [2]             AND   #2
+  003c cd0100   [6]             JSR   L100 ;abs = 0100
+  003f 2709     [3]             BEQ   L4A ;abs = 004a
+  706:    {
+  707:      (void)Radio_WriteRegister(gRadioTmrCmp2AReg_c, 0x8000, PhyHandlingRadioEvents);
+  0041 a61d     [2]             LDA   #29
+  0043 cd00f1   [6]             JSR   LF1 ;abs = 00f1
+  708:      hREState = mHREDozeDisablingTimerState_c;
+  0046 a601     [2]             LDA   #1
+  709:      return;
+  0048 202c     [3]             BRA   L76 ;abs = 0076
+  004a          L4A:    
+  710:    }  
+  711:    
+  712:    if (vStatusContent & gRadioIrqFlagAttnIrq_c) 
+  004a 9ee601   [4]             LDA   1,SP
+  004d a404     [2]             AND   #4
+  004f cd0100   [6]             JSR   L100 ;abs = 0100
+  0052 2712     [3]             BEQ   L66 ;abs = 0066
+  713:    {
+  714:      (void)Radio_ReadRegister(gRadioResetReg_c, &u16HREReg, PhyHandlingRadioEvents);
+  0054 89       [2]             PSHX  
+  0055 450000   [3]             LDHX  @u16HREReg
+  0058 89       [2]             PSHX  
+  0059 8b       [2]             PSHH  
+  005a 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  005d cd0000   [6]             JSR   Radio_ReadRegister
+  0060 a703     [2]             AIS   #3
+  715:      hREState = mHREAttnReadingRSTIndRegState_c;
+  0062 a604     [2]             LDA   #4
+  716:      return;
+  0064 2074     [3]             BRA   LDA ;abs = 00da
+  0066          L66:    
+  717:    }
+  718:    
+  719:    if (vStatusContent & gRadioIrqFlagTmr1Irq_c) 
+  0066 9ee601   [4]             LDA   1,SP
+  0069 a401     [2]             AND   #1
+  006b cd0100   [6]             JSR   L100 ;abs = 0100
+  006e 2708     [3]             BEQ   L78 ;abs = 0078
+  720:    {
+  721:      (void)Radio_WriteRegister(gRadioTmrCmp1AReg_c, 0x8000, PhyHandlingRadioEvents);
+  0070 a61b     [2]             LDA   #27
+  0072 ad7d     [5]             BSR   LF1 ;abs = 00f1
+  722:      hREState = mHRETmr1WrittingTmrCmp1ARegState_c;
+  0074 a605     [2]             LDA   #5
+  0076          L76:    
+  723:      return;
+  0076 2062     [3]             BRA   LDA ;abs = 00da
+  0078          L78:    
+  724:    }
+  725:  
+  726:    if (vStatusContent & gRadioIrqFlagPllLockIrq_c) 
+  0078 9ee601   [4]             LDA   1,SP
+  007b a480     [2]             AND   #-128
+  007d cd0100   [6]             JSR   L100 ;abs = 0100
+  0080 270a     [3]             BEQ   L8C ;abs = 008c
+  727:    {
+  728:      mPhyState = mPhyIdleState_c;
+  0082 a601     [2]             LDA   #1
+  0084 c70000   [4]             STA   mPhyState
+  729:      PhyPlmeSyncLossIndication();
+  0087 cd0000   [6]             JSR   PhyPlmeSyncLossIndication
+  008a          L8A:    
+  730:      return;
+  008a 2051     [3]             BRA   LDD ;abs = 00dd
+  008c          L8C:    
+  731:    }
+  732:    
+  733:    if(vStatusContent & gRadioIrqFlagTxSentIrq_c)
+  008c 95       [2]             TSX   
+  008d e601     [3]             LDA   1,X
+  008f a540     [2]             BIT   #64
+  0091 2708     [3]             BEQ   L9B ;abs = 009b
+  734:    {
+  735:      mPhyState = mPhyIdleState_c;
+  0093 a601     [2]             LDA   #1
+  0095 c70000   [4]             STA   mPhyState
+  736:      PhyPdDataConfirm();
+  0098 cd0000   [6]             JSR   PhyPdDataConfirm
+  009b          L9B:    
+  737:    }
+  738:    
+  739:    if (vStatusContent & gRadioIrqFlagCcaIrq_c)  
+  009b 95       [2]             TSX   
+  009c e601     [3]             LDA   1,X
+  009e a520     [2]             BIT   #32
+  00a0 2725     [3]             BEQ   LC7 ;abs = 00c7
+  740:    {
+  741:          
+  742:      if(mPhyCcaState_c == mPhyState) 
+  00a2 c60000   [4]             LDA   mPhyState
+  00a5 a104     [2]             CMP   #4
+  00a7 2614     [3]             BNE   LBD ;abs = 00bd
+  743:      {
+  744:        mPhyState = mPhyIdleState_c;
+  00a9 a601     [2]             LDA   #1
+  00ab c70000   [4]             STA   mPhyState
+  745:        PhyPlmeCcaConfirm((vStatusContent & gRadioIrqFlagCca_c) == gRadioIrqFlagCca_c);
+  00ae e601     [3]             LDA   1,X
+  00b0 a502     [2]             BIT   #2
+  00b2 2602     [3]             BNE   LB6 ;abs = 00b6
+  00b4 4f       [1]             CLRA  
+  00b5 65       [3]             SKIP2 LB8 ;abs = 00b8
+  00b6          LB6:    
+  00b6 a601     [2]             LDA   #1
+  00b8          LB8:    
+  00b8 cd0000   [6]             JSR   PhyPlmeCcaConfirm
+  746:      }
+  00bb 2020     [3]             BRA   LDD ;abs = 00dd
+  00bd          LBD:    
+  747:      else if(mPhyEdState_c == mPhyState)
+  00bd a105     [2]             CMP   #5
+  00bf 261c     [3]             BNE   LDD ;abs = 00dd
+  00c1 ad1d     [5]             BSR   LE0 ;abs = 00e0
+  748:      {
+  749:        (void)Radio_ReadRegister(gRadioRXStatusReg_c, &u16HREReg, PhyHandlingRadioEvents);
+  750:        hREState = mHREEdReadingRxStatusRegState_c;
+  00c3 a60d     [2]             LDA   #13
+  751:        return;
+  00c5 2013     [3]             BRA   LDA ;abs = 00da
+  00c7          LC7:    
+  752:      }
+  753:      return;
+  754:    }
+  755:    
+  756:    if(vStatusContent & gRadioIrqFlagRxRcvdIrq_c) 
+  00c7 e601     [3]             LDA   1,X
+  00c9 2a12     [3]             BPL   LDD ;abs = 00dd
+  757:    {  
+  758:      if(!(vStatusContent & gRadioIrqFlagCrcValid_c)) 
+  00cb e601     [3]             LDA   1,X
+  00cd a501     [2]             BIT   #1
+  00cf 2605     [3]             BNE   LD6 ;abs = 00d6
+  759:      {
+  760:        PhyHREventsReStartSequense();
+  00d1 cd0000   [6]             JSR   PhyHREventsReStartSequense
+  761:      }
+  00d4 2007     [3]             BRA   LDD ;abs = 00dd
+  00d6          LD6:    
+  00d6 ad08     [5]             BSR   LE0 ;abs = 00e0
+  762:      else 
+  763:      {
+  764:        /* Read received packet length register and mask off length bits */
+  765:        //Gpio_PinToggle(gGpioPortD_c, gGpioPin4Mask_c);
+  766:        (void)Radio_ReadRegister(gRadioRXStatusReg_c, &u16HREReg, PhyHandlingRadioEvents);
+  767:        hREState = mHRERxRcvdReadingRXStatusRegState_c;
+  00d8 a609     [2]             LDA   #9
+  00da          LDA:    
+  00da c70000   [4]             STA   hREState
+  00dd          LDD:    
+  768:      }
+  769:    }
+  770:  }
+  00dd a702     [2]             AIS   #2
+  00df 81       [6]             RTS   
+  00e0          LE0:    
+  00e0 a62d     [2]             LDA   #45
+  00e2 87       [2]             PSHA  
+  00e3 450000   [3]             LDHX  @u16HREReg
+  00e6 89       [2]             PSHX  
+  00e7 8b       [2]             PSHH  
+  00e8 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  00eb cd0000   [6]             JSR   Radio_ReadRegister
+  00ee a703     [2]             AIS   #3
+  00f0 81       [6]             RTS   
+  00f1          LF1:    
+  00f1 87       [2]             PSHA  
+  00f2 458000   [3]             LDHX  #-32768
+  00f5 89       [2]             PSHX  
+  00f6 8b       [2]             PSHH  
+  00f7 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  00fa cd0000   [6]             JSR   Radio_WriteRegister
+  00fd a703     [2]             AIS   #3
+  00ff 81       [6]             RTS   
+  0100          L100:   
+  0100 87       [2]             PSHA  
+  0101 8a       [3]             PULH  
+  0102 650000   [3]             CPHX  #0
+  0105 81       [6]             RTS   
+  771:  
+  772:  /************************************************************************************/
+  773:  static void PhyHandlingRadioEvents(void) 
+  774:  {
+  775:    static uint8_t u8DataLength;
+  776:    
+  777:    switch(hREState){
+  0000 c60000   [4]             LDA   hREState
+  0003 a10d     [2]             CMP   #13
+  0005 2247     [3]             BHI   L4E ;abs = 004e
+  0007 410149   [4]             CBEQA #1,L53 ;abs = 0053
+  000a 41025a   [4]             CBEQA #2,L67 ;abs = 0067
+  000d 410367   [4]             CBEQA #3,L77 ;abs = 0077
+  0010 41046e   [4]             CBEQA #4,L81 ;abs = 0081
+  0013 a105     [2]             CMP   #5
+  0015 2603     [3]             BNE   L1A ;abs = 001a
+  0017 cc00a3   [4]             JMP   LA3 ;abs = 00a3
+  001a          L1A:    
+  001a a106     [2]             CMP   #6
+  001c 2603     [3]             BNE   L21 ;abs = 0021
+  001e cc00aa   [4]             JMP   LAA ;abs = 00aa
+  0021          L21:    
+  0021 a107     [2]             CMP   #7
+  0023 2603     [3]             BNE   L28 ;abs = 0028
+  0025 cc00c2   [4]             JMP   LC2 ;abs = 00c2
+  0028          L28:    
+  0028 a108     [2]             CMP   #8
+  002a 2603     [3]             BNE   L2F ;abs = 002f
+  002c cc00d1   [4]             JMP   LD1 ;abs = 00d1
+  002f          L2F:    
+  002f a109     [2]             CMP   #9
+  0031 2603     [3]             BNE   L36 ;abs = 0036
+  0033 cc00db   [4]             JMP   LDB ;abs = 00db
+  0036          L36:    
+  0036 a10a     [2]             CMP   #10
+  0038 2603     [3]             BNE   L3D ;abs = 003d
+  003a cc0101   [4]             JMP   L101 ;abs = 0101
+  003d          L3D:    
+  003d a10b     [2]             CMP   #11
+  003f 2603     [3]             BNE   L44 ;abs = 0044
+  0041 cc0107   [4]             JMP   L107 ;abs = 0107
+  0044          L44:    
+  0044 a10c     [2]             CMP   #12
+  0046 2603     [3]             BNE   L4B ;abs = 004b
+  0048 cc011f   [4]             JMP   L11F ;abs = 011f
+  004b          L4B:    
+  004b 410d6b   [4]             CBEQA #13,LB9 ;abs = 00b9
+  004e          L4E:    
+  004e cd0161   [6]             JSR   L161 ;abs = 0161
+  778:      case mHREDozeDisablingTimerState_c:
+  779:           (void)Radio_ReadRegister(gRadioControlBReg_c, &u16HREReg, PhyHandlingRadioEvents);
+  780:           hREState = mHREDozeReadingControlBRegState_c;
+  781:           break;
+  782:      case mHREDozeReadingControlBRegState_c:
+  783:           u16HREReg &= 0xFFFC;
+  784:           (void)Radio_WriteRegister(gRadioControlBReg_c, u16HREReg, PhyHandlingRadioEvents);
+  785:           hREState = mHREDozeDisablingDozeState_c;
+  786:           break;
+  787:      case mHREDozeDisablingDozeState_c:
+  788:           mPhyState = mPhyIdleState_c;        
+  789:           hREState = mHREIdleState_c;
+  790:           PhyPlmeWakeComfirm();         /*Informs to the NHL that the radio is awake*/
+  791:           break;
+  792:      case mHREAttnReadingRSTIndRegState_c:
+  793:           if(IsRadioRecoveringFromReset(u16HREReg)) { 
+  794:             mPhyState = mPhyResetAttnState_c;
+  795:             PhyPlmeResetIndication();
+  796:             hREState = mHREIdleState_c;
+  797:           }
+  798:           else 
+  799:           {
+  800:             (void)Radio_WriteRegister(gRadioTmrCmp2AReg_c, 0x8000, PhyHandlingRadioEvents);
+  801:             hREState = mHREDozeDisablingTimerState_c;
+  802:           }
+  803:           break;
+  804:      case mHRETmr1WrittingTmrCmp1ARegState_c:
+  805:           (void)Radio_WriteRegister(gRadioTmrCmp1BReg_c, 0x0000, PhyHandlingRadioEvents);
+  806:           hREState = mHRETmr1WrittingTmrCmp1BRegState_c;
+  807:           break;
+  808:      case mHRETmr1WrittingTmrCmp1BRegState_c:
+  809:           if(mPhyRxWtoState_c == mPhyState)
+  810:           {
+  811:             mPhyState = mPhyIdleState_c;
+  812:             PhyTimeRxTimeoutIndication();  /* TIMEOUT notification */
+  813:           }
+  814:           hREState = mHREIdleState_c;
+  815:           break;
+  816:      case mHREEdReadingRxStatusRegState_c:
+  817:           mPhyState = mPhyIdleState_c;
+  818:           PhyPlmeEdConfirm((uint8_t)((u16HREReg & 0xFF00)>>8));
+  819:           break;
+  820:      case mHRERxRcvdReadingControlARegState_c:
+  821:           u16HREReg &= 0xFF7F;
+  822:           (void)Radio_WriteRegister(gRadioControlAReg_c, u16HREReg, PhyHandlingRadioEvents);
+  823:           hREState = mHRERxRcvdWrittingControlARegState_c;
+  824:           break;
+  825:      case mHRERxRcvdWrittingControlARegState_c: 
+  826:           Radio_AssertTxRxEnable();          /* Re-start the sequence. */
+  827:           hREState = mHREIdleState_c;
+  828:           break;
+  829:      case mHRERxRcvdReadingRXStatusRegState_c:
+  830:           u8DataLength = (uint8_t)(u16HREReg & 0x007F);
+  831:           mPhyRxParams->linkQuality = (uint8_t)((u16HREReg & 0xFF00)>>8);                
+  832:           mPhyRxParams->linkQuality = (mPhyRxParams->linkQuality / 2);		 
+  833:           if (u8DataLength < mMinPhyLength_c) /* Rx_pkt_length is bad when <3 because of CRC and byte codes. */
+  834:           {
+  835:              PhyHREventsReStartSequense();
+  836:           }
+  837:           else
+  838:           {/* A valid packet has been received. */
+  839:             mPhyState = mPhyIdleState_c;             /* Set the rtx_state to idle */
+  840:             (void)Radio_WriteRegister(gRadioTmrCmp1AReg_c, 0x8000, PhyHandlingRadioEvents);
+  841:             hREState = mHRERxRcvdWrittingTmrCmp1ARegState_c;
+  842:           }
+  843:           break;
+  844:      case mHRERxRcvdWrittingTmrCmp1ARegState_c:
+  845:           (void)Radio_WriteRegister(gRadioTmrCmp1BReg_c, 0x0000, PhyHandlingRadioEvents);
+  846:           hREState = mHRERxRcvdWrittingTmrCmp1BRegState_c;
+  847:           break;
+  848:      case mHRERxRcvdWrittingTmrCmp1BRegState_c:
+  849:           (void)Radio_ReadRxBuffer(mDrvRxPacket->data, u8DataLength,PhyHandlingRadioEvents, gRadioNoBlock_d);
+  850:           hREState = mHRERxRcvdReadingRxPacketState_c;
+  851:           break;
+  852:      case mHRERxRcvdReadingRxPacketState_c:
+  853:           mDrvRxPacket->frameLength = u8DataLength;
+  854:           PhyChangePacketEndianess(mDrvRxPacket, u8DataLength);
+  855:           PhyPdDataIndication(); /* Notify PHY that there is data available. */
+  856:           hREState = mHREIdleState_c;         
+  857:           break;
+  858:      default:
+  859:           mPhyState = mPhyIdleState_c;
+  860:           hREState = mHREIdleState_c;
+  861:           break;
+  0051 2064     [3]             BRA   LB7 ;abs = 00b7
+  0053          L53:    
+  0053 a607     [2]             LDA   #7
+  0055 87       [2]             PSHA  
+  0056 450000   [3]             LDHX  @u16HREReg
+  0059 89       [2]             PSHX  
+  005a 8b       [2]             PSHH  
+  005b 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  005e cd0000   [6]             JSR   Radio_ReadRegister
+  0061 a703     [2]             AIS   #3
+  0063 a602     [2]             LDA   #2
+  0065 2068     [3]             BRA   LCF ;abs = 00cf
+  0067          L67:    
+  0067 450001   [3]             LDHX  @u16HREReg:1
+  006a f6       [3]             LDA   ,X
+  006b a4fc     [2]             AND   #-4
+  006d f7       [2]             STA   ,X
+  006e a607     [2]             LDA   #7
+  0070 cd0134   [6]             JSR   L134 ;abs = 0134
+  0073 a603     [2]             LDA   #3
+  0075 2058     [3]             BRA   LCF ;abs = 00cf
+  0077          L77:    
+  0077 cd0161   [6]             JSR   L161 ;abs = 0161
+  007a 4f       [1]             CLRA  
+  007b c70000   [4]             STA   hREState
+  007e cc0000   [4]             JMP   PhyPlmeWakeComfirm
+  0081          L81:    
+  0081 450000   [3]             LDHX  @u16HREReg
+  0084 e601     [3]             LDA   1,X
+  0086 a480     [2]             AND   #-128
+  0088 e701     [3]             STA   1,X
+  008a 4f       [1]             CLRA  
+  008b f7       [2]             STA   ,X
+  008c 9eae     [5]             LDHX  ,X
+  008e 260a     [3]             BNE   L9A ;abs = 009a
+  0090 a609     [2]             LDA   #9
+  0092 c70000   [4]             STA   mPhyState
+  0095 cd0000   [6]             JSR   PhyPlmeResetIndication
+  0098 203f     [3]             BRA   LD9 ;abs = 00d9
+  009a          L9A:    
+  009a a61d     [2]             LDA   #29
+  009c cd0143   [6]             JSR   L143 ;abs = 0143
+  009f a601     [2]             LDA   #1
+  00a1 202c     [3]             BRA   LCF ;abs = 00cf
+  00a3          LA3:    
+  00a3 cd0152   [6]             JSR   L152 ;abs = 0152
+  00a6 a606     [2]             LDA   #6
+  00a8 2025     [3]             BRA   LCF ;abs = 00cf
+  00aa          LAA:    
+  00aa c60000   [4]             LDA   mPhyState
+  00ad a106     [2]             CMP   #6
+  00af 267e     [3]             BNE   L12F ;abs = 012f
+  00b1 cd0161   [6]             JSR   L161 ;abs = 0161
+  00b4 cd0000   [6]             JSR   PhyTimeRxTimeoutIndication
+  00b7          LB7:    
+  00b7 2076     [3]             BRA   L12F ;abs = 012f
+  00b9          LB9:    
+  00b9 cd0161   [6]             JSR   L161 ;abs = 0161
+  00bc c60000   [4]             LDA   u16HREReg
+  00bf cc0000   [4]             JMP   PhyPlmeEdConfirm
+  00c2          LC2:    
+  00c2 450001   [3]             LDHX  @u16HREReg:1
+  00c5 f6       [3]             LDA   ,X
+  00c6 a47f     [2]             AND   #127
+  00c8 f7       [2]             STA   ,X
+  00c9 a606     [2]             LDA   #6
+  00cb ad67     [5]             BSR   L134 ;abs = 0134
+  00cd a608     [2]             LDA   #8
+  00cf          LCF:    
+  00cf 205f     [3]             BRA   L130 ;abs = 0130
+  00d1          LD1:    
+  00d1 ae02     [2]             LDX   #2
+  00d3 a604     [2]             LDA   #4
+  00d5 ac000000 [8]             CALL  Gpio_PinSet
+  00d9          LD9:    
+  00d9 2054     [3]             BRA   L12F ;abs = 012f
+  00db          LDB:    
+  00db c60001   [4]             LDA   u16HREReg:1
+  00de a47f     [2]             AND   #127
+  00e0 c70000   [4]             STA   u8DataLength
+  00e3 c60000   [4]             LDA   u16HREReg
+  00e6 320000   [5]             LDHX  mPhyRxParams
+  00e9 e704     [3]             STA   4,X
+  00eb 6404     [5]             LSR   4,X
+  00ed c60000   [4]             LDA   u8DataLength
+  00f0 a103     [2]             CMP   #3
+  00f2 2403     [3]             BCC   LF7 ;abs = 00f7
+  00f4 cc0000   [4]             JMP   PhyHREventsReStartSequense
+  00f7          LF7:    
+  00f7 ad68     [5]             BSR   L161 ;abs = 0161
+  00f9 a61b     [2]             LDA   #27
+  00fb ad46     [5]             BSR   L143 ;abs = 0143
+  00fd a60a     [2]             LDA   #10
+  00ff 202f     [3]             BRA   L130 ;abs = 0130
+  0101          L101:   
+  0101 ad4f     [5]             BSR   L152 ;abs = 0152
+  0103 a60b     [2]             LDA   #11
+  0105 2029     [3]             BRA   L130 ;abs = 0130
+  0107          L107:   
+  0107 320000   [5]             LDHX  mDrvRxPacket
+  010a af01     [2]             AIX   #1
+  010c 89       [2]             PSHX  
+  010d 8b       [2]             PSHH  
+  010e c60000   [4]             LDA   u8DataLength
+  0111 87       [2]             PSHA  
+  0112 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  0115 4f       [1]             CLRA  
+  0116 cd0000   [6]             JSR   Radio_ReadRxBuffer
+  0119 a703     [2]             AIS   #3
+  011b a60c     [2]             LDA   #12
+  011d 2011     [3]             BRA   L130 ;abs = 0130
+  011f          L11F:   
+  011f c60000   [4]             LDA   u8DataLength
+  0122 320000   [5]             LDHX  mDrvRxPacket
+  0125 f7       [2]             STA   ,X
+  0126 c60000   [4]             LDA   u8DataLength
+  0129 cd0000   [6]             JSR   PhyChangePacketEndianess
+  012c cd0000   [6]             JSR   PhyPdDataIndication
+  012f          L12F:   
+  012f 4f       [1]             CLRA  
+  0130          L130:   
+  0130 c70000   [4]             STA   hREState
+  862:    }
+  863:  }
+  0133 81       [6]             RTS   
+  0134          L134:   
+  0134 87       [2]             PSHA  
+  0135 320000   [5]             LDHX  u16HREReg
+  0138 89       [2]             PSHX  
+  0139 8b       [2]             PSHH  
+  013a 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  013d cd0000   [6]             JSR   Radio_WriteRegister
+  0140 a703     [2]             AIS   #3
+  0142 81       [6]             RTS   
+  0143          L143:   
+  0143 87       [2]             PSHA  
+  0144 458000   [3]             LDHX  #-32768
+  0147 89       [2]             PSHX  
+  0148 8b       [2]             PSHH  
+  0149 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  014c cd0000   [6]             JSR   Radio_WriteRegister
+  014f a703     [2]             AIS   #3
+  0151 81       [6]             RTS   
+  0152          L152:   
+  0152 a61c     [2]             LDA   #28
+  0154 87       [2]             PSHA  
+  0155 4f       [1]             CLRA  
+  0156 87       [2]             PSHA  
+  0157 87       [2]             PSHA  
+  0158 450000   [3]             LDHX  @PhyHandlingRadioEvents
+  015b cd0000   [6]             JSR   Radio_WriteRegister
+  015e a703     [2]             AIS   #3
+  0160 81       [6]             RTS   
+  0161          L161:   
+  0161 a601     [2]             LDA   #1
+  0163 c70000   [4]             STA   mPhyState
+  0166 81       [6]             RTS   
+  864:  
+  865:  #pragma CODE_SEG DEFAULT
+  866:  
+  867:  
