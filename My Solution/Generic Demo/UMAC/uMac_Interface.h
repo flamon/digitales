@@ -13,24 +13,24 @@
 
 //Tipos Publicos
 typedef enum{
-  uMac_Router = 0,
-  uMac_Client = 1,
+  uMac_Router,
+  uMac_Client,
   uMac_Other
-}uMac_nodeType;
+} uMac_nodeType;
 
-typedef enum{
+/*typedef enum{
 	uMac_Hello,
 	uMac_Data,
 	uMac_Other1
-}uMac_PacketType;
+}uMac_PacketType;*/
 
 typedef struct{
 	uint8_t Pan_ID;
-	uMac_PacketType Packet_Type;
+	uint8_t Packet_Type;
 	uint8_t Source_Add;
 	uint8_t Dest_Add;
-	uint8_t uMac_PDU[119];
-}uMac_Packet;
+	uint8_t uMac_PDU[1];
+} uMac_Packet;
 
 void NetworkTxCallback(void);
 void NetworkRxCallback(void);
@@ -48,6 +48,6 @@ void NetworkRxCallback(void);
 
 
 //Prototipos Publicos
-void Init_uMac(uMac_nodeType,uMac_txCallBack,uMac_rxCallBack);
+void Init_uMac(/*uMac_nodeType, uint8_tuMac_txCallBack,uMac_rxCallBack*/);
 void uMac_Engine();
 

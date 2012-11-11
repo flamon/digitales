@@ -135,7 +135,6 @@
 <perspective_action id="org.eclipse.debug.ui.DebugPerspective"/>
 <perspective_action id="org.eclipse.team.ui.TeamSynchronizingPerspective"/>
 <hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
-<view id="com.freescale.core.ide.projectsview.ProjectsView"/>
 <view id="org.eclipse.ui.views.ProblemView"/>
 <view id="org.eclipse.ui.views.TaskList"/>
 <view id="org.eclipse.ui.console.ConsoleView"/>
@@ -143,6 +142,7 @@
 <view id="org.eclipse.rse.ui.view.systemView"/>
 <view id="org.eclipse.ui.views.ContentOutline"/>
 <view id="org.eclipse.cdt.make.ui.views.MakeView"/>
+<view id="com.freescale.core.ide.projectsview.ProjectsView"/>
 <fastViewBars/>
 <layout>
 <mainWindow>

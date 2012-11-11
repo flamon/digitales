@@ -1,4 +1,5 @@
 
+
 UMAC/uMac_c.obj: \
 	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/OTAP/../UMAC/uMac.c \
 	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Source/Common/Sys/McuInit.h \
@@ -41,5 +42,8 @@ UMAC/uMac_c.obj: \
 	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Interface/CMT_Interface.h \
 	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Interface/Accelerometer_Interface.h \
 	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Interface/Eeprom_Interface.h \
-	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Interface/LCD_Interface.h 
+	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Interface/LCD_Interface.h \
+	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/OTAP/OTAP_Interface.h \
+	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_Interface.h \
+	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_Interface.h 
 

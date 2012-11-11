@@ -9,8 +9,10 @@
 #include "McuInit.h"                /*CPU and System Clock related functions*/
 #include "EmbeddedTypes.h"          /*Include special data types*/       
 #include "SMAC_Interface.h"         /*Include all OTA functionality*/
-#include "uMac.h"        			 /*Include all OTA functionality*/
+#include "uMac.h"        			/*Include all OTA functionality*/
 #include "app_config.h"
+#include "OTAP_Interface.h"
+#include "PLM_config.h"
 
 
 //Definiciones
@@ -20,14 +22,14 @@ typedef enum{
 	uMac_WaitRx = 2,
 	uMac_Rx = 3,
 	uMac_Tx = 4
-}uMac_Engine_State;
+} uMac_Engine_State;
 
 channels_t       bestChannel;
 bool_t           bScanDone;
 
 static uMac_Engine_State uMac_Current_State;
 static bool_t uMac_On = FALSE;
-static uint8_t uMac_Best_Channel;
+//static uint8_t uMac_Best_Channel;
 
 //Variables
 static uint8_t gau8RxDataBuffer[130]; /* 123 bytes is the SDU max size in non
@@ -49,72 +51,86 @@ static uMac_Packet * uMac_RxPacket;
 static uMac_Packet * uMac_TxPacket;
 
 bool_t			bTxDone;
-bool_t			bRxDone;		
+bool_t			bRxDone;
+bool_t			bDoTx;
+
+uMac_nodeType uMactype;
+uint8_t uMacdest = 1;
 
 //Prototipos
 //void MLMEScanComfirm(channels_t ClearestChann); //Poner tambien
 void InitSmac(void); //Poner en memoria bankeada******
+void uMac_Txf(void);
 
-void Init_uMac(uMac_nodeType NodeType,uMac_txCallBack TxCallBack,uMac_rxCallBack RxCallBack){
+void Init_uMac(/*uMac_nodeType type, uint8_t dest, uMac_txCallBack TxCallBack, uMac_rxCallBack RxCallBack*/) {
+	Led_PrintValue(0x08);
 	uMac_On = TRUE;
+	uMactype = type;
+	uMacdest = dest;
 	uMac_RxPacket = (uMac_Packet *)AppRxPacket->smacPdu.u8Data;
 	uMac_TxPacket = (uMac_Packet *)AppTxPacket->smacPdu.u8Data;
+	uMac_Current_State = uMac_NoInit;
 	//guardar tipo de nodo y callbacks
+}
+
+void uMac_Txf() {
+	bDoTx = TRUE;
 }
 
 void uMac_Engine(){
 	uint16_t ChannelsToScan = 0xFFF;
-	uint8_t TheBestChannel[16];
-	rxPacket_t ReceivedPacket;
-	uMac_Packet HelloResponse;
-	switch (uMac_Current_State){
+	uint8_t ChannelsEnergy[16], i = 0;
+	channels_t Channels[] = {gChannel11_c, gChannel12_c, gChannel13_c, gChannel14_c, gChannel15_c,
+			gChannel16_c, gChannel17_c, gChannel18_c, gChannel19_c, gChannel20_c, gChannel21_c,
+			gChannel22_c, gChannel23_c, gChannel24_c, gChannel25_c, gChannel26_c};
+	
+	switch (uMac_Current_State) {
 		case uMac_NoInit:
-			//No Init
-			if(uMac_On==TRUE){
+			if(uMac_On == TRUE) {
 				uMac_On = FALSE;
 				InitSmac();
-				(void) MLMEScanRequest(ChannelsToScan, gScanModeED_c, TheBestChannel);
+				(void) MLMESetChannelRequest(Channels[i++]);
+				uMac_TxPacket->Dest_Add = uMacdest;
+				uMac_TxPacket->Packet_Type = 0;
+				uMac_TxPacket->Pan_ID = 10;
+				uMac_TxPacket->Source_Add = 0;
+				(void) MCPSDataRequest(AppTxPacket);
 				uMac_Current_State = uMac_Init;
 			}
-		break;
+			break;
 		case uMac_Init:
-			//Init
-			if(bScanDone==TRUE){
-				bScanDone = FALSE;
-				(void) MLMESetChannelRequest(bestChannel);
-				(void) MLMERXEnableRequest(AppRxPacket, 0); 
-				uMac_Current_State = uMac_WaitRx;
-			}
-		break;
+			(void) MLMERXEnableRequest(AppRxPacket, 0); 
+			uMac_Current_State = uMac_WaitRx;
+			break;
 		case uMac_WaitRx:
-			//Wait Rx
-			if(bRxDone == TRUE) {
-				bRxDone = FALSE;
-				//Analizar el paquete
-				if (AppRxPacket->rxStatus == rxSuccessStatus_c) {
-					//El paquete esta chido
-					if (uMac_RxPacket->Packet_Type == uMac_Hello) {
-						//Si el paquete es de control, responder con otro hello
-						uMac_TxPacket->Dest_Add = uMac_RxPacket->Source_Add;
-						uMac_TxPacket->Packet_Type = uMac_Hello;
-						uMac_TxPacket->Pan_ID = 10;
-						uMac_TxPacket->Source_Add = 0;
-						AppTxPacket->u8DataLength = 4;
-						(void) MCPSDataRequest(AppTxPacket);
+				if(bRxDone == TRUE) {
+					bRxDone = FALSE;
+					//Analizar el paquete
+					if (AppRxPacket->rxStatus == rxSuccessStatus_c) {
+						if (uMac_RxPacket->Pan_ID == 10) {
+							
+							if (uMac_RxPacket->Packet_Type != 0) {
+								// Llamar a la callback
+							}
+						} else {
+							uMac_Current_State = uMac_NoInit;
+							break;
+						}
 					}
 				}
-			}
-			(void) MLMERXEnableRequest(AppRxPacket, 0);
-			uMac_Current_State = uMac_Tx;
-		break;
-		case uMac_Rx:
-			//Rx
-		break;
+				if (bDoTx == TRUE) {
+					bDoTx = FALSE;
+					(void) MCPSDataRequest(AppTxPacket);
+				}
+				(void) MLMERXEnableRequest(AppRxPacket, 0);
+				// uMac_Current_State = uMac_Tx;
+				break;
 		case uMac_Tx:
 			if(bTxDone==TRUE){
-				uMac_Current_State = uMac_WaitRx;
+				bTxDone = FALSE;
+				uMac_Current_State = uMac_Init;
 			}
-		break;
+			break;
 	}
 }
 
@@ -128,7 +144,9 @@ void InitSmac(void)
     AppTxPacket = (txPacket_t*)gau8TxDataBuffer;
     AppRxPacket = (rxPacket_t*)gau8RxDataBuffer; 
     AppRxPacket->u8MaxDataLength = gMaxSmacSDULenght_c;
-    AppTxPacket->smacPdu.u8Data[0] = 'T';
+    // AppTxPacket->smacPdu.u8Data[0] = 'T';
+   /* */
+    AppTxPacket->u8DataLength = 10;
     
     
     (void)MLMERadioInit();

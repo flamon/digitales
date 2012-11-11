@@ -26,6 +26,7 @@
 #include "Radio_Interface.h"        /*Include all Radio functionality*/
 #include "app_config.h"
 #include "OTAP_Interface.h"
+#include "uMAc_Interface.h"
 
 
 /************************************************************************************
@@ -34,7 +35,7 @@
 *************************************************************************************
 ************************************************************************************/
 void InitProject(void);
-void InitSmac(void);
+//void InitSmac(void);
 
 /* Place it in NON_BANKED memory */
 #ifdef MEMORY_MODEL_BANKED
@@ -76,7 +77,7 @@ void MCPSDataIndication(rxPacket_t *gsRxPacket);
 *************************************************************************************
 ************************************************************************************/
 
-bool_t           KeyPressed;
+bool_t  KeyPressed = FALSE;
 
 bool_t bUartDataInFlag;
 bool_t bUartTxDone;  
@@ -84,7 +85,10 @@ uint8_t UartData;
 uartPortNumber_t portNumber;  
 uartConfigSet_t uartSettings;
 
-kbiConfig_t gKbiConfiguration; 
+kbiConfig_t gKbiConfiguration;
+
+uMac_nodeType type;
+uint8_t dest;
 
 
 /************************************************************************************
@@ -100,8 +104,9 @@ void main(void)
   EnableInterrupts; /* Enable interrupts */  
   
   InitProject();
-  InitSmac();
- 
+  //InitSmac();
+  (void) Init_uMac();
+  //(void) uMac_Txf();
   (void)Uart_BlockingStringTx("\f\r\n\r\n\t Generic Demonstration Application", gDefaultUartPort_c);
  
   for(;;) 
@@ -109,7 +114,10 @@ void main(void)
     Otap_OpcMain();
      
     /* Put your own code here */
-      
+    //if (KeyPressed == TRUE) {
+    	
+    	(void) uMac_Engine();
+    //}
     __RESET_WATCHDOG();
     
   } 
@@ -327,16 +335,20 @@ void KbiCallback(kbiPressed_t PressedKey)
   switch(PressedKey)
   {
     case gKbiPressedKey0_c:
-      /* Place your implementation here */ 
+      /* Place your implementation here */
+    	type = uMac_Router;
     break;
     case gKbiPressedKey1_c:
-      /* Place your implementation here */ 
+      /* Place your implementation here */
+    	type = uMac_Client;
     break;
     case gKbiPressedKey2_c:
       /* Place your implementation here */
+    	dest = 1;
     break;
     case gKbiPressedKey3_c:
       /* Place your implementation here */
+    	dest = 2;
     break;
     default:
     break;

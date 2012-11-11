@@ -7,3 +7,44 @@ Command-line arguments:  -os win32 -ws win32 -arch x86
 
 !ENTRY org.eclipse.osgi 2 1 2012-11-10 11:28:35.666
 !MESSAGE NLS unused message: // in: org.eclipse.rse.internal.core.messages
+!SESSION 2012-11-10 16:49:03.859 -----------------------------------------------
+eclipse.buildId=I20070613-1755
+java.version=1.6.0_15
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86 -data C:\Users\hbarba\repos\digitales\My Solution\Generic Demo
+
+!ENTRY org.eclipse.osgi 2 1 2012-11-10 16:49:12.578
+!MESSAGE NLS unused message: // in: org.eclipse.rse.internal.core.messages
+
+!ENTRY org.eclipse.ui.ide 4 4 2012-11-10 16:50:11.897
+!MESSAGE The file 'My Solution.bksln' could not be opened.
+See log for details.
+
+!ENTRY org.eclipse.ui 4 0 2012-11-10 16:50:11.897
+!MESSAGE Unable to open external editor for C:/Users/hbarba/repos/digitales/My Solution/My Solution.bksln.
+!SESSION 2012-11-11 13:00:49.234 -----------------------------------------------
+eclipse.buildId=I20070613-1755
+java.version=1.6.0_15
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86
+
+!ENTRY org.eclipse.osgi 2 1 2012-11-11 13:01:02.921
+!MESSAGE NLS unused message: // in: org.eclipse.rse.internal.core.messages
+
+!ENTRY org.eclipse.ui.ide 4 4 2012-11-11 13:01:29.762
+!MESSAGE The file 'My Solution.bksln' could not be opened.
+See log for details.
+
+!ENTRY org.eclipse.ui 4 0 2012-11-11 13:01:29.778
+!MESSAGE Unable to open external editor for C:/Users/hbarba/repos/digitales/My Solution/My Solution.bksln.
+!SESSION 2012-11-11 13:01:37.366 -----------------------------------------------
+eclipse.buildId=I20070613-1755
+java.version=1.6.0_15
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86
+
+!ENTRY org.eclipse.osgi 2 1 2012-11-11 13:01:56.241
+!MESSAGE NLS unused message: // in: org.eclipse.rse.internal.core.messages
