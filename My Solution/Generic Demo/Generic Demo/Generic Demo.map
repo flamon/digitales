@@ -42,20 +42,20 @@ Entry point: 0x3382 (_Startup)
 _startupData is allocated at 0x2080 and uses 6 Bytes
 extern struct _tagStartup {
   unsigned nofZeroOut     1
-  _Range   pZeroOut       0x300     867
-  _Copy    *toCopyDownBeg 0x3E48
+  _Range   pZeroOut       0x300     885
+  _Copy    *toCopyDownBeg 0x3E34
 } _startupData;
 
 *********************************************************************************************
 SECTION-ALLOCATION SECTION
 Section Name                    Size  Type     From       To       Segment
 ---------------------------------------------------------------------------------------------
-.data                             49   R/W      0x300      0x330   APP_RAM_1
+.data                             66   R/W      0x300      0x341   APP_RAM_1
 NON_BANKED                      4511     R     0x20B0     0x324E   APP_CODE_0
-.copy                             55     R     0x3E48     0x3E7E   APP_CODE_0
+.copy                             72     R     0x3E34     0x3E7B   APP_CODE_0
 .rodata                          138     R     0x324F     0x32D8   APP_CODE_0
 .rodata1                          41     R     0x32D9     0x3301   APP_CODE_0
-.text                           2747     R     0x338D     0x3E47   APP_CODE_0
+.text                           2727     R     0x338D     0x3E33   APP_CODE_0
 .startData                        26     R     0x2080     0x2099   APP_STARTUP_STRUC_FLASH
 .stack                           512   R/W      0x100      0x2FF   APP_STACK_RAM
 .abs_section_0                     1   N/I        0x0        0x0   .absSeg0
@@ -239,14 +239,14 @@ NON_BANKED                      4511     R     0x20B0     0x324E   APP_CODE_0
 .abs_section_1816                  2   N/I     0x1816     0x1817   .absSeg178
 .abs_section_1870                  2   N/I     0x1870     0x1871   .absSeg179
 .abs_section_ffc0                 62     R     0xFFC0     0xFFFD   .absSeg180
-.bss                             652   R/W      0x331      0x5BC   APP_RAM_1
+.bss                             653   R/W      0x342      0x5CE   APP_RAM_1
 .init                            139     R     0x3302     0x338C   APP_CODE_0
-.common                          166   R/W      0x5BD      0x662   APP_RAM_1
+.common                          166   R/W      0x5CF      0x674   APP_RAM_1
 RES_RESET_VECTOR_FLASH_vect          2     R     0xFFFE     0xFFFF   RES_RESET_VECTOR_FLASH
 
 Summary of section sizes per section type:
-READ_ONLY (R):        1E29 (dec:     7721)
-READ_WRITE (R/W):      563 (dec:     1379)
+READ_ONLY (R):        1E26 (dec:     7718)
+READ_WRITE (R/W):      575 (dec:     1397)
 NO_INIT (N/I):          CF (dec:      207)
 
 *********************************************************************************************
@@ -261,42 +261,45 @@ OBJECT-ALLOCATION SECTION
 ---------------------------------------------------------------------------------------------
 MODULE:                 -- uMac_c.obj --
 - PROCEDURES:
-     Init_uMac                                 338D      20      32       2   .text       
-     uMac_Engine                               33AD      E2     226       6   .text       
-     InitSmac                                  348F      3E      62       2   .text       
+     Init_uMac                                 338D      1E      30       2   .text       
+     uMac_Engine                               33AB      D0     208       9   .text       
+     InitSmac                                  347B      3E      62       2   .text       
      MLMEScanComfirm                           20B0       9       9       2   NON_BANKED  
      MCPSDataIndication                        20B9       6       6       3   NON_BANKED  
      MCPSDataComfirm                           20BF       6       6       1   NON_BANKED  
      MLMEResetIndication                       20C5       1       1       1   NON_BANKED  
      MLMEWakeComfirm                           20C6       1       1       1   NON_BANKED  
 - VARIABLES:
-     uMacdest                                   300       1       1       1   .data       
-     uMac_On                                    331       1       1       3   .bss        
-     uMac_Current_State                         332       1       1       3   .bss        
-     gau8RxDataBuffer                           333      82     130       1   .bss        
-     gau8TxDataBuffer                           3B5      80     128       2   .bss        
-     AppTxPacket                                435       2       2       4   .bss        
-     AppRxPacket                                437       2       2       4   .bss        
-     uMac_RxPacket                              439       2       2       2   .bss        
-     uMac_TxPacket                              43B       2       2       2   .bss        
-     bestChannel                                5BD       1       1       1   .common     
-     bScanDone                                  5BE       1       1       1   .common     
-     bTxDone                                    5BF       1       1       3   .common     
-     bRxDone                                    5C0       1       1       3   .common     
-     bDoTx                                      5C1       1       1       2   .common     
+     bToggle                                    300       1       1       2   .data       
+     uMacdest                                   301       1       1       1   .data       
+     Channels                                   302      10      16       1   .data       
+     uMac_On                                    342       1       1       3   .bss        
+     i                                          343       1       1       2   .bss        
+     uMac_Current_State                         344       1       1       4   .bss        
+     gau8RxDataBuffer                           345      82     130       1   .bss        
+     gau8TxDataBuffer                           3C7      80     128       2   .bss        
+     AppTxPacket                                447       2       2       4   .bss        
+     AppRxPacket                                449       2       2       4   .bss        
+     uMac_RxPacket                              44B       2       2       2   .bss        
+     uMac_TxPacket                              44D       2       2       2   .bss        
+     bestChannel                                5CF       1       1       1   .common     
+     bScanDone                                  5D0       1       1       1   .common     
+     bTxDone                                    5D1       1       1       4   .common     
+     bRxDone                                    5D2       1       1       3   .common     
+     bDoTx                                      5D3       1       1       2   .common     
 MODULE:                 -- SMAC_c.obj --
 - PROCEDURES:
-     MCPSDataRequest                           34CD      4B      75       4   .text       
-     MLMERXEnableRequest                       3518      9A     154       2   .text       
-     MLMERadioInit                             35B2      61      97       2   .text       
-     MLMEFEGainAdjust                          3613       D      13       2   .text       
-     MLMESetChannelRequest                     3620      38      56       4   .text       
-     MLMEPAOutputAdjust                        3658      2C      44       2   .text       
-     MLMESetClockRate                          3684       4       4       2   .text       
-     MLMESetTmrPrescale                        3688      1C      28       2   .text       
-     SmacScanTheNextChannel                    36A4      60      96       6   .text       
-     SmacSetRxTimeout                          3704      27      39       4   .text       
-     SmacFormatTxPacket                        372B      29      41       2   .text       
+     MCPSDataRequest                           34B9      4B      75       4   .text       
+     MLMERXEnableRequest                       3504      9A     154       2   .text       
+     MLMERadioInit                             359E      61      97       2   .text       
+     MLMEFEGainAdjust                          35FF       D      13       2   .text       
+     MLMESetChannelRequest                     360C      38      56       4   .text       
+     MLMEPAOutputAdjust                        3644      2C      44       2   .text       
+     MLMESetClockRate                          3670       4       4       2   .text       
+     MLMESetTmrPrescale                        3674      1C      28       2   .text       
+     SmacScanTheNextChannel                    3690      60      96       6   .text       
+     SmacSetRxTimeout                          36F0      27      39       4   .text       
+     SmacFormatTxPacket                        3717      29      41       2   .text       
      PhyPdDataConfirm                          20C7      5F      95       1   NON_BANKED  
      PhyPdDataIndication                       2126      81     129       1   NON_BANKED  
      PhyPlmeCcaConfirm                         21A7      4A      74       1   NON_BANKED  
@@ -306,17 +309,17 @@ MODULE:                 -- SMAC_c.obj --
      PhyPlmeWakeComfirm                        22C1       3       3       1   NON_BANKED  
      PhyTimeRxTimeoutIndication                22C4      12      18       1   NON_BANKED  
 - VARIABLES:
-     smacTimeout                                43D       4       4       4   .bss        
-     smacChannelsBeingScanned                   441       2       2       2   .bss        
-     smacEdValue                                443       1       1       5   .bss        
-     smacState                                  444       1       1      16   .bss        
-     smacLastDataRxParams                       445       5       5       6   .bss        
-     smacCurrentChannel                         44A       1       1       4   .bss        
-     smacScanCurrentChannel                     44B       1       1       8   .bss        
-     smacClearestChann                          44C       1       1       5   .bss        
-     pTestPacket                                44D       2       2       1   .bss        
-     smacProccesPacketPtr                       44F       2       2      24   .bss        
-     smacFlags                                  5C2       1       1      25   .common     
+     smacTimeout                                44F       4       4       4   .bss        
+     smacChannelsBeingScanned                   453       2       2       2   .bss        
+     smacEdValue                                455       1       1       5   .bss        
+     smacState                                  456       1       1      16   .bss        
+     smacLastDataRxParams                       457       5       5       6   .bss        
+     smacCurrentChannel                         45C       1       1       4   .bss        
+     smacScanCurrentChannel                     45D       1       1       8   .bss        
+     smacClearestChann                          45E       1       1       5   .bss        
+     pTestPacket                                45F       2       2       1   .bss        
+     smacProccesPacketPtr                       461       2       2      24   .bss        
+     smacFlags                                  5D4       1       1      25   .common     
 MODULE:                 -- Timer_c.obj --
 - PROCEDURES:
      Tmr_Init                                  22D6      36      54       1   NON_BANKED  
@@ -324,8 +327,8 @@ MODULE:                 -- Timer_c.obj --
      Tmr_Tmr2Isr                               233E      32      50       4   NON_BANKED  
      Tmr_Tmr3Isr                               2370      56      86       7   NON_BANKED  
 - VARIABLES:
-     mu8TmrStartRegs                            301       6       6       1   .data       
-     mTmrCallbackFuncEvent                      451      2A      42      17   .bss        
+     mu8TmrStartRegs                            312       6       6       1   .data       
+     mTmrCallbackFuncEvent                      463      2A      42      17   .bss        
 MODULE:                 -- SPI_c.obj --
 - PROCEDURES:
      SPI1_Init                                 23C6      20      32       1   NON_BANKED  
@@ -340,35 +343,35 @@ MODULE:                 -- SPI_c.obj --
      SPI1_ReadByteBlocking                     250A       A      10       1   NON_BANKED  
      SPI1_Isr                                  2514      5F      95       1   NON_BANKED  
 - VARIABLES:
-     mpu8SPI1Ptr                                47B       2       2       8   .bss        
-     mu8SPI1Counter                             47D       1       1       6   .bss        
-     mSPI1Status                                47E       1       1      18   .bss        
-     gpfSpi1CallBack                            5C3       2       2       4   .common     
+     mpu8SPI1Ptr                                48D       2       2       8   .bss        
+     mu8SPI1Counter                             48F       1       1       6   .bss        
+     mSPI1Status                                490       1       1      18   .bss        
+     gpfSpi1CallBack                            5D5       2       2       4   .common     
 MODULE:                 -- UART_c.obj --
 - PROCEDURES:
-     Uart_Init                                 3754      A9     169       7   .text       
-     Uart_ClearErrors                          37FD      1B      27       2   .text       
-     Uart_Configure                            3818      82     130       2   .text       
-     Uart_GetBytesFromRxBuffer                 389A      AD     173       2   .text       
-     Uart_RegisterRxCallBack                   3947      2C      44       2   .text       
-     Uart_RegisterTxCallBack                   3973      30      48       2   .text       
-     Uart_BlockingStringTx                     39A3      33      51       2   .text       
-     Uart_BlockingByteTx                       39D6      28      40       2   .text       
+     Uart_Init                                 3740      A9     169       7   .text       
+     Uart_ClearErrors                          37E9      1B      27       2   .text       
+     Uart_Configure                            3804      82     130       2   .text       
+     Uart_GetBytesFromRxBuffer                 3886      AD     173       2   .text       
+     Uart_RegisterRxCallBack                   3933      2C      44       2   .text       
+     Uart_RegisterTxCallBack                   395F      30      48       2   .text       
+     Uart_BlockingStringTx                     398F      33      51       2   .text       
+     Uart_BlockingByteTx                       39C2      28      40       2   .text       
      Uart2_TxIsr                               2573      37      55       1   NON_BANKED  
      Uart2_RxIsr                               25AA      61      97       1   NON_BANKED  
      Uart2_ErrorIsr                            260B       1       1       1   NON_BANKED  
 - VARIABLES:
-     maUartStartOfModule                        307       2       2       3   .data       
-     mSciModuleHwErrors                         47F       1       1       2   .bss        
-     mIsTxPending                               480       1       1       5   .bss        
-     mUartRxBuff                                481      40      64       3   .bss        
-     mUartTxBuff                                4C1      C8     200       2   .bss        
-     mUartRxBufferIndx                          589       2       2      13   .bss        
-     mUartTxBufferIndx                          58B       2       2       9   .bss        
-     mUartRxCbFn                                58D       2       2       5   .bss        
-     mUartTxCbFn                                58F       2       2       5   .bss        
-     mUartRxCbFlags                             591       1       1       2   .bss        
-     mUartTxNumOfFreeBytes                      592       1       1       2   .bss        
+     maUartStartOfModule                        318       2       2       3   .data       
+     mSciModuleHwErrors                         491       1       1       2   .bss        
+     mIsTxPending                               492       1       1       5   .bss        
+     mUartRxBuff                                493      40      64       3   .bss        
+     mUartTxBuff                                4D3      C8     200       2   .bss        
+     mUartRxBufferIndx                          59B       2       2      13   .bss        
+     mUartTxBufferIndx                          59D       2       2       9   .bss        
+     mUartRxCbFn                                59F       2       2       5   .bss        
+     mUartTxCbFn                                5A1       2       2       5   .bss        
+     mUartRxCbFlags                             5A3       1       1       2   .bss        
+     mUartTxNumOfFreeBytes                      5A4       1       1       2   .bss        
 MODULE:                 -- PhyMC1320X_c.obj --
 - PROCEDURES:
      PhyInit                                   260C      94     148       1   NON_BANKED  
@@ -394,12 +397,12 @@ MODULE:                 -- PhyMC1320X_c.obj --
      cu8ChannelRegisterValues                  324F      20      32       2   .rodata     
      u8PARegisterValues                        326F      10      16       1   .rodata     
      radioConfiguration                        327F      24      36       2   .rodata     
-     mPhyState                                  593       1       1      16   .bss        
-     u16HREReg                                  594       2       2      11   .bss        
-     hREState                                   596       1       1       5   .bss        
-     mDrvRxPacket                               597       2       2       3   .bss        
-     mPhyRxParams                               599       2       2       2   .bss        
-     u8DataLength.17                            59B       1       1       5   .bss        
+     mPhyState                                  5A5       1       1      16   .bss        
+     u16HREReg                                  5A6       2       2      11   .bss        
+     hREState                                   5A8       1       1       5   .bss        
+     mDrvRxPacket                               5A9       2       2       3   .bss        
+     mPhyRxParams                               5AB       2       2       2   .bss        
+     u8DataLength.17                            5AD       1       1       5   .bss        
 MODULE:                 -- Radio_c.obj --
 - PROCEDURES:
      Radio_DriverInit                          2BAF      27      39       1   NON_BANKED  
@@ -413,88 +416,88 @@ MODULE:                 -- Radio_c.obj --
      RadioInitControlSignals                   2E0D      18      24       1   NON_BANKED  
      RadioProcess                              2E25      7D     125       6   NON_BANKED  
 - VARIABLES:
-     gu16RadioIrqStatus                         5C5       2       2       3   .common     
-     mRadioDriverState                          5C7       1       1      20   .common     
-     mpfRadioProcessCallback                    5C8       2       2       5   .common     
-     mpfRadioEventCallback                      5CA       2       2       2   .common     
-     mau8RadioDataBuffer                        5CC      80     128       3   .common     
-     mpu8RadioRxPointer                         64C       2       2       3   .common     
-     mau8RadioDataLength                        64E       1       1       4   .common     
-     mu16WrittingRegisterValue                  64F       2       2       2   .common     
-     mpu16ReadingRegisterPointer                651       2       2       2   .common     
-     mRadioProcessState                         653       1       1       9   .common     
+     gu16RadioIrqStatus                         5D7       2       2       3   .common     
+     mRadioDriverState                          5D9       1       1      20   .common     
+     mpfRadioProcessCallback                    5DA       2       2       5   .common     
+     mpfRadioEventCallback                      5DC       2       2       2   .common     
+     mau8RadioDataBuffer                        5DE      80     128       3   .common     
+     mpu8RadioRxPointer                         65E       2       2       3   .common     
+     mau8RadioDataLength                        660       1       1       4   .common     
+     mu16WrittingRegisterValue                  661       2       2       2   .common     
+     mpu16ReadingRegisterPointer                663       2       2       2   .common     
+     mRadioProcessState                         665       1       1       9   .common     
 MODULE:                 -- LVD_c.obj --
 - PROCEDURES:
      LowVoltageDetectIsr                       2EA2      23      35       1   NON_BANKED  
 - VARIABLES:
-     LvwCllbk                                   59C       2       2       1   .bss        
-     LvdCllbk                                   59E       2       2       1   .bss        
+     LvwCllbk                                   5AE       2       2       1   .bss        
+     LvdCllbk                                   5B0       2       2       1   .bss        
 MODULE:                 -- LED_c.obj --
 - PROCEDURES:
-     Led_PrintValue                            39FE      41      65       2   .text       
-     Led_OffAll                                3A3F      21      33       2   .text       
+     Led_PrintValue                            39EA      41      65       4   .text       
+     Led_OffAll                                3A2B      21      33       2   .text       
 - VARIABLES:
 MODULE:                 -- LCD_c.obj --
 - PROCEDURES:
-     Lcd_Init                                  3A60      95     149      20   .text       
-     Lcd_Config                                3AF5      59      89       6   .text       
-     LcdWriteCmd                               3B4E      18      24       8   .text       
-     LcdSetPort                                3B66      3B      59       4   .text       
+     Lcd_Init                                  3A4C      95     149      20   .text       
+     Lcd_Config                                3AE1      59      89       6   .text       
+     LcdWriteCmd                               3B3A      18      24       8   .text       
+     LcdSetPort                                3B52      3B      59       4   .text       
 - VARIABLES:
-     mLcdStatus                                 5A0       1       1       5   .bss        
-     mu8LcdString                               5A1       2       2       1   .bss        
-     mu8RsState                                 5A3       1       1       1   .bss        
-     mu8LcdStrFlag                              5A4       1       1       1   .bss        
-     mbLcdBlockingFlag                          5A5       1       1       2   .bss        
-     gpfLcdCallBack                             654       2       2       2   .common     
+     mLcdStatus                                 5B2       1       1       5   .bss        
+     mu8LcdString                               5B3       2       2       1   .bss        
+     mu8RsState                                 5B5       1       1       1   .bss        
+     mu8LcdStrFlag                              5B6       1       1       1   .bss        
+     mbLcdBlockingFlag                          5B7       1       1       2   .bss        
+     gpfLcdCallBack                             666       2       2       2   .common     
 MODULE:                 -- KBI_c.obj --
 - PROCEDURES:
-     Kbi_Config                                3BA1      40      64       2   .text       
-     Kbi_Init                                  3BE1      2F      47       2   .text       
-     Kbi_PortValue                             3C10      2B      43       4   .text       
+     Kbi_Config                                3B8D      40      64       2   .text       
+     Kbi_Init                                  3BCD      2F      47       2   .text       
+     Kbi_PortValue                             3BFC      2B      43       4   .text       
      KBI1_ISR                                  2EC5      21      33       1   NON_BANKED  
 - VARIABLES:
-     gpKbiControl                               309       4       4       1   .data       
-     pKbiCallback                               5A6       4       4       4   .bss        
+     gpKbiControl                               31A       4       4       1   .data       
+     pKbiCallback                               5B8       4       4       4   .bss        
 MODULE:                 -- IRQ_c.obj --
 - PROCEDURES:
-     IRQ_Init                                  3C3B       9       9       4   .text       
+     IRQ_Init                                  3C27       9       9       4   .text       
      IRQ_Isr                                   2EE6       B      11       1   NON_BANKED  
 - VARIABLES:
-     IrqCallBack                                5AA       2       2       2   .bss        
+     IrqCallBack                                5BC       2       2       2   .bss        
 MODULE:                 -- IIC_c.obj --
 - PROCEDURES:
      IIC_Isr                                   2EF1      85     133       1   NON_BANKED  
      iicFinishReadWrite                        2F76       B      11       1   NON_BANKED  
 - VARIABLES:
-     mIicState                                  5AC       1       1       3   .bss        
-     mpu8IicTxRxPointer                         5AD       2       2       6   .bss        
-     mu8IicDataCounter                          5AF       1       1       4   .bss        
-     mpfIicCallback                             5B0       2       2       1   .bss        
-     bIicDeviceAddressFlag                      5B2       1       1       2   .bss        
+     mIicState                                  5BE       1       1       3   .bss        
+     mpu8IicTxRxPointer                         5BF       2       2       6   .bss        
+     mu8IicDataCounter                          5C1       1       1       4   .bss        
+     mpfIicCallback                             5C2       2       2       1   .bss        
+     bIicDeviceAddressFlag                      5C4       1       1       2   .bss        
 MODULE:                 -- GPIO_c.obj --
 - PROCEDURES:
-     Gpio_Init                                 3C44      77     119       2   .text       
-     Gpio_PortWrite                            3CBB       B      11       2   .text       
-     Gpio_PinSet                               3CC6      1F      31      18   .text       
-     Gpio_PinClear                             3CE5      1F      31      30   .text       
-     Gpio_PinToggle                            3D04       9       9       4   .text       
+     Gpio_Init                                 3C30      77     119       2   .text       
+     Gpio_PortWrite                            3CA7       B      11       2   .text       
+     Gpio_PinSet                               3CB2      1F      31      18   .text       
+     Gpio_PinClear                             3CD1      1F      31      30   .text       
+     Gpio_PinToggle                            3CF0       9       9       4   .text       
 - VARIABLES:
      GpioDataHandling                          32A3      12      18       2   .rodata     
      GpioConfigPort                            32B5      1B      27       3   .rodata     
      GpioLogicConfig                           32D0       9       9       1   .rodata     
-     gpGpioPortData                             30D      12      18       7   .data       
-     gpGpioPullDown                             31F      12      18       1   .data       
-     gGpioPortLogic                             5B3       9       9       4   .bss        
+     gpGpioPortData                             31E      12      18       7   .data       
+     gpGpioPullDown                             330      12      18       1   .data       
+     gGpioPortLogic                             5C5       9       9       4   .bss        
 MODULE:                 -- Utilities_c.obj --
 - PROCEDURES:
-     Delay_ms                                  3D0D      46      70       4   .text       
-     Delay_us                                  3D53      38      56       6   .text       
+     Delay_ms                                  3CF9      46      70       4   .text       
+     Delay_us                                  3D3F      38      56       6   .text       
 - VARIABLES:
 MODULE:                 -- McuInit_c.obj --
 - PROCEDURES:
-     MCUInit                                   3D8B       B      11       2   .text       
-     MCU_UseExternalClock                      3D96       A      10       2   .text       
+     MCUInit                                   3D77       B      11       2   .text       
+     MCU_UseExternalClock                      3D82       A      10       2   .text       
 - VARIABLES:
 MODULE:                 -- Start08_c.obj --
 - PROCEDURES:
@@ -695,28 +698,28 @@ MODULE:                 -- vectortable_c.obj --
      ISR_vectors                               FFC0      3E      62       0   .abs_section_ffc0
 MODULE:                 -- OTAP_c.obj --
 - PROCEDURES:
-     Otap_OpcMain                              3DA0       1       1       2   .text       
-     Otap_OpcInit                              3DA1       1       1       2   .text       
+     Otap_OpcMain                              3D8C       1       1       2   .text       
+     Otap_OpcInit                              3D8D       1       1       2   .text       
 - VARIABLES:
 MODULE:                 -- main_c.obj --
 - PROCEDURES:
-     main                                      3DA2      22      34       2   .text       
-     InitProject                               3DC4      84     132       2   .text       
+     main                                      3D8E      22      34       2   .text       
+     InitProject                               3DB0      84     132       2   .text       
      UartTxCallback                            2F84       6       6       1   NON_BANKED  
      UartRxCallback                            2F8A      1D      29       1   NON_BANKED  
      KbiCallback                               2FA7      2B      43       1   NON_BANKED  
      LCDCallback                               2FD2       1       1       1   NON_BANKED  
 - VARIABLES:
      STRING........Generic.Demon.1             32D9      29      41       1   .rodata1    
-     KeyPressed                                 5BC       1       1       1   .bss        
-     bUartDataInFlag                            656       1       1       1   .common     
-     bUartTxDone                                657       1       1       1   .common     
-     UartData                                   658       1       1       1   .common     
-     portNumber                                 659       1       1       5   .common     
-     uartSettings                               65A       4       4       4   .common     
-     gKbiConfiguration                          65E       3       3       2   .common     
-     type                                       661       1       1       2   .common     
-     dest                                       662       1       1       2   .common     
+     KeyPressed                                 5CE       1       1       1   .bss        
+     bUartDataInFlag                            668       1       1       1   .common     
+     bUartTxDone                                669       1       1       1   .common     
+     UartData                                   66A       1       1       1   .common     
+     portNumber                                 66B       1       1       5   .common     
+     uartSettings                               66C       4       4       4   .common     
+     gKbiConfiguration                          670       3       3       2   .common     
+     type                                       673       1       1       2   .common     
+     dest                                       674       1       1       2   .common     
 MODULE:                 -- rtshc08.o (ansibim.lib) --
 - PROCEDURES:
      _PUSH_ARGS_L                              2FD3      20      32       2   NON_BANKED  
@@ -744,7 +747,7 @@ MODULE:                 -- rtshc08.o (ansibim.lib) --
 MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
-  uMac_c.obj                                 274    343      0
+  uMac_c.obj                                 292    323      0
   SMAC_c.obj                                  21   1174      0
   Timer_c.obj                                 48    240      0
   SPI_c.obj                                    6    429      0
@@ -766,7 +769,7 @@ MODULE STATISTIC
   OTAP_c.obj                                   0      2      0
   main_c.obj                                  14    245     41
   rtshc08.o (ansibim.lib)                      0    636      0
-  other                                      512     28     55
+  other                                      512     28     72
 
 *********************************************************************************************
 SECTION USE IN OBJECT-ALLOCATION SECTION
@@ -783,10 +786,10 @@ SECTION: ".text"
   Delay_us MCUInit MCU_UseExternalClock Otap_OpcMain Otap_OpcInit main 
   InitProject 
 SECTION: ".data"
-  uMacdest mu8TmrStartRegs maUartStartOfModule gpKbiControl gpGpioPortData 
-  gpGpioPullDown 
+  bToggle uMacdest Channels mu8TmrStartRegs maUartStartOfModule gpKbiControl 
+  gpGpioPortData gpGpioPullDown 
 SECTION: ".bss"
-  uMac_On uMac_Current_State gau8RxDataBuffer gau8TxDataBuffer AppTxPacket 
+  uMac_On i uMac_Current_State gau8RxDataBuffer gau8TxDataBuffer AppTxPacket 
   AppRxPacket uMac_RxPacket uMac_TxPacket smacTimeout smacChannelsBeingScanned 
   smacEdValue smacState smacLastDataRxParams smacCurrentChannel 
   smacScanCurrentChannel smacClearestChann pTestPacket smacProccesPacketPtr 
@@ -1300,92 +1303,95 @@ OBJECT LIST SORTED BY ADDRESS
      _LBP                                        7D       1       1       0   .abs_section_7d
      _LB                                         7E       1       1       0   .abs_section_7e
      _LAPAB                                      7F       1       1       0   .abs_section_7f
-     uMacdest                                   300       1       1       1   .data       
-     mu8TmrStartRegs                            301       6       6       1   .data       
-     maUartStartOfModule                        307       2       2       3   .data       
-     gpKbiControl                               309       4       4       1   .data       
-     gpGpioPortData                             30D      12      18       7   .data       
-     gpGpioPullDown                             31F      12      18       1   .data       
-     uMac_On                                    331       1       1       3   .bss        
-     uMac_Current_State                         332       1       1       3   .bss        
-     gau8RxDataBuffer                           333      82     130       1   .bss        
-     gau8TxDataBuffer                           3B5      80     128       2   .bss        
-     AppTxPacket                                435       2       2       4   .bss        
-     AppRxPacket                                437       2       2       4   .bss        
-     uMac_RxPacket                              439       2       2       2   .bss        
-     uMac_TxPacket                              43B       2       2       2   .bss        
-     smacTimeout                                43D       4       4       4   .bss        
-     smacChannelsBeingScanned                   441       2       2       2   .bss        
-     smacEdValue                                443       1       1       5   .bss        
-     smacState                                  444       1       1      16   .bss        
-     smacLastDataRxParams                       445       5       5       6   .bss        
-     smacCurrentChannel                         44A       1       1       4   .bss        
-     smacScanCurrentChannel                     44B       1       1       8   .bss        
-     smacClearestChann                          44C       1       1       5   .bss        
-     pTestPacket                                44D       2       2       1   .bss        
-     smacProccesPacketPtr                       44F       2       2      24   .bss        
-     mTmrCallbackFuncEvent                      451      2A      42      17   .bss        
-     mpu8SPI1Ptr                                47B       2       2       8   .bss        
-     mu8SPI1Counter                             47D       1       1       6   .bss        
-     mSPI1Status                                47E       1       1      18   .bss        
-     mSciModuleHwErrors                         47F       1       1       2   .bss        
-     mIsTxPending                               480       1       1       5   .bss        
-     mUartRxBuff                                481      40      64       3   .bss        
-     mUartTxBuff                                4C1      C8     200       2   .bss        
-     mUartRxBufferIndx                          589       2       2      13   .bss        
-     mUartTxBufferIndx                          58B       2       2       9   .bss        
-     mUartRxCbFn                                58D       2       2       5   .bss        
-     mUartTxCbFn                                58F       2       2       5   .bss        
-     mUartRxCbFlags                             591       1       1       2   .bss        
-     mUartTxNumOfFreeBytes                      592       1       1       2   .bss        
-     mPhyState                                  593       1       1      16   .bss        
-     u16HREReg                                  594       2       2      11   .bss        
-     hREState                                   596       1       1       5   .bss        
-     mDrvRxPacket                               597       2       2       3   .bss        
-     mPhyRxParams                               599       2       2       2   .bss        
-     u8DataLength.17                            59B       1       1       5   .bss        
-     LvwCllbk                                   59C       2       2       1   .bss        
-     LvdCllbk                                   59E       2       2       1   .bss        
-     mLcdStatus                                 5A0       1       1       5   .bss        
-     mu8LcdString                               5A1       2       2       1   .bss        
-     mu8RsState                                 5A3       1       1       1   .bss        
-     mu8LcdStrFlag                              5A4       1       1       1   .bss        
-     mbLcdBlockingFlag                          5A5       1       1       2   .bss        
-     pKbiCallback                               5A6       4       4       4   .bss        
-     IrqCallBack                                5AA       2       2       2   .bss        
-     mIicState                                  5AC       1       1       3   .bss        
-     mpu8IicTxRxPointer                         5AD       2       2       6   .bss        
-     mu8IicDataCounter                          5AF       1       1       4   .bss        
-     mpfIicCallback                             5B0       2       2       1   .bss        
-     bIicDeviceAddressFlag                      5B2       1       1       2   .bss        
-     gGpioPortLogic                             5B3       9       9       4   .bss        
-     KeyPressed                                 5BC       1       1       1   .bss        
-     bestChannel                                5BD       1       1       1   .common     
-     bScanDone                                  5BE       1       1       1   .common     
-     bTxDone                                    5BF       1       1       3   .common     
-     bRxDone                                    5C0       1       1       3   .common     
-     bDoTx                                      5C1       1       1       2   .common     
-     smacFlags                                  5C2       1       1      25   .common     
-     gpfSpi1CallBack                            5C3       2       2       4   .common     
-     gu16RadioIrqStatus                         5C5       2       2       3   .common     
-     mRadioDriverState                          5C7       1       1      20   .common     
-     mpfRadioProcessCallback                    5C8       2       2       5   .common     
-     mpfRadioEventCallback                      5CA       2       2       2   .common     
-     mau8RadioDataBuffer                        5CC      80     128       3   .common     
-     mpu8RadioRxPointer                         64C       2       2       3   .common     
-     mau8RadioDataLength                        64E       1       1       4   .common     
-     mu16WrittingRegisterValue                  64F       2       2       2   .common     
-     mpu16ReadingRegisterPointer                651       2       2       2   .common     
-     mRadioProcessState                         653       1       1       9   .common     
-     gpfLcdCallBack                             654       2       2       2   .common     
-     bUartDataInFlag                            656       1       1       1   .common     
-     bUartTxDone                                657       1       1       1   .common     
-     UartData                                   658       1       1       1   .common     
-     portNumber                                 659       1       1       5   .common     
-     uartSettings                               65A       4       4       4   .common     
-     gKbiConfiguration                          65E       3       3       2   .common     
-     type                                       661       1       1       2   .common     
-     dest                                       662       1       1       2   .common     
+     bToggle                                    300       1       1       2   .data       
+     uMacdest                                   301       1       1       1   .data       
+     Channels                                   302      10      16       1   .data       
+     mu8TmrStartRegs                            312       6       6       1   .data       
+     maUartStartOfModule                        318       2       2       3   .data       
+     gpKbiControl                               31A       4       4       1   .data       
+     gpGpioPortData                             31E      12      18       7   .data       
+     gpGpioPullDown                             330      12      18       1   .data       
+     uMac_On                                    342       1       1       3   .bss        
+     i                                          343       1       1       2   .bss        
+     uMac_Current_State                         344       1       1       4   .bss        
+     gau8RxDataBuffer                           345      82     130       1   .bss        
+     gau8TxDataBuffer                           3C7      80     128       2   .bss        
+     AppTxPacket                                447       2       2       4   .bss        
+     AppRxPacket                                449       2       2       4   .bss        
+     uMac_RxPacket                              44B       2       2       2   .bss        
+     uMac_TxPacket                              44D       2       2       2   .bss        
+     smacTimeout                                44F       4       4       4   .bss        
+     smacChannelsBeingScanned                   453       2       2       2   .bss        
+     smacEdValue                                455       1       1       5   .bss        
+     smacState                                  456       1       1      16   .bss        
+     smacLastDataRxParams                       457       5       5       6   .bss        
+     smacCurrentChannel                         45C       1       1       4   .bss        
+     smacScanCurrentChannel                     45D       1       1       8   .bss        
+     smacClearestChann                          45E       1       1       5   .bss        
+     pTestPacket                                45F       2       2       1   .bss        
+     smacProccesPacketPtr                       461       2       2      24   .bss        
+     mTmrCallbackFuncEvent                      463      2A      42      17   .bss        
+     mpu8SPI1Ptr                                48D       2       2       8   .bss        
+     mu8SPI1Counter                             48F       1       1       6   .bss        
+     mSPI1Status                                490       1       1      18   .bss        
+     mSciModuleHwErrors                         491       1       1       2   .bss        
+     mIsTxPending                               492       1       1       5   .bss        
+     mUartRxBuff                                493      40      64       3   .bss        
+     mUartTxBuff                                4D3      C8     200       2   .bss        
+     mUartRxBufferIndx                          59B       2       2      13   .bss        
+     mUartTxBufferIndx                          59D       2       2       9   .bss        
+     mUartRxCbFn                                59F       2       2       5   .bss        
+     mUartTxCbFn                                5A1       2       2       5   .bss        
+     mUartRxCbFlags                             5A3       1       1       2   .bss        
+     mUartTxNumOfFreeBytes                      5A4       1       1       2   .bss        
+     mPhyState                                  5A5       1       1      16   .bss        
+     u16HREReg                                  5A6       2       2      11   .bss        
+     hREState                                   5A8       1       1       5   .bss        
+     mDrvRxPacket                               5A9       2       2       3   .bss        
+     mPhyRxParams                               5AB       2       2       2   .bss        
+     u8DataLength.17                            5AD       1       1       5   .bss        
+     LvwCllbk                                   5AE       2       2       1   .bss        
+     LvdCllbk                                   5B0       2       2       1   .bss        
+     mLcdStatus                                 5B2       1       1       5   .bss        
+     mu8LcdString                               5B3       2       2       1   .bss        
+     mu8RsState                                 5B5       1       1       1   .bss        
+     mu8LcdStrFlag                              5B6       1       1       1   .bss        
+     mbLcdBlockingFlag                          5B7       1       1       2   .bss        
+     pKbiCallback                               5B8       4       4       4   .bss        
+     IrqCallBack                                5BC       2       2       2   .bss        
+     mIicState                                  5BE       1       1       3   .bss        
+     mpu8IicTxRxPointer                         5BF       2       2       6   .bss        
+     mu8IicDataCounter                          5C1       1       1       4   .bss        
+     mpfIicCallback                             5C2       2       2       1   .bss        
+     bIicDeviceAddressFlag                      5C4       1       1       2   .bss        
+     gGpioPortLogic                             5C5       9       9       4   .bss        
+     KeyPressed                                 5CE       1       1       1   .bss        
+     bestChannel                                5CF       1       1       1   .common     
+     bScanDone                                  5D0       1       1       1   .common     
+     bTxDone                                    5D1       1       1       4   .common     
+     bRxDone                                    5D2       1       1       3   .common     
+     bDoTx                                      5D3       1       1       2   .common     
+     smacFlags                                  5D4       1       1      25   .common     
+     gpfSpi1CallBack                            5D5       2       2       4   .common     
+     gu16RadioIrqStatus                         5D7       2       2       3   .common     
+     mRadioDriverState                          5D9       1       1      20   .common     
+     mpfRadioProcessCallback                    5DA       2       2       5   .common     
+     mpfRadioEventCallback                      5DC       2       2       2   .common     
+     mau8RadioDataBuffer                        5DE      80     128       3   .common     
+     mpu8RadioRxPointer                         65E       2       2       3   .common     
+     mau8RadioDataLength                        660       1       1       4   .common     
+     mu16WrittingRegisterValue                  661       2       2       2   .common     
+     mpu16ReadingRegisterPointer                663       2       2       2   .common     
+     mRadioProcessState                         665       1       1       9   .common     
+     gpfLcdCallBack                             666       2       2       2   .common     
+     bUartDataInFlag                            668       1       1       1   .common     
+     bUartTxDone                                669       1       1       1   .common     
+     UartData                                   66A       1       1       1   .common     
+     portNumber                                 66B       1       1       5   .common     
+     uartSettings                               66C       4       4       4   .common     
+     gKbiConfiguration                          670       3       3       2   .common     
+     type                                       673       1       1       2   .common     
+     dest                                       674       1       1       2   .common     
      _SRS                                      1800       1       1       1   .abs_section_1800
      _SBDFR                                    1801       1       1       0   .abs_section_1801
      _SOPT1                                    1802       1       1       1   .abs_section_1802
@@ -1567,51 +1573,51 @@ OBJECT LIST SORTED BY ADDRESS
      loadByte                                  3302       E      14       5   .init       
      Init                                      3310      72     114       1   .init       
      _Startup                                  3382       B      11       0   .init       
-     Init_uMac                                 338D      20      32       2   .text       
-     uMac_Engine                               33AD      E2     226       6   .text       
-     InitSmac                                  348F      3E      62       2   .text       
-     MCPSDataRequest                           34CD      4B      75       4   .text       
-     MLMERXEnableRequest                       3518      9A     154       2   .text       
-     MLMERadioInit                             35B2      61      97       2   .text       
-     MLMEFEGainAdjust                          3613       D      13       2   .text       
-     MLMESetChannelRequest                     3620      38      56       4   .text       
-     MLMEPAOutputAdjust                        3658      2C      44       2   .text       
-     MLMESetClockRate                          3684       4       4       2   .text       
-     MLMESetTmrPrescale                        3688      1C      28       2   .text       
-     SmacScanTheNextChannel                    36A4      60      96       6   .text       
-     SmacSetRxTimeout                          3704      27      39       4   .text       
-     SmacFormatTxPacket                        372B      29      41       2   .text       
-     Uart_Init                                 3754      A9     169       7   .text       
-     Uart_ClearErrors                          37FD      1B      27       2   .text       
-     Uart_Configure                            3818      82     130       2   .text       
-     Uart_GetBytesFromRxBuffer                 389A      AD     173       2   .text       
-     Uart_RegisterRxCallBack                   3947      2C      44       2   .text       
-     Uart_RegisterTxCallBack                   3973      30      48       2   .text       
-     Uart_BlockingStringTx                     39A3      33      51       2   .text       
-     Uart_BlockingByteTx                       39D6      28      40       2   .text       
-     Led_PrintValue                            39FE      41      65       2   .text       
-     Led_OffAll                                3A3F      21      33       2   .text       
-     Lcd_Init                                  3A60      95     149      20   .text       
-     Lcd_Config                                3AF5      59      89       6   .text       
-     LcdWriteCmd                               3B4E      18      24       8   .text       
-     LcdSetPort                                3B66      3B      59       4   .text       
-     Kbi_Config                                3BA1      40      64       2   .text       
-     Kbi_Init                                  3BE1      2F      47       2   .text       
-     Kbi_PortValue                             3C10      2B      43       4   .text       
-     IRQ_Init                                  3C3B       9       9       4   .text       
-     Gpio_Init                                 3C44      77     119       2   .text       
-     Gpio_PortWrite                            3CBB       B      11       2   .text       
-     Gpio_PinSet                               3CC6      1F      31      18   .text       
-     Gpio_PinClear                             3CE5      1F      31      30   .text       
-     Gpio_PinToggle                            3D04       9       9       4   .text       
-     Delay_ms                                  3D0D      46      70       4   .text       
-     Delay_us                                  3D53      38      56       6   .text       
-     MCUInit                                   3D8B       B      11       2   .text       
-     MCU_UseExternalClock                      3D96       A      10       2   .text       
-     Otap_OpcMain                              3DA0       1       1       2   .text       
-     Otap_OpcInit                              3DA1       1       1       2   .text       
-     main                                      3DA2      22      34       2   .text       
-     InitProject                               3DC4      84     132       2   .text       
+     Init_uMac                                 338D      1E      30       2   .text       
+     uMac_Engine                               33AB      D0     208       9   .text       
+     InitSmac                                  347B      3E      62       2   .text       
+     MCPSDataRequest                           34B9      4B      75       4   .text       
+     MLMERXEnableRequest                       3504      9A     154       2   .text       
+     MLMERadioInit                             359E      61      97       2   .text       
+     MLMEFEGainAdjust                          35FF       D      13       2   .text       
+     MLMESetChannelRequest                     360C      38      56       4   .text       
+     MLMEPAOutputAdjust                        3644      2C      44       2   .text       
+     MLMESetClockRate                          3670       4       4       2   .text       
+     MLMESetTmrPrescale                        3674      1C      28       2   .text       
+     SmacScanTheNextChannel                    3690      60      96       6   .text       
+     SmacSetRxTimeout                          36F0      27      39       4   .text       
+     SmacFormatTxPacket                        3717      29      41       2   .text       
+     Uart_Init                                 3740      A9     169       7   .text       
+     Uart_ClearErrors                          37E9      1B      27       2   .text       
+     Uart_Configure                            3804      82     130       2   .text       
+     Uart_GetBytesFromRxBuffer                 3886      AD     173       2   .text       
+     Uart_RegisterRxCallBack                   3933      2C      44       2   .text       
+     Uart_RegisterTxCallBack                   395F      30      48       2   .text       
+     Uart_BlockingStringTx                     398F      33      51       2   .text       
+     Uart_BlockingByteTx                       39C2      28      40       2   .text       
+     Led_PrintValue                            39EA      41      65       4   .text       
+     Led_OffAll                                3A2B      21      33       2   .text       
+     Lcd_Init                                  3A4C      95     149      20   .text       
+     Lcd_Config                                3AE1      59      89       6   .text       
+     LcdWriteCmd                               3B3A      18      24       8   .text       
+     LcdSetPort                                3B52      3B      59       4   .text       
+     Kbi_Config                                3B8D      40      64       2   .text       
+     Kbi_Init                                  3BCD      2F      47       2   .text       
+     Kbi_PortValue                             3BFC      2B      43       4   .text       
+     IRQ_Init                                  3C27       9       9       4   .text       
+     Gpio_Init                                 3C30      77     119       2   .text       
+     Gpio_PortWrite                            3CA7       B      11       2   .text       
+     Gpio_PinSet                               3CB2      1F      31      18   .text       
+     Gpio_PinClear                             3CD1      1F      31      30   .text       
+     Gpio_PinToggle                            3CF0       9       9       4   .text       
+     Delay_ms                                  3CF9      46      70       4   .text       
+     Delay_us                                  3D3F      38      56       6   .text       
+     MCUInit                                   3D77       B      11       2   .text       
+     MCU_UseExternalClock                      3D82       A      10       2   .text       
+     Otap_OpcMain                              3D8C       1       1       2   .text       
+     Otap_OpcInit                              3D8D       1       1       2   .text       
+     main                                      3D8E      22      34       2   .text       
+     InitProject                               3DB0      84     132       2   .text       
      ISR_vectors                               FFC0      3E      62       0   .abs_section_ffc0
 
 *********************************************************************************************
@@ -1681,7 +1687,7 @@ rtshc08.o (ansibim.lib):
   _POP_CC _CONV_FAR_TO_NEAR _CONV_FAR_TO_LINEAR _CONV_LINEAR_TO_FAR 
 NOT USED VARIABLES
 uMac_c.obj:
-  uMactype 
+  ChannelsToScan uMactype ChannelsEnergy 
 SMAC_c.obj:
   au8SmacVersion u8TestBuffer 
 Timer_c.obj:
@@ -1711,38 +1717,45 @@ rtshc08.o (ansibim.lib):
 *********************************************************************************************
 COPYDOWN SECTION
 ---------------------------------------------------------------------------------------------
-------- ROM-ADDRESS: 0x3E48 ---- SIZE       4 ---
+------- ROM-ADDRESS: 0x3E34 ---- SIZE       4 ---
 Filling bytes inserted
- 00310300
-------- ROM-ADDRESS: 0x3E4C ---- RAM-ADDRESS: 0x300 ---- SIZE       1 ---
+ 00420300
+------- ROM-ADDRESS: 0x3E38 ---- RAM-ADDRESS: 0x300 ---- SIZE       1 ---
+Name of initialized Object : bToggle
+ 01
+------- ROM-ADDRESS: 0x3E39 ---- RAM-ADDRESS: 0x301 ---- SIZE       1 ---
 Name of initialized Object : uMacdest
  01
-------- ROM-ADDRESS: 0x3E4D ---- SIZE       1 ---
+------- ROM-ADDRESS: 0x3E3A ---- RAM-ADDRESS: 0x302 ---- SIZE      16 ---
+Name of initialized Object : Channels
+ 0B0C0D0E0F 1011121314 1516171819
+ 1A
+------- ROM-ADDRESS: 0x3E4A ---- SIZE       1 ---
 Filling bytes inserted
  00
-------- ROM-ADDRESS: 0x3E4E ---- RAM-ADDRESS: 0x302 ---- SIZE       5 ---
+------- ROM-ADDRESS: 0x3E4B ---- RAM-ADDRESS: 0x313 ---- SIZE       5 ---
 Name of initialized Object : mu8TmrStartRegs:1
  4000500060
-------- ROM-ADDRESS: 0x3E53 ---- RAM-ADDRESS: 0x307 ---- SIZE       2 ---
+------- ROM-ADDRESS: 0x3E50 ---- RAM-ADDRESS: 0x318 ---- SIZE       2 ---
 Name of initialized Object : maUartStartOfModule
  1870
-------- ROM-ADDRESS: 0x3E55 ---- SIZE       1 ---
+------- ROM-ADDRESS: 0x3E52 ---- SIZE       1 ---
 Filling bytes inserted
  00
-------- ROM-ADDRESS: 0x3E56 ---- RAM-ADDRESS: 0x30A ---- SIZE       3 ---
+------- ROM-ADDRESS: 0x3E53 ---- RAM-ADDRESS: 0x31B ---- SIZE       3 ---
 Name of initialized Object : gpKbiControl:1
  0C003C
-------- ROM-ADDRESS: 0x3E59 ---- SIZE       3 ---
+------- ROM-ADDRESS: 0x3E56 ---- SIZE       3 ---
 Filling bytes inserted
  000000
-------- ROM-ADDRESS: 0x3E5C ---- RAM-ADDRESS: 0x310 ---- SIZE      15 ---
+------- ROM-ADDRESS: 0x3E59 ---- RAM-ADDRESS: 0x321 ---- SIZE      15 ---
 Name of initialized Object : gpGpioPortData:3
  0200040006 0008000A00 1C001E002E
-------- ROM-ADDRESS: 0x3E6B ---- RAM-ADDRESS: 0x31F ---- SIZE      18 ---
+------- ROM-ADDRESS: 0x3E68 ---- RAM-ADDRESS: 0x330 ---- SIZE      18 ---
 Name of initialized Object : gpGpioPullDown
  1840184418 48184C1850 1854185818
  5C1860
-------- ROM-ADDRESS: 0x3E7D ---- SIZE       2 ---
+------- ROM-ADDRESS: 0x3E7A ---- SIZE       2 ---
 Filling bytes inserted
  0000
 
@@ -1893,12 +1906,13 @@ _LLSL                     USES _ENTER_UNARY_L
 _LCMP                     USES _ENTER_BINARY_L _LCMP_k_rel_j 
 Init                      USES _startupData loadByte 
 _Startup                  USES __SEG_END_SSTACK Init main 
-Init_uMac                 USES Led_PrintValue uMac_On AppRxPacket 
-                                uMac_RxPacket AppTxPacket uMac_TxPacket uMac_Current_State 
-uMac_Engine               USES uMac_Current_State uMac_On InitSmac 
-                                MLMESetChannelRequest uMacdest uMac_TxPacket AppTxPacket 
-                                MCPSDataRequest uMac_Engine bRxDone AppRxPacket uMac_RxPacket 
-                                bDoTx bTxDone MLMERXEnableRequest 
+Init_uMac                 USES uMac_On InitSmac AppRxPacket uMac_RxPacket 
+                                AppTxPacket uMac_TxPacket uMac_Current_State 
+uMac_Engine               USES uMac_Current_State uMac_Engine uMac_On i 
+                                Channels MLMESetChannelRequest uMacdest uMac_TxPacket 
+                                AppTxPacket MCPSDataRequest bTxDone bRxDone AppRxPacket 
+                                uMac_RxPacket bToggle Led_PrintValue bDoTx 
+                                MLMERXEnableRequest 
 InitSmac                  USES gau8TxDataBuffer AppTxPacket gau8RxDataBuffer 
                                 AppRxPacket MLMERadioInit MLMESetClockRate 
                                 MCU_UseExternalClock MLMESetTmrPrescale MLMESetChannelRequest 
@@ -2081,14 +2095,302 @@ DEPENDENCY TREE
  |  |       
  |  +- Init_uMac           
  |  |  | 
- |  |  +- Led_PrintValue      
+ |  |  +- InitSmac            
  |  |     | 
- |  |     +- Led_OffAll          
+ |  |     +- MLMERadioInit       
  |  |     |  | 
- |  |     |  +- Gpio_PinClear        (see above)
+ |  |     |  +- PhyInit             
+ |  |     |  |  | 
+ |  |     |  |  +- PhyRadioEvent       
+ |  |     |  |  |  | 
+ |  |     |  |  |  +- Gpio_PinClear        (see above)
+ |  |     |  |  |  |  
+ |  |     |  |  |  +- PhyHandlingRadioEvents (recursive dependency)
+ |  |     |  |  |  |  | 
+ |  |     |  |  |  |  +- Radio_ReadRegister  
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- RadioProcess        
+ |  |     |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  +- SPI1_WriteString    
+ |  |     |  |  |  |  |  |  |    
+ |  |     |  |  |  |  |  |  +- SPI1_ReadString     
+ |  |     |  |  |  |  |  |  |    
+ |  |     |  |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin
+ |  |     |  |  |  |  |  |     | 
+ |  |     |  |  |  |  |  |     +- Gpio_PinClear        (see above)
+ |  |     |  |  |  |  |  |        
+ |  |     |  |  |  |  |  +- SPI1_AssertPeripheralSsPin
+ |  |     |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  +- Gpio_PinSet          (see above)
+ |  |     |  |  |  |  |  |     
+ |  |     |  |  |  |  |  +- SPI1_WriteByte      
+ |  |     |  |  |  |  |     | 
+ |  |     |  |  |  |  |     +- SPI1_WriteString     (see above)
+ |  |     |  |  |  |  |        
+ |  |     |  |  |  |  +- PhyPlmeWakeComfirm  
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- MLMEWakeComfirm     
+ |  |     |  |  |  |  |       
+ |  |     |  |  |  |  +- PhyPlmeResetIndication
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- MLMEResetIndication 
+ |  |     |  |  |  |  |       
+ |  |     |  |  |  |  +- PhyTimeRxTimeoutIndication
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- MCPSDataIndication  
+ |  |     |  |  |  |  |       
+ |  |     |  |  |  |  +- PhyPlmeEdConfirm    
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- SmacScanTheNextChannel
+ |  |     |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  +- _ILSL               
+ |  |     |  |  |  |  |  |  |    
+ |  |     |  |  |  |  |  |  +- PhyPlmeSetCurrentChannelRequest
+ |  |     |  |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  |  +- Radio_WriteRegisterBlocking
+ |  |     |  |  |  |  |  |  |     | 
+ |  |     |  |  |  |  |  |  |     +- RadioProcess         (see above)
+ |  |     |  |  |  |  |  |  |     |  
+ |  |     |  |  |  |  |  |  |     +- SPI1_AssertPeripheralSsPin (see above)
+ |  |     |  |  |  |  |  |  |     |  
+ |  |     |  |  |  |  |  |  |     +- SPI1_WriteByteBlocking
+ |  |     |  |  |  |  |  |  |     |    
+ |  |     |  |  |  |  |  |  |     +- SPI1_WriteStringBlocking
+ |  |     |  |  |  |  |  |  |     |  | 
+ |  |     |  |  |  |  |  |  |     |  +- SPI1_WriteByteBlocking (see above)
+ |  |     |  |  |  |  |  |  |     |     
+ |  |     |  |  |  |  |  |  |     +- SPI1_DeassertPeripheralSsPin (see above)
+ |  |     |  |  |  |  |  |  |        
+ |  |     |  |  |  |  |  |  +- PhyPlmeCcaEdRequest 
+ |  |     |  |  |  |  |  |     | 
+ |  |     |  |  |  |  |  |     +- Radio_ReadRegisterBlocking
+ |  |     |  |  |  |  |  |     |  | 
+ |  |     |  |  |  |  |  |     |  +- RadioProcess         (see above)
+ |  |     |  |  |  |  |  |     |  |  
+ |  |     |  |  |  |  |  |     |  +- SPI1_AssertPeripheralSsPin (see above)
+ |  |     |  |  |  |  |  |     |  |  
+ |  |     |  |  |  |  |  |     |  +- SPI1_WriteByteBlocking (see above)
+ |  |     |  |  |  |  |  |     |  |  
+ |  |     |  |  |  |  |  |     |  +- SPI1_ReadStringBlocking
+ |  |     |  |  |  |  |  |     |  |  | 
+ |  |     |  |  |  |  |  |     |  |  +- SPI1_ReadByteBlocking
+ |  |     |  |  |  |  |  |     |  |       
+ |  |     |  |  |  |  |  |     |  +- SPI1_DeassertPeripheralSsPin (see above)
+ |  |     |  |  |  |  |  |     |     
+ |  |     |  |  |  |  |  |     +- Radio_WriteRegisterBlocking (see above)
+ |  |     |  |  |  |  |  |     |  
+ |  |     |  |  |  |  |  |     +- PhySetTrxStateRequest
+ |  |     |  |  |  |  |  |        | 
+ |  |     |  |  |  |  |  |        +- Gpio_PinClear        (see above)
+ |  |     |  |  |  |  |  |        |  
+ |  |     |  |  |  |  |  |        +- Radio_ReadRegisterBlocking (see above)
+ |  |     |  |  |  |  |  |        |  
+ |  |     |  |  |  |  |  |        +- Radio_WriteRegisterBlocking (see above)
+ |  |     |  |  |  |  |  |        |  
+ |  |     |  |  |  |  |  |        +- Gpio_PinSet          (see above)
+ |  |     |  |  |  |  |  |           
+ |  |     |  |  |  |  |  +- MLMEScanComfirm     
+ |  |     |  |  |  |  |  |    
+ |  |     |  |  |  |  |  +- PhyPlmeSetCurrentChannelRequest (see above)
+ |  |     |  |  |  |  |     
+ |  |     |  |  |  |  +- Gpio_PinSet          (see above)
+ |  |     |  |  |  |  |  
+ |  |     |  |  |  |  +- PhyHREventsReStartSequense (recursive dependency)
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- PhyHandlingRadioEvents (see above) (recursive dependency)
+ |  |     |  |  |  |  |  |  
+ |  |     |  |  |  |  |  +- Radio_ReadRegister   (see above)
+ |  |     |  |  |  |  |     
+ |  |     |  |  |  |  +- Radio_ReadRxBuffer  
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- RadioProcess         (see above)
+ |  |     |  |  |  |  |  |  
+ |  |     |  |  |  |  |  +- SPI1_AssertPeripheralSsPin (see above)
+ |  |     |  |  |  |  |  |  
+ |  |     |  |  |  |  |  +- SPI1_WriteByte       (see above)
+ |  |     |  |  |  |  |  |  
+ |  |     |  |  |  |  |  +- SPI1_WriteByteBlocking (see above)
+ |  |     |  |  |  |  |  |  
+ |  |     |  |  |  |  |  +- SPI1_ReadStringBlocking (see above)
+ |  |     |  |  |  |  |  |  
+ |  |     |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin (see above)
+ |  |     |  |  |  |  |     
+ |  |     |  |  |  |  +- PhyChangePacketEndianess
+ |  |     |  |  |  |  |    
+ |  |     |  |  |  |  +- PhyPdDataIndication 
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- PhyPlmeRxRequest    
+ |  |     |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  +- PhySetTrxStateRequest (see above)
+ |  |     |  |  |  |  |  |     
+ |  |     |  |  |  |  |  +- SmacSetRxTimeout    
+ |  |     |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  +- PhyTimeReadClock    
+ |  |     |  |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  |  +- Radio_ReadRegisterBlocking (see above)
+ |  |     |  |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  |  +- _LLSL                (see above)
+ |  |     |  |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  |  +- _POP32              
+ |  |     |  |  |  |  |  |  |  |    
+ |  |     |  |  |  |  |  |  |  +- _LADD               
+ |  |     |  |  |  |  |  |  |     | 
+ |  |     |  |  |  |  |  |  |     +- _ENTER_BINARY_L      (see above)
+ |  |     |  |  |  |  |  |  |     |  
+ |  |     |  |  |  |  |  |  |     +- _LADD_k_is_k_plus_j 
+ |  |     |  |  |  |  |  |  |          
+ |  |     |  |  |  |  |  |  +- _LADD_RC            
+ |  |     |  |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  |  +- _ENTER_BINARY_L_RC   (see above)
+ |  |     |  |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  |  +- _LADD_k_is_k_plus_j  (see above)
+ |  |     |  |  |  |  |  |  |     
+ |  |     |  |  |  |  |  |  +- _LADD                (see above)
+ |  |     |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  +- _POP32               (see above)
+ |  |     |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  +- PhyTimeSetEventTimeout
+ |  |     |  |  |  |  |  |     | 
+ |  |     |  |  |  |  |  |     +- Radio_WriteRegisterBlocking (see above)
+ |  |     |  |  |  |  |  |        
+ |  |     |  |  |  |  |  +- PhyTimeDisableEventTimeout
+ |  |     |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  +- Radio_WriteRegisterBlocking (see above)
+ |  |     |  |  |  |  |  |     
+ |  |     |  |  |  |  |  +- MCPSDataIndication   (see above)
+ |  |     |  |  |  |  |     
+ |  |     |  |  |  |  +- Radio_WriteRegister 
+ |  |     |  |  |  |     | 
+ |  |     |  |  |  |     +- RadioProcess         (see above)
+ |  |     |  |  |  |     |  
+ |  |     |  |  |  |     +- SPI1_AssertPeripheralSsPin (see above)
+ |  |     |  |  |  |     |  
+ |  |     |  |  |  |     +- SPI1_WriteByte       (see above)
+ |  |     |  |  |  |        
+ |  |     |  |  |  +- Radio_ReadRegister   (see above)
+ |  |     |  |  |  |  
+ |  |     |  |  |  +- PhyPlmeSyncLossIndication
+ |  |     |  |  |  |  | 
+ |  |     |  |  |  |  +- PhyPlmeRxRequest     (see above)
+ |  |     |  |  |  |  |  
+ |  |     |  |  |  |  +- PhyTimeDisableEventTimeout (see above)
+ |  |     |  |  |  |  |  
+ |  |     |  |  |  |  +- MCPSDataIndication   (see above)
+ |  |     |  |  |  |  |  
+ |  |     |  |  |  |  +- PhyPdDataRequest    
+ |  |     |  |  |  |  |  | 
+ |  |     |  |  |  |  |  +- Radio_ReadRegisterBlocking (see above)
+ |  |     |  |  |  |  |  |  
+ |  |     |  |  |  |  |  +- Radio_WriteRegisterBlocking (see above)
+ |  |     |  |  |  |  |  |  
+ |  |     |  |  |  |  |  +- Radio_WriteTxBuffer 
+ |  |     |  |  |  |  |  |  | 
+ |  |     |  |  |  |  |  |  +- RadioProcess         (see above)
+ |  |     |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  +- SPI1_AssertPeripheralSsPin (see above)
+ |  |     |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  +- SPI1_WriteByte       (see above)
+ |  |     |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  +- SPI1_WriteByteBlocking (see above)
+ |  |     |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  +- SPI1_WriteStringBlocking (see above)
+ |  |     |  |  |  |  |  |  |  
+ |  |     |  |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin (see above)
+ |  |     |  |  |  |  |  |     
+ |  |     |  |  |  |  |  +- PhySetTrxStateRequest (see above)
+ |  |     |  |  |  |  |     
+ |  |     |  |  |  |  +- SmacScanTheNextChannel (see above)
+ |  |     |  |  |  |  |  
+ |  |     |  |  |  |  +- PhyPlmeCcaEdRequest  (see above)
+ |  |     |  |  |  |     
+ |  |     |  |  |  +- PhyPdDataConfirm    
+ |  |     |  |  |  |  | 
+ |  |     |  |  |  |  +- MCPSDataComfirm     
+ |  |     |  |  |  |  |    
+ |  |     |  |  |  |  +- PhyPdDataRequest     (see above)
+ |  |     |  |  |  |     
+ |  |     |  |  |  +- PhyPlmeCcaConfirm   
+ |  |     |  |  |  |  | 
+ |  |     |  |  |  |  +- SmacScanTheNextChannel (see above)
+ |  |     |  |  |  |  |  
+ |  |     |  |  |  |  +- PhyPlmeSetCurrentChannelRequest (see above)
+ |  |     |  |  |  |  |  
+ |  |     |  |  |  |  +- MLMEScanComfirm      (see above)
+ |  |     |  |  |  |     
+ |  |     |  |  |  +- PhyHREventsReStartSequense (see above) (recursive dependency)
+ |  |     |  |  |  |  
+ |  |     |  |  |  +- Radio_WriteRegister  (see above)
+ |  |     |  |  |     
+ |  |     |  |  +- Radio_DriverInit    
+ |  |     |  |  |  | 
+ |  |     |  |  |  +- RadioIRQServiceRoutine
+ |  |     |  |  |  |  | 
+ |  |     |  |  |  |  +- Radio_ReadRegister   (see above)
+ |  |     |  |  |  |     
+ |  |     |  |  |  +- IRQ_Init             (see above)
+ |  |     |  |  |  |  
+ |  |     |  |  |  +- RadioInitControlSignals
+ |  |     |  |  |     | 
+ |  |     |  |  |     +- Gpio_PinClear        (see above)
+ |  |     |  |  |     |  
+ |  |     |  |  |     +- Gpio_PinSet          (see above)
+ |  |     |  |  |        
+ |  |     |  |  +- Gpio_PinClear        (see above)
+ |  |     |  |  |  
+ |  |     |  |  +- Radio_ReadRegisterBlocking (see above)
+ |  |     |  |  |  
+ |  |     |  |  +- Radio_WriteRegisterBlocking (see above)
+ |  |     |  |     
+ |  |     |  +- PhyPlmeSetCurrentChannelRequest (see above)
+ |  |     |  |  
+ |  |     |  +- PhyPlmeSetPwrLevelRequest
+ |  |     |  |  | 
+ |  |     |  |  +- Radio_ReadRegisterBlocking (see above)
+ |  |     |  |  |  
+ |  |     |  |  +- Radio_WriteRegisterBlocking (see above)
+ |  |     |  |     
+ |  |     |  +- PhyPpSetCcaThreshold
+ |  |     |  |  | 
+ |  |     |  |  +- Radio_ReadRegisterBlocking (see above)
+ |  |     |  |  |  
+ |  |     |  |  +- Radio_WriteRegisterBlocking (see above)
+ |  |     |  |     
+ |  |     |  +- PhyPpSetPromiscuous 
+ |  |     |       
+ |  |     +- MLMESetClockRate    
+ |  |     |  | 
+ |  |     |  +- PhyPlmeSetClockOutRate
+ |  |     |     | 
+ |  |     |     +- Radio_ReadRegisterBlocking (see above)
+ |  |     |     |  
+ |  |     |     +- Radio_WriteRegisterBlocking (see above)
+ |  |     |        
+ |  |     +- MCU_UseExternalClock
+ |  |     |    
+ |  |     +- MLMESetTmrPrescale  
+ |  |     |  | 
+ |  |     |  +- PhySetRadioTimerPrescaler
+ |  |     |     | 
+ |  |     |     +- Radio_ReadRegisterBlocking (see above)
+ |  |     |     |  
+ |  |     |     +- Radio_WriteRegisterBlocking (see above)
+ |  |     |        
+ |  |     +- MLMESetChannelRequest
+ |  |     |  | 
+ |  |     |  +- PhyPlmeSetCurrentChannelRequest (see above)
  |  |     |     
- |  |     +- Gpio_PinSet          (see above)
- |  |        
+ |  |     +- MLMEPAOutputAdjust  
+ |  |     |  | 
+ |  |     |  +- PhyPlmeSetPwrLevelRequest (see above)
+ |  |     |     
+ |  |     +- MLMEFEGainAdjust    
+ |  |        | 
+ |  |        +- PhyAdjustCcaOffsetCmp
+ |  |           | 
+ |  |           +- Radio_ReadRegisterBlocking (see above)
+ |  |           |  
+ |  |           +- Radio_WriteRegisterBlocking (see above)
+ |  |              
  |  +- Uart_BlockingStringTx
  |  |  | 
  |  |  +- Uart_BlockingByteTx 
@@ -2097,302 +2399,6 @@ DEPENDENCY TREE
  |  |    
  |  +- uMac_Engine         
  |     | 
- |     +- InitSmac            
- |     |  | 
- |     |  +- MLMERadioInit       
- |     |  |  | 
- |     |  |  +- PhyInit             
- |     |  |  |  | 
- |     |  |  |  +- PhyRadioEvent       
- |     |  |  |  |  | 
- |     |  |  |  |  +- Gpio_PinClear        (see above)
- |     |  |  |  |  |  
- |     |  |  |  |  +- PhyHandlingRadioEvents (recursive dependency)
- |     |  |  |  |  |  | 
- |     |  |  |  |  |  +- Radio_ReadRegister  
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- RadioProcess        
- |     |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  +- SPI1_WriteString    
- |     |  |  |  |  |  |  |  |    
- |     |  |  |  |  |  |  |  +- SPI1_ReadString     
- |     |  |  |  |  |  |  |  |    
- |     |  |  |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin
- |     |  |  |  |  |  |  |     | 
- |     |  |  |  |  |  |  |     +- Gpio_PinClear        (see above)
- |     |  |  |  |  |  |  |        
- |     |  |  |  |  |  |  +- SPI1_AssertPeripheralSsPin
- |     |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  +- Gpio_PinSet          (see above)
- |     |  |  |  |  |  |  |     
- |     |  |  |  |  |  |  +- SPI1_WriteByte      
- |     |  |  |  |  |  |     | 
- |     |  |  |  |  |  |     +- SPI1_WriteString     (see above)
- |     |  |  |  |  |  |        
- |     |  |  |  |  |  +- PhyPlmeWakeComfirm  
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- MLMEWakeComfirm     
- |     |  |  |  |  |  |       
- |     |  |  |  |  |  +- PhyPlmeResetIndication
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- MLMEResetIndication 
- |     |  |  |  |  |  |       
- |     |  |  |  |  |  +- PhyTimeRxTimeoutIndication
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- MCPSDataIndication  
- |     |  |  |  |  |  |       
- |     |  |  |  |  |  +- PhyPlmeEdConfirm    
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- SmacScanTheNextChannel
- |     |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  +- _ILSL               
- |     |  |  |  |  |  |  |  |    
- |     |  |  |  |  |  |  |  +- PhyPlmeSetCurrentChannelRequest
- |     |  |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  |  +- Radio_WriteRegisterBlocking
- |     |  |  |  |  |  |  |  |     | 
- |     |  |  |  |  |  |  |  |     +- RadioProcess         (see above)
- |     |  |  |  |  |  |  |  |     |  
- |     |  |  |  |  |  |  |  |     +- SPI1_AssertPeripheralSsPin (see above)
- |     |  |  |  |  |  |  |  |     |  
- |     |  |  |  |  |  |  |  |     +- SPI1_WriteByteBlocking
- |     |  |  |  |  |  |  |  |     |    
- |     |  |  |  |  |  |  |  |     +- SPI1_WriteStringBlocking
- |     |  |  |  |  |  |  |  |     |  | 
- |     |  |  |  |  |  |  |  |     |  +- SPI1_WriteByteBlocking (see above)
- |     |  |  |  |  |  |  |  |     |     
- |     |  |  |  |  |  |  |  |     +- SPI1_DeassertPeripheralSsPin (see above)
- |     |  |  |  |  |  |  |  |        
- |     |  |  |  |  |  |  |  +- PhyPlmeCcaEdRequest 
- |     |  |  |  |  |  |  |     | 
- |     |  |  |  |  |  |  |     +- Radio_ReadRegisterBlocking
- |     |  |  |  |  |  |  |     |  | 
- |     |  |  |  |  |  |  |     |  +- RadioProcess         (see above)
- |     |  |  |  |  |  |  |     |  |  
- |     |  |  |  |  |  |  |     |  +- SPI1_AssertPeripheralSsPin (see above)
- |     |  |  |  |  |  |  |     |  |  
- |     |  |  |  |  |  |  |     |  +- SPI1_WriteByteBlocking (see above)
- |     |  |  |  |  |  |  |     |  |  
- |     |  |  |  |  |  |  |     |  +- SPI1_ReadStringBlocking
- |     |  |  |  |  |  |  |     |  |  | 
- |     |  |  |  |  |  |  |     |  |  +- SPI1_ReadByteBlocking
- |     |  |  |  |  |  |  |     |  |       
- |     |  |  |  |  |  |  |     |  +- SPI1_DeassertPeripheralSsPin (see above)
- |     |  |  |  |  |  |  |     |     
- |     |  |  |  |  |  |  |     +- Radio_WriteRegisterBlocking (see above)
- |     |  |  |  |  |  |  |     |  
- |     |  |  |  |  |  |  |     +- PhySetTrxStateRequest
- |     |  |  |  |  |  |  |        | 
- |     |  |  |  |  |  |  |        +- Gpio_PinClear        (see above)
- |     |  |  |  |  |  |  |        |  
- |     |  |  |  |  |  |  |        +- Radio_ReadRegisterBlocking (see above)
- |     |  |  |  |  |  |  |        |  
- |     |  |  |  |  |  |  |        +- Radio_WriteRegisterBlocking (see above)
- |     |  |  |  |  |  |  |        |  
- |     |  |  |  |  |  |  |        +- Gpio_PinSet          (see above)
- |     |  |  |  |  |  |  |           
- |     |  |  |  |  |  |  +- MLMEScanComfirm     
- |     |  |  |  |  |  |  |    
- |     |  |  |  |  |  |  +- PhyPlmeSetCurrentChannelRequest (see above)
- |     |  |  |  |  |  |     
- |     |  |  |  |  |  +- Gpio_PinSet          (see above)
- |     |  |  |  |  |  |  
- |     |  |  |  |  |  +- PhyHREventsReStartSequense (recursive dependency)
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- PhyHandlingRadioEvents (see above) (recursive dependency)
- |     |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  +- Radio_ReadRegister   (see above)
- |     |  |  |  |  |  |     
- |     |  |  |  |  |  +- Radio_ReadRxBuffer  
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- RadioProcess         (see above)
- |     |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  +- SPI1_AssertPeripheralSsPin (see above)
- |     |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  +- SPI1_WriteByte       (see above)
- |     |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  +- SPI1_WriteByteBlocking (see above)
- |     |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  +- SPI1_ReadStringBlocking (see above)
- |     |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin (see above)
- |     |  |  |  |  |  |     
- |     |  |  |  |  |  +- PhyChangePacketEndianess
- |     |  |  |  |  |  |    
- |     |  |  |  |  |  +- PhyPdDataIndication 
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- PhyPlmeRxRequest    
- |     |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  +- PhySetTrxStateRequest (see above)
- |     |  |  |  |  |  |  |     
- |     |  |  |  |  |  |  +- SmacSetRxTimeout    
- |     |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  +- PhyTimeReadClock    
- |     |  |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  |  +- Radio_ReadRegisterBlocking (see above)
- |     |  |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  |  +- _LLSL                (see above)
- |     |  |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  |  +- _POP32              
- |     |  |  |  |  |  |  |  |  |    
- |     |  |  |  |  |  |  |  |  +- _LADD               
- |     |  |  |  |  |  |  |  |     | 
- |     |  |  |  |  |  |  |  |     +- _ENTER_BINARY_L      (see above)
- |     |  |  |  |  |  |  |  |     |  
- |     |  |  |  |  |  |  |  |     +- _LADD_k_is_k_plus_j 
- |     |  |  |  |  |  |  |  |          
- |     |  |  |  |  |  |  |  +- _LADD_RC            
- |     |  |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  |  +- _ENTER_BINARY_L_RC   (see above)
- |     |  |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  |  +- _LADD_k_is_k_plus_j  (see above)
- |     |  |  |  |  |  |  |  |     
- |     |  |  |  |  |  |  |  +- _LADD                (see above)
- |     |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  +- _POP32               (see above)
- |     |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  +- PhyTimeSetEventTimeout
- |     |  |  |  |  |  |  |     | 
- |     |  |  |  |  |  |  |     +- Radio_WriteRegisterBlocking (see above)
- |     |  |  |  |  |  |  |        
- |     |  |  |  |  |  |  +- PhyTimeDisableEventTimeout
- |     |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  +- Radio_WriteRegisterBlocking (see above)
- |     |  |  |  |  |  |  |     
- |     |  |  |  |  |  |  +- MCPSDataIndication   (see above)
- |     |  |  |  |  |  |     
- |     |  |  |  |  |  +- Radio_WriteRegister 
- |     |  |  |  |  |     | 
- |     |  |  |  |  |     +- RadioProcess         (see above)
- |     |  |  |  |  |     |  
- |     |  |  |  |  |     +- SPI1_AssertPeripheralSsPin (see above)
- |     |  |  |  |  |     |  
- |     |  |  |  |  |     +- SPI1_WriteByte       (see above)
- |     |  |  |  |  |        
- |     |  |  |  |  +- Radio_ReadRegister   (see above)
- |     |  |  |  |  |  
- |     |  |  |  |  +- PhyPlmeSyncLossIndication
- |     |  |  |  |  |  | 
- |     |  |  |  |  |  +- PhyPlmeRxRequest     (see above)
- |     |  |  |  |  |  |  
- |     |  |  |  |  |  +- PhyTimeDisableEventTimeout (see above)
- |     |  |  |  |  |  |  
- |     |  |  |  |  |  +- MCPSDataIndication   (see above)
- |     |  |  |  |  |  |  
- |     |  |  |  |  |  +- PhyPdDataRequest    
- |     |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  +- Radio_ReadRegisterBlocking (see above)
- |     |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  +- Radio_WriteRegisterBlocking (see above)
- |     |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  +- Radio_WriteTxBuffer 
- |     |  |  |  |  |  |  |  | 
- |     |  |  |  |  |  |  |  +- RadioProcess         (see above)
- |     |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  +- SPI1_AssertPeripheralSsPin (see above)
- |     |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  +- SPI1_WriteByte       (see above)
- |     |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  +- SPI1_WriteByteBlocking (see above)
- |     |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  +- SPI1_WriteStringBlocking (see above)
- |     |  |  |  |  |  |  |  |  
- |     |  |  |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin (see above)
- |     |  |  |  |  |  |  |     
- |     |  |  |  |  |  |  +- PhySetTrxStateRequest (see above)
- |     |  |  |  |  |  |     
- |     |  |  |  |  |  +- SmacScanTheNextChannel (see above)
- |     |  |  |  |  |  |  
- |     |  |  |  |  |  +- PhyPlmeCcaEdRequest  (see above)
- |     |  |  |  |  |     
- |     |  |  |  |  +- PhyPdDataConfirm    
- |     |  |  |  |  |  | 
- |     |  |  |  |  |  +- MCPSDataComfirm     
- |     |  |  |  |  |  |    
- |     |  |  |  |  |  +- PhyPdDataRequest     (see above)
- |     |  |  |  |  |     
- |     |  |  |  |  +- PhyPlmeCcaConfirm   
- |     |  |  |  |  |  | 
- |     |  |  |  |  |  +- SmacScanTheNextChannel (see above)
- |     |  |  |  |  |  |  
- |     |  |  |  |  |  +- PhyPlmeSetCurrentChannelRequest (see above)
- |     |  |  |  |  |  |  
- |     |  |  |  |  |  +- MLMEScanComfirm      (see above)
- |     |  |  |  |  |     
- |     |  |  |  |  +- PhyHREventsReStartSequense (see above) (recursive dependency)
- |     |  |  |  |  |  
- |     |  |  |  |  +- Radio_WriteRegister  (see above)
- |     |  |  |  |     
- |     |  |  |  +- Radio_DriverInit    
- |     |  |  |  |  | 
- |     |  |  |  |  +- RadioIRQServiceRoutine
- |     |  |  |  |  |  | 
- |     |  |  |  |  |  +- Radio_ReadRegister   (see above)
- |     |  |  |  |  |     
- |     |  |  |  |  +- IRQ_Init             (see above)
- |     |  |  |  |  |  
- |     |  |  |  |  +- RadioInitControlSignals
- |     |  |  |  |     | 
- |     |  |  |  |     +- Gpio_PinClear        (see above)
- |     |  |  |  |     |  
- |     |  |  |  |     +- Gpio_PinSet          (see above)
- |     |  |  |  |        
- |     |  |  |  +- Gpio_PinClear        (see above)
- |     |  |  |  |  
- |     |  |  |  +- Radio_ReadRegisterBlocking (see above)
- |     |  |  |  |  
- |     |  |  |  +- Radio_WriteRegisterBlocking (see above)
- |     |  |  |     
- |     |  |  +- PhyPlmeSetCurrentChannelRequest (see above)
- |     |  |  |  
- |     |  |  +- PhyPlmeSetPwrLevelRequest
- |     |  |  |  | 
- |     |  |  |  +- Radio_ReadRegisterBlocking (see above)
- |     |  |  |  |  
- |     |  |  |  +- Radio_WriteRegisterBlocking (see above)
- |     |  |  |     
- |     |  |  +- PhyPpSetCcaThreshold
- |     |  |  |  | 
- |     |  |  |  +- Radio_ReadRegisterBlocking (see above)
- |     |  |  |  |  
- |     |  |  |  +- Radio_WriteRegisterBlocking (see above)
- |     |  |  |     
- |     |  |  +- PhyPpSetPromiscuous 
- |     |  |       
- |     |  +- MLMESetClockRate    
- |     |  |  | 
- |     |  |  +- PhyPlmeSetClockOutRate
- |     |  |     | 
- |     |  |     +- Radio_ReadRegisterBlocking (see above)
- |     |  |     |  
- |     |  |     +- Radio_WriteRegisterBlocking (see above)
- |     |  |        
- |     |  +- MCU_UseExternalClock
- |     |  |    
- |     |  +- MLMESetTmrPrescale  
- |     |  |  | 
- |     |  |  +- PhySetRadioTimerPrescaler
- |     |  |     | 
- |     |  |     +- Radio_ReadRegisterBlocking (see above)
- |     |  |     |  
- |     |  |     +- Radio_WriteRegisterBlocking (see above)
- |     |  |        
- |     |  +- MLMESetChannelRequest
- |     |  |  | 
- |     |  |  +- PhyPlmeSetCurrentChannelRequest (see above)
- |     |  |     
- |     |  +- MLMEPAOutputAdjust  
- |     |  |  | 
- |     |  |  +- PhyPlmeSetPwrLevelRequest (see above)
- |     |  |     
- |     |  +- MLMEFEGainAdjust    
- |     |     | 
- |     |     +- PhyAdjustCcaOffsetCmp
- |     |        | 
- |     |        +- Radio_ReadRegisterBlocking (see above)
- |     |        |  
- |     |        +- Radio_WriteRegisterBlocking (see above)
- |     |           
  |     +- MLMESetChannelRequest (see above)
  |     |  
  |     +- MCPSDataRequest     
@@ -2400,6 +2406,14 @@ DEPENDENCY TREE
  |     |  +- SmacFormatTxPacket  
  |     |  |    
  |     |  +- PhyPdDataRequest     (see above)
+ |     |     
+ |     +- Led_PrintValue      
+ |     |  | 
+ |     |  +- Led_OffAll          
+ |     |  |  | 
+ |     |  |  +- Gpio_PinClear        (see above)
+ |     |  |     
+ |     |  +- Gpio_PinSet          (see above)
  |     |     
  |     +- MLMERXEnableRequest 
  |        | 
@@ -2452,5 +2466,5 @@ STATISTIC SECTION
 ExeFile:
 --------
 Number of blocks to be downloaded: 9
-Total size of all blocks to be downloaded: 7721
+Total size of all blocks to be downloaded: 7718
 

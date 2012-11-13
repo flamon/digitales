@@ -17,15 +17,15 @@ HC08 Compiler: *** Processing ok ***
 'Building file: ../PLM/HCS08/Source/TPM/Timer.c'
 'Building file: ../PLM/HCS08/Source/SPI/SPI.c'
 'Building file: ../PLM/HCS08/Source/SCI/UART.c'
-'Building file: ../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c'
 'Building file: ../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c'
-'Executing target #2 ../SMAC/Source/SMAC.c'
+'Building file: ../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c'
 'Executing target #1 ../UMAC/uMac.c'
-'Executing target #3 ../PLM/HCS08/Source/TouchPad/TouchPad.c'
+'Executing target #2 ../SMAC/Source/SMAC.c'
 'Executing target #4 ../PLM/HCS08/Source/TPM/Timer.c'
+'Executing target #3 ../PLM/HCS08/Source/TouchPad/TouchPad.c'
 'Executing target #5 ../PLM/HCS08/Source/SPI/SPI.c'
-'Executing target #6 ../PLM/HCS08/Source/SCI/UART.c'
 'Executing target #7 ../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c'
+'Executing target #6 ../PLM/HCS08/Source/SCI/UART.c'
 'Executing target #8 ../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c'
 'Invoking: HCS08 Compiler'
 'Invoking: HCS08 Compiler'
@@ -43,230 +43,279 @@ HC08 Compiler: *** Processing ok ***
 "C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/SCI/UART.args" -ObjN="PLM/HCS08/Source/SCI/UART_c.obj" "../PLM/HCS08/Source/SCI/UART.c" -Lm="PLM/HCS08/Source/SCI/UART_c.d" -LmCfg=xilmou
 "C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.args" -ObjN="PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.obj" "../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c" -Lm="PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.d" -LmCfg=xilmou
 "C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.args" -ObjN="PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.obj" "../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c" -Lm="PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.d" -LmCfg=xilmou
-../PLM/HCS08/Source/TPM/Timer.c
-Command Line: '-ArgFile"PLM/HCS08/Source/TPM/Timer.args" -ObjN="PLM/HCS08/Source/TPM/Timer_c.obj" "../PLM/HCS08/Source/TPM/Timer.c" -Lm="PLM/HCS08/Source/TPM/Timer_c.d" -LmCfg=xilmou'
+../UMAC/uMac.c
+Command Line: '-ArgFile"UMAC/uMac.args" -ObjN="UMAC/uMac_c.obj" "../UMAC/uMac.c" -Lm="UMAC/uMac_c.d" -LmCfg=xilmou'
 ../PLM/HCS08/Source/TouchPad/TouchPad.c
 Command Line: '-ArgFile"PLM/HCS08/Source/TouchPad/TouchPad.args" -ObjN="PLM/HCS08/Source/TouchPad/TouchPad_c.obj" "../PLM/HCS08/Source/TouchPad/TouchPad.c" -Lm="PLM/HCS08/Source/TouchPad/TouchPad_c.d" -LmCfg=xilmou'
 ../PLM/HCS08/Source/SPI/SPI.c
 Command Line: '-ArgFile"PLM/HCS08/Source/SPI/SPI.args" -ObjN="PLM/HCS08/Source/SPI/SPI_c.obj" "../PLM/HCS08/Source/SPI/SPI.c" -Lm="PLM/HCS08/Source/SPI/SPI_c.d" -LmCfg=xilmou'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/TouchPad\TouchPad.c"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/TPM\Timer.c"
-../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.args" -ObjN="PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.obj" "../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c" -Lm="PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.d" -LmCfg=xilmou'
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/TPM\Timer.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/TouchPad\TouchPad.h"
-../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c
-../PLM/HCS08/Source/SCI/UART.c
-Command Line: '-ArgFile"PLM/HCS08/Source/SCI/UART.args" -ObjN="PLM/HCS08/Source/SCI/UART_c.obj" "../PLM/HCS08/Source/SCI/UART.c" -Lm="PLM/HCS08/Source/SCI/UART_c.d" -LmCfg=xilmou'
-Command Line: '-ArgFile"PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.args" -ObjN="PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.obj" "../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c" -Lm="PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.d" -LmCfg=xilmou'
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\TouchPad_Interface.h"
 ../SMAC/Source/SMAC.c
 Command Line: '-ArgFile"SMAC/Source/SMAC.args" -ObjN="SMAC/Source/SMAC_c.obj" "../SMAC/Source/SMAC.c" -Lm="SMAC/Source/SMAC_c.d" -LmCfg=xilmou'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/SCI\UART.c"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/SCI\UART.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/SPI\SPI.c"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Radio/PhyMC1320x\PhyMC1320X.c"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-../UMAC/uMac.c
-Command Line: '-ArgFile"UMAC/uMac.args" -ObjN="UMAC/uMac_c.obj" "../UMAC/uMac.c" -Lm="UMAC/uMac_c.d" -LmCfg=xilmou'
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/SPI\SPI.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../SMAC/Source\SMAC.c"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1320x\PhyMC1320X.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Radio_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver\Radio.c"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+../PLM/HCS08/Source/TPM/Timer.c
+../PLM/HCS08/Source/SCI/UART.c
+Command Line: '-ArgFile"PLM/HCS08/Source/TPM/Timer.args" -ObjN="PLM/HCS08/Source/TPM/Timer_c.obj" "../PLM/HCS08/Source/TPM/Timer.c" -Lm="PLM/HCS08/Source/TPM/Timer_c.d" -LmCfg=xilmou'
+Command Line: '-ArgFile"PLM/HCS08/Source/SCI/UART.args" -ObjN="PLM/HCS08/Source/SCI/UART_c.obj" "../PLM/HCS08/Source/SCI/UART.c" -Lm="PLM/HCS08/Source/SCI/UART_c.d" -LmCfg=xilmou'
+../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/TouchPad\TouchPad.c"
+Command Line: '-ArgFile"PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.args" -ObjN="PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.obj" "../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c" -Lm="PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.d" -LmCfg=xilmou'
 "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../UMAC\uMac.c"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Common/Sys\McuInit.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/SPI\SPI.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/SPI\SPI.h"
   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver\Radio.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Radio_Interface.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Interface\SMAC_Interface.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/TPM\Timer.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/TPM\Timer.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/SCI\UART.c"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/TouchPad\TouchPad.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\TouchPad_Interface.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/SCI\UART.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../SMAC/Source\SMAC.c"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Source\SMAC.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio\SimplePhy.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/TPM/Timer_c.d'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Interface\SMAC_Interface.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Source\SMAC.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio\SimplePhy.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Radio/PhyMC1320x\PhyMC1320X.c"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1320x\PhyMC1320X.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Timer.lst'
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_Interface.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/TouchPad/TouchPad_c.d'
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Radio_Interface.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/SPI/SPI_c.d'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1320x\PhyMC1320X_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Radio_Interface.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
-      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
-       "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-        "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.args" -ObjN="PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.obj" "../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c" -Lm="PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.d" -LmCfg=xilmou'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
       "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Interface\SMAC_Interface.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/SCI/UART_c.d'
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/UMAC\uMac.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/UMAC\uMac_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1320x\PhyMC1320X_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/TPM/Timer_c.d'
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
 Option -Lm: Updating make info to 'PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.d'
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/SCI/UART_c.d'
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/UMAC\uMac.h"
+        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/UMAC\uMac_Interface.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/Application/Configure\app_config.h"
-Option -Lm: Updating make info to 'SMAC/Source/SMAC_c.d'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\RTI_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\UART.lst'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver\Radio.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver\Radio.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\SMAC.lst'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Radio_Interface.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\PhyMC1320X.lst'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\SPI.lst'
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ASM_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\TouchPad.lst'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/SPI/SPI_c.d'
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\UART.lst'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\PhyMC1320X.lst'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\KBI_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LED_Interface.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/TouchPad/TouchPad_c.d'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LPM_Interface.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\SPI.lst'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LVD_interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\TouchPad_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ADC_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Keyboard_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\CMT_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Accelerometer_Interface.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\TouchPad.lst'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Eeprom_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LCD_Interface.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\OTAP_Interface.h"
-Object file: PLM/HCS08/Source/TouchPad/TouchPad_c.obj, format ELF/DWARF 2.0
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP_Interface.h"
-Code Size: 3
-Global objects: 2
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap_Interface.h"
+Option -Lm: Updating make info to 'UMAC/uMac_c.d'
+Object file: PLM/HCS08/Source/TPM/Timer_c.obj, format ELF/DWARF 2.0
+Object file: PLM/HCS08/Source/TouchPad/TouchPad_c.obj, format ELF/DWARF 2.0
+Code Size: 3
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Radio_Interface.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\uMac.lst'
+Code Size: 568
+Global objects: 44, Data Size (RAM): 156, Const Data Size (ROM): 3
+Global objects: 2
 HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
 HC08 Compiler: *** Processing ok ***
-Option -Lm: Updating make info to 'UMAC/uMac_c.d'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Timer.lst'
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
+      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+       "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+        "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Interface\SMAC_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
+Option -Lm: Updating make info to 'SMAC/Source/SMAC_c.d'
+'Finished building: ../PLM/HCS08/Source/TouchPad/TouchPad.c'
+Object file: PLM/HCS08/Source/SPI/SPI_c.obj, format ELF/DWARF 2.0
+Code Size: 434
+Global objects: 23, Data Size (RAM): 6
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+Object file: PLM/HCS08/Source/SCI/UART_c.obj, format ELF/DWARF 2.0
+Code Size: 1297
+Global objects: 35, Data Size (RAM): 278
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\uMac.lst'
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
+' '
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
       "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
+Object file: UMAC/uMac_c.obj, format ELF/DWARF 2.0
+Code Size: 329
+Global objects: 39, Data Size (RAM): 311
 Option -Lm: Updating make info to 'PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.d'
-'Finished building: ../PLM/HCS08/Source/TouchPad/TouchPad.c'
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Finished building: ../PLM/HCS08/Source/TPM/Timer.c'
 Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Radio.lst'
-' '
+'Finished building: ../PLM/HCS08/Source/SPI/SPI.c'
+'Finished building: ../UMAC/uMac.c'
+'Finished building: ../PLM/HCS08/Source/SCI/UART.c'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\SMAC.lst'
 'Building file: ../PLM/HCS08/Source/RTI/RTI.c'
+' '
+' '
+' '
+' '
+'Building file: ../PLM/HCS08/Source/LVD/LVD.c'
 'Executing target #9 ../PLM/HCS08/Source/RTI/RTI.c'
+'Building file: ../PLM/HCS08/Source/LCD/LCD.c'
+'Building file: ../PLM/HCS08/Source/LPM/LPM.c'
+'Building file: ../PLM/HCS08/Source/LED/LED.c'
 'Invoking: HCS08 Compiler'
+'Executing target #10 ../PLM/HCS08/Source/LVD/LVD.c'
+'Executing target #11 ../PLM/HCS08/Source/LPM/LPM.c'
+'Executing target #12 ../PLM/HCS08/Source/LED/LED.c'
 "C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/RTI/RTI.args" -ObjN="PLM/HCS08/Source/RTI/RTI_c.obj" "../PLM/HCS08/Source/RTI/RTI.c" -Lm="PLM/HCS08/Source/RTI/RTI_c.d" -LmCfg=xilmou
+Object file: PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.obj, format ELF/DWARF 2.0
+Code Size: 1839
+Global objects: 83, Data Size (RAM): 26, Const Data Size (ROM): 84
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Executing target #13 ../PLM/HCS08/Source/LCD/LCD.c'
+'Invoking: HCS08 Compiler'
+'Invoking: HCS08 Compiler'
+Object file: PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.obj, format ELF/DWARF 2.0
+Code Size: 779
+Global objects: 40, Data Size (RAM): 143
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Finished building: ../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c'
 ../PLM/HCS08/Source/RTI/RTI.c
 Command Line: '-ArgFile"PLM/HCS08/Source/RTI/RTI.args" -ObjN="PLM/HCS08/Source/RTI/RTI_c.obj" "../PLM/HCS08/Source/RTI/RTI.c" -Lm="PLM/HCS08/Source/RTI/RTI_c.d" -LmCfg=xilmou'
 "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/RTI\RTI.c"
@@ -283,177 +332,35 @@ Command Line: '-ArgFile"PLM/HCS08/Source/RTI/RTI.args" -ObjN="PLM/HCS08/Source/R
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/LVD/LVD.args" -ObjN="PLM/HCS08/Source/LVD/LVD_c.obj" "../PLM/HCS08/Source/LVD/LVD.c" -Lm="PLM/HCS08/Source/LVD/LVD_c.d" -LmCfg=xilmou
+'Finished building: ../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
 Option -Lm: Updating make info to 'PLM/HCS08/Source/RTI/RTI_c.d'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/LPM/LPM.args" -ObjN="PLM/HCS08/Source/LPM/LPM_c.obj" "../PLM/HCS08/Source/LPM/LPM.c" -Lm="PLM/HCS08/Source/LPM/LPM_c.d" -LmCfg=xilmou
+'Invoking: HCS08 Compiler'
 Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\RTI.lst'
-Object file: UMAC/uMac_c.obj, format ELF/DWARF 2.0
-Code Size: 349
-Global objects: 34, Data Size (RAM): 275
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-Object file: PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X_c.obj, format ELF/DWARF 2.0
-Code Size: 1839
-Global objects: 83, Data Size (RAM): 26, Const Data Size (ROM): 84
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Finished building: ../UMAC/uMac.c'
-'Finished building: ../PLM/HCS08/Source/Radio/PhyMC1320x/PhyMC1320X.c'
+'Invoking: HCS08 Compiler'
 Object file: PLM/HCS08/Source/RTI/RTI_c.obj, format ELF/DWARF 2.0
 Code Size: 126
 Global objects: 8, Data Size (RAM): 2
 HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
 HC08 Compiler: *** Processing ok ***
-' '
-' '
-'Building file: ../PLM/HCS08/Source/LVD/LVD.c'
-'Building file: ../PLM/HCS08/Source/LPM/LPM.c'
-'Finished building: ../PLM/HCS08/Source/RTI/RTI.c'
-Object file: PLM/HCS08/Source/SCI/UART_c.obj, format ELF/DWARF 2.0
-Code Size: 1297
-Global objects: 35, Data Size (RAM): 278
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Executing target #10 ../PLM/HCS08/Source/LVD/LVD.c'
-'Finished building: ../PLM/HCS08/Source/SCI/UART.c'
-'Executing target #11 ../PLM/HCS08/Source/LPM/LPM.c'
-'Invoking: HCS08 Compiler'
-' '
-' '
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/LVD/LVD.args" -ObjN="PLM/HCS08/Source/LVD/LVD_c.obj" "../PLM/HCS08/Source/LVD/LVD.c" -Lm="PLM/HCS08/Source/LVD/LVD_c.d" -LmCfg=xilmou
-Object file: PLM/HCS08/Source/TPM/Timer_c.obj, format ELF/DWARF 2.0
-Code Size: 568
-Global objects: 44, Data Size (RAM): 156, Const Data Size (ROM): 3
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Building file: ../PLM/HCS08/Source/LCD/LCD.c'
-'Building file: ../PLM/HCS08/Source/LED/LED.c'
-Object file: PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio_c.obj, format ELF/DWARF 2.0
-Code Size: 779
-Global objects: 40, Data Size (RAM): 143
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Invoking: HCS08 Compiler'
-'Executing target #13 ../PLM/HCS08/Source/LCD/LCD.c'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/LPM/LPM.args" -ObjN="PLM/HCS08/Source/LPM/LPM_c.obj" "../PLM/HCS08/Source/LPM/LPM.c" -Lm="PLM/HCS08/Source/LPM/LPM_c.d" -LmCfg=xilmou
-'Finished building: ../PLM/HCS08/Source/TPM/Timer.c'
-'Executing target #12 ../PLM/HCS08/Source/LED/LED.c'
-Object file: PLM/HCS08/Source/SPI/SPI_c.obj, format ELF/DWARF 2.0
-Code Size: 434
-Global objects: 23, Data Size (RAM): 6
-'Invoking: HCS08 Compiler'
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-' '
-'Finished building: ../PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/Radio.c'
-../PLM/HCS08/Source/LVD/LVD.c
-Command Line: '-ArgFile"PLM/HCS08/Source/LVD/LVD.args" -ObjN="PLM/HCS08/Source/LVD/LVD_c.obj" "../PLM/HCS08/Source/LVD/LVD.c" -Lm="PLM/HCS08/Source/LVD/LVD_c.d" -LmCfg=xilmou'
-'Building file: ../PLM/HCS08/Source/Keyboard/Keyboard.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/LED/LED.args" -ObjN="PLM/HCS08/Source/LED/LED_c.obj" "../PLM/HCS08/Source/LED/LED.c" -Lm="PLM/HCS08/Source/LED/LED_c.d" -LmCfg=xilmou
 "C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/LCD/LCD.args" -ObjN="PLM/HCS08/Source/LCD/LCD_c.obj" "../PLM/HCS08/Source/LCD/LCD.c" -Lm="PLM/HCS08/Source/LCD/LCD_c.d" -LmCfg=xilmou
 ' '
-../PLM/HCS08/Source/LPM/LPM.c
-Command Line: '-ArgFile"PLM/HCS08/Source/LPM/LPM.args" -ObjN="PLM/HCS08/Source/LPM/LPM_c.obj" "../PLM/HCS08/Source/LPM/LPM.c" -Lm="PLM/HCS08/Source/LPM/LPM_c.d" -LmCfg=xilmou'
-'Invoking: HCS08 Compiler'
-Object file: SMAC/Source/SMAC_c.obj, format ELF/DWARF 2.0
-Code Size: 1767
-Global objects: 88, Data Size (RAM): 86, Const Data Size (ROM): 7
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Executing target #14 ../PLM/HCS08/Source/Keyboard/Keyboard.c'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/LED/LED.args" -ObjN="PLM/HCS08/Source/LED/LED_c.obj" "../PLM/HCS08/Source/LED/LED.c" -Lm="PLM/HCS08/Source/LED/LED_c.d" -LmCfg=xilmou
-'Building file: ../PLM/HCS08/Source/KBI/KBI.c'
-'Finished building: ../PLM/HCS08/Source/SPI/SPI.c'
-'Invoking: HCS08 Compiler'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/LVD\LVD.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/LPM\LPM.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/LPM\LPM.h"
-  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LPM_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-'Executing target #15 ../PLM/HCS08/Source/KBI/KBI.c'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Keyboard/Keyboard.args" -ObjN="PLM/HCS08/Source/Keyboard/Keyboard_c.obj" "../PLM/HCS08/Source/Keyboard/Keyboard.c" -Lm="PLM/HCS08/Source/Keyboard/Keyboard_c.d" -LmCfg=xilmou
-../PLM/HCS08/Source/LCD/LCD.c
-Command Line: '-ArgFile"PLM/HCS08/Source/LCD/LCD.args" -ObjN="PLM/HCS08/Source/LCD/LCD_c.obj" "../PLM/HCS08/Source/LCD/LCD.c" -Lm="PLM/HCS08/Source/LCD/LCD_c.d" -LmCfg=xilmou'
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
 ' '
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/LVD\LVD.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LVD_interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/LVD/LVD_c.d'
 ../PLM/HCS08/Source/LED/LED.c
 Command Line: '-ArgFile"PLM/HCS08/Source/LED/LED.args" -ObjN="PLM/HCS08/Source/LED/LED_c.obj" "../PLM/HCS08/Source/LED/LED.c" -Lm="PLM/HCS08/Source/LED/LED_c.d" -LmCfg=xilmou'
-'Building file: ../PLM/HCS08/Source/IRQ/IRQ.c'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/LCD\LCD.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/LCD\LCD.h"
-'Invoking: HCS08 Compiler'
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Lcd_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/KBI/KBI.args" -ObjN="PLM/HCS08/Source/KBI/KBI_c.obj" "../PLM/HCS08/Source/KBI/KBI.c" -Lm="PLM/HCS08/Source/KBI/KBI_c.d" -LmCfg=xilmou
-'Finished building: ../SMAC/Source/SMAC.c'
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/LPM/LPM_c.d'
-../PLM/HCS08/Source/Keyboard/Keyboard.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Keyboard/Keyboard.args" -ObjN="PLM/HCS08/Source/Keyboard/Keyboard_c.obj" "../PLM/HCS08/Source/Keyboard/Keyboard.c" -Lm="PLM/HCS08/Source/Keyboard/Keyboard_c.d" -LmCfg=xilmou'
-' '
 "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/LED\LED.c"
-'Executing target #16 ../PLM/HCS08/Source/IRQ/IRQ.c'
-../PLM/HCS08/Source/KBI/KBI.c
-Command Line: '-ArgFile"PLM/HCS08/Source/KBI/KBI.args" -ObjN="PLM/HCS08/Source/KBI/KBI_c.obj" "../PLM/HCS08/Source/KBI/KBI.c" -Lm="PLM/HCS08/Source/KBI/KBI_c.d" -LmCfg=xilmou'
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/LED\LED.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LED_interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\LVD.lst'
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
       "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-'Building file: ../PLM/HCS08/Source/IIC/IIC.c'
-'Invoking: HCS08 Compiler'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\LPM.lst'
-Object file: PLM/HCS08/Source/LVD/LVD_c.obj, format ELF/DWARF 2.0
-Code Size: 95
-Global objects: 7, Data Size (RAM): 4
-Option -Lm: Updating make info to 'PLM/HCS08/Source/LCD/LCD_c.d'
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/IRQ/IRQ.args" -ObjN="PLM/HCS08/Source/IRQ/IRQ_c.obj" "../PLM/HCS08/Source/IRQ/IRQ.c" -Lm="PLM/HCS08/Source/IRQ/IRQ_c.d" -LmCfg=xilmou
-'Executing target #17 ../PLM/HCS08/Source/IIC/IIC.c'
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
@@ -463,12 +370,119 @@ HC08 Compiler: *** Processing ok ***
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
 Option -Lm: Updating make info to 'PLM/HCS08/Source/LED/LED_c.d'
+'Finished building: ../PLM/HCS08/Source/RTI/RTI.c'
+'Building file: ../PLM/HCS08/Source/Keyboard/Keyboard.c'
+../PLM/HCS08/Source/LPM/LPM.c
+Command Line: '-ArgFile"PLM/HCS08/Source/LPM/LPM.args" -ObjN="PLM/HCS08/Source/LPM/LPM_c.obj" "../PLM/HCS08/Source/LPM/LPM.c" -Lm="PLM/HCS08/Source/LPM/LPM_c.d" -LmCfg=xilmou'
+../PLM/HCS08/Source/LCD/LCD.c
+Command Line: '-ArgFile"PLM/HCS08/Source/LCD/LCD.args" -ObjN="PLM/HCS08/Source/LCD/LCD_c.obj" "../PLM/HCS08/Source/LCD/LCD.c" -Lm="PLM/HCS08/Source/LCD/LCD_c.d" -LmCfg=xilmou'
+'Building file: ../PLM/HCS08/Source/KBI/KBI.c'
+Object file: SMAC/Source/SMAC_c.obj, format ELF/DWARF 2.0
+Code Size: 1767
+Global objects: 88, Data Size (RAM): 86, Const Data Size (ROM): 7
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\LED.lst'
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+Object file: PLM/HCS08/Source/LED/LED_c.obj, format ELF/DWARF 2.0
+Code Size: 131
+Global objects: 5
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+' '
+'Executing target #14 ../PLM/HCS08/Source/Keyboard/Keyboard.c'
+'Executing target #15 ../PLM/HCS08/Source/KBI/KBI.c'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/LCD\LCD.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/LCD\LCD.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Lcd_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/LPM\LPM.c"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/LPM\LPM.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LPM_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/LCD/LCD_c.d'
+'Building file: ../PLM/HCS08/Source/IRQ/IRQ.c'
+'Finished building: ../PLM/HCS08/Source/LED/LED.c'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+'Finished building: ../SMAC/Source/SMAC.c'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/LPM/LPM_c.d'
+'Invoking: HCS08 Compiler'
+../PLM/HCS08/Source/LVD/LVD.c
+Command Line: '-ArgFile"PLM/HCS08/Source/LVD/LVD.args" -ObjN="PLM/HCS08/Source/LVD/LVD_c.obj" "../PLM/HCS08/Source/LVD/LVD.c" -Lm="PLM/HCS08/Source/LVD/LVD_c.d" -LmCfg=xilmou'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\LPM.lst'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/LVD\LVD.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\LCD.lst'
+  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/LVD\LVD.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LVD_interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/LVD/LVD_c.d'
 Object file: PLM/HCS08/Source/LPM/LPM_c.obj, format ELF/DWARF 2.0
 Code Size: 9
 Global objects: 6
 HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+' '
+'Invoking: HCS08 Compiler'
+' '
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Keyboard/Keyboard.args" -ObjN="PLM/HCS08/Source/Keyboard/Keyboard_c.obj" "../PLM/HCS08/Source/Keyboard/Keyboard.c" -Lm="PLM/HCS08/Source/Keyboard/Keyboard_c.d" -LmCfg=xilmou
+'Executing target #16 ../PLM/HCS08/Source/IRQ/IRQ.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/KBI/KBI.args" -ObjN="PLM/HCS08/Source/KBI/KBI_c.obj" "../PLM/HCS08/Source/KBI/KBI.c" -Lm="PLM/HCS08/Source/KBI/KBI_c.d" -LmCfg=xilmou
 HC08 Compiler: *** Processing ok ***
-'Finished building: ../PLM/HCS08/Source/LVD/LVD.c'
+Object file: PLM/HCS08/Source/LCD/LCD_c.obj, format ELF/DWARF 2.0
+Code Size: 654
+Global objects: 26, Data Size (RAM): 9
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Building file: ../PLM/HCS08/Source/IIC/IIC.c'
+'Building file: ../PLM/HCS08/Source/GPIO/GPIO.c'
+'Invoking: HCS08 Compiler'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\LVD.lst'
+../PLM/HCS08/Source/Keyboard/Keyboard.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Keyboard/Keyboard.args" -ObjN="PLM/HCS08/Source/Keyboard/Keyboard_c.obj" "../PLM/HCS08/Source/Keyboard/Keyboard.c" -Lm="PLM/HCS08/Source/Keyboard/Keyboard_c.d" -LmCfg=xilmou'
+Object file: PLM/HCS08/Source/LVD/LVD_c.obj, format ELF/DWARF 2.0
+Code Size: 95
+Global objects: 7, Data Size (RAM): 4
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Finished building: ../PLM/HCS08/Source/LPM/LPM.c'
+'Finished building: ../PLM/HCS08/Source/LCD/LCD.c'
+'Executing target #17 ../PLM/HCS08/Source/IIC/IIC.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/IRQ/IRQ.args" -ObjN="PLM/HCS08/Source/IRQ/IRQ_c.obj" "../PLM/HCS08/Source/IRQ/IRQ.c" -Lm="PLM/HCS08/Source/IRQ/IRQ_c.d" -LmCfg=xilmou
 "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Keyboard\Keyboard.c"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Keyboard\Keyboard.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Keyboard_Interface.h"
@@ -477,283 +491,237 @@ HC08 Compiler: *** Processing ok ***
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\LED.lst'
-Object file: PLM/HCS08/Source/LED/LED_c.obj, format ELF/DWARF 2.0
-Code Size: 131
-Global objects: 5
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
+' '
+'Executing target #18 ../PLM/HCS08/Source/GPIO/GPIO.c'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/KBI\KBI.c"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\KBI_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/KBI\KBI.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\KBI_interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-'Invoking: HCS08 Compiler'
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/Application/Configure\app_config.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\RTI_Interface.h"
-' '
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\LCD.lst'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
+../PLM/HCS08/Source/IRQ/IRQ.c
+Command Line: '-ArgFile"PLM/HCS08/Source/IRQ/IRQ.args" -ObjN="PLM/HCS08/Source/IRQ/IRQ_c.obj" "../PLM/HCS08/Source/IRQ/IRQ.c" -Lm="PLM/HCS08/Source/IRQ/IRQ_c.d" -LmCfg=xilmou'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
+'Finished building: ../PLM/HCS08/Source/LVD/LVD.c'
+' '
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ASM_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/IIC/IIC.args" -ObjN="PLM/HCS08/Source/IIC/IIC_c.obj" "../PLM/HCS08/Source/IIC/IIC.c" -Lm="PLM/HCS08/Source/IIC/IIC_c.d" -LmCfg=xilmou
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LED_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LPM_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LVD_interface.h"
+../PLM/HCS08/Source/KBI/KBI.c
+Command Line: '-ArgFile"PLM/HCS08/Source/KBI/KBI.args" -ObjN="PLM/HCS08/Source/KBI/KBI_c.obj" "../PLM/HCS08/Source/KBI/KBI.c" -Lm="PLM/HCS08/Source/KBI/KBI_c.d" -LmCfg=xilmou'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/IRQ\IRQ.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\TouchPad_Interface.h"
-'Building file: ../PLM/HCS08/Source/GPIO/GPIO.c'
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+' '
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+'Invoking: HCS08 Compiler'
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ADC_Interface.h"
-'Finished building: ../PLM/HCS08/Source/LED/LED.c'
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/IRQ/IRQ_c.d'
+'Invoking: HCS08 Compiler'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/IIC/IIC.args" -ObjN="PLM/HCS08/Source/IIC/IIC_c.obj" "../PLM/HCS08/Source/IIC/IIC.c" -Lm="PLM/HCS08/Source/IIC/IIC_c.d" -LmCfg=xilmou
+'Building file: ../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\CMT_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Accelerometer_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Eeprom_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LCD_Interface.h"
 Option -Lm: Updating make info to 'PLM/HCS08/Source/Keyboard/Keyboard_c.d'
-'Finished building: ../PLM/HCS08/Source/LPM/LPM.c'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/KBI\KBI.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/KBI\KBI.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\KBI_interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+'Building file: ../PLM/HCS08/Source/Flash/Flash.c'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Keyboard.lst'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-'Executing target #18 ../PLM/HCS08/Source/GPIO/GPIO.c'
-../PLM/HCS08/Source/IRQ/IRQ.c
-Command Line: '-ArgFile"PLM/HCS08/Source/IRQ/IRQ.args" -ObjN="PLM/HCS08/Source/IRQ/IRQ_c.obj" "../PLM/HCS08/Source/IRQ/IRQ.c" -Lm="PLM/HCS08/Source/IRQ/IRQ_c.d" -LmCfg=xilmou'
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/KBI/KBI_c.d'
-' '
-' '
-../PLM/HCS08/Source/IIC/IIC.c
-Command Line: '-ArgFile"PLM/HCS08/Source/IIC/IIC.args" -ObjN="PLM/HCS08/Source/IIC/IIC_c.obj" "../PLM/HCS08/Source/IIC/IIC.c" -Lm="PLM/HCS08/Source/IIC/IIC_c.d" -LmCfg=xilmou'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Keyboard.lst'
-Object file: PLM/HCS08/Source/LCD/LCD_c.obj, format ELF/DWARF 2.0
-Code Size: 654
-Global objects: 26, Data Size (RAM): 9
 Object file: PLM/HCS08/Source/Keyboard/Keyboard_c.obj, format ELF/DWARF 2.0
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/GPIO/GPIO.args" -ObjN="PLM/HCS08/Source/GPIO/GPIO_c.obj" "../PLM/HCS08/Source/GPIO/GPIO.c" -Lm="PLM/HCS08/Source/GPIO/GPIO_c.d" -LmCfg=xilmou
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
+'Building file: ../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c'
+Option -Lm: Updating make info to 'PLM/HCS08/Source/KBI/KBI_c.d'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\IRQ.lst'
 Code Size: 2
 Global objects: 1
 HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
 HC08 Compiler: *** Processing ok ***
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/IRQ\IRQ.c"
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
-'Building file: ../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c'
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-'Building file: ../PLM/HCS08/Source/Flash/Flash.c'
-'Executing target #19 ../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/IIC\IIC.c"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/IIC\IIC.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/IRQ/IRQ_c.d'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\KBI.lst'
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\IRQ.lst'
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-'Invoking: HCS08 Compiler'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/IIC/IIC_c.d'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/GPIO/GPIO.args" -ObjN="PLM/HCS08/Source/GPIO/GPIO_c.obj" "../PLM/HCS08/Source/GPIO/GPIO.c" -Lm="PLM/HCS08/Source/GPIO/GPIO_c.d" -LmCfg=xilmou
 Object file: PLM/HCS08/Source/IRQ/IRQ_c.obj, format ELF/DWARF 2.0
 Code Size: 24
-'Executing target #20 ../PLM/HCS08/Source/Flash/Flash.c'
 Global objects: 5, Data Size (RAM): 2
 HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
 HC08 Compiler: *** Processing ok ***
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\IIC.lst'
-'Invoking: HCS08 Compiler'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.args" -ObjN="PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.obj" "../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c" -Lm="PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.d" -LmCfg=xilmou
-'Finished building: ../PLM/HCS08/Source/LCD/LCD.c'
-'Invoking: HCS08 Compiler'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Flash/Flash.args" -ObjN="PLM/HCS08/Source/Flash/Flash_c.obj" "../PLM/HCS08/Source/Flash/Flash.c" -Lm="PLM/HCS08/Source/Flash/Flash_c.d" -LmCfg=xilmou
-' '
-'Finished building: ../PLM/HCS08/Source/Keyboard/Keyboard.c'
-'Finished building: ../PLM/HCS08/Source/IRQ/IRQ.c'
-'Building file: ../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c'
-' '
-'Building file: ../PLM/HCS08/Source/EEPROM/Eeprom.c'
-' '
-'Executing target #22 ../PLM/HCS08/Source/EEPROM/Eeprom.c'
-'Executing target #21 ../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c'
-Object file: PLM/HCS08/Source/KBI/KBI_c.obj, format ELF/DWARF 2.0
-../PLM/HCS08/Source/Flash/Flash.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Flash/Flash.args" -ObjN="PLM/HCS08/Source/Flash/Flash_c.obj" "../PLM/HCS08/Source/Flash/Flash.c" -Lm="PLM/HCS08/Source/Flash/Flash_c.d" -LmCfg=xilmou'
-'Invoking: HCS08 Compiler'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/EEPROM/Eeprom.args" -ObjN="PLM/HCS08/Source/EEPROM/Eeprom_c.obj" "../PLM/HCS08/Source/EEPROM/Eeprom.c" -Lm="PLM/HCS08/Source/EEPROM/Eeprom_c.d" -LmCfg=xilmou
-Code Size: 187
-Global objects: 15, Data Size (RAM): 8
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Building file: ../PLM/HCS08/Source/Common/Utilities/Utilities.c'
-'Executing target #23 ../PLM/HCS08/Source/Common/Utilities/Utilities.c'
-'Invoking: HCS08 Compiler'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.args" -ObjN="PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.obj" "../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c" -Lm="PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.d" -LmCfg=xilmou
-../PLM/HCS08/Source/EEPROM/Eeprom.c
-Command Line: '-ArgFile"PLM/HCS08/Source/EEPROM/Eeprom.args" -ObjN="PLM/HCS08/Source/EEPROM/Eeprom_c.obj" "../PLM/HCS08/Source/EEPROM/Eeprom.c" -Lm="PLM/HCS08/Source/EEPROM/Eeprom_c.d" -LmCfg=xilmou'
-'Invoking: HCS08 Compiler'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Utilities/Utilities.args" -ObjN="PLM/HCS08/Source/Common/Utilities/Utilities_c.obj" "../PLM/HCS08/Source/Common/Utilities/Utilities.c" -Lm="PLM/HCS08/Source/Common/Utilities/Utilities_c.d" -LmCfg=xilmou
-'Finished building: ../PLM/HCS08/Source/KBI/KBI.c'
-' '
-'Building file: ../PLM/HCS08/Source/Common/Sys/McuInit.c'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/EEPROM\Eeprom.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM\Eeprom.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Eeprom_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-'Executing target #24 ../PLM/HCS08/Source/Common/Sys/McuInit.c'
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Flash\Flash.c"
-Command Line: '-ArgFile"PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.args" -ObjN="PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.obj" "../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c" -Lm="PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.d" -LmCfg=xilmou'
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
 ../PLM/HCS08/Source/GPIO/GPIO.c
 Command Line: '-ArgFile"PLM/HCS08/Source/GPIO/GPIO.args" -ObjN="PLM/HCS08/Source/GPIO/GPIO_c.obj" "../PLM/HCS08/Source/GPIO/GPIO.c" -Lm="PLM/HCS08/Source/GPIO/GPIO_c.d" -LmCfg=xilmou'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash\Flash.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/EEPROM/Eeprom_c.d'
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+'Executing target #19 ../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\KBI.lst'
+'Finished building: ../PLM/HCS08/Source/Keyboard/Keyboard.c'
 "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/GPIO\GPIO.c"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/GPIO\GPIO.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+../PLM/HCS08/Source/IIC/IIC.c
+Command Line: '-ArgFile"PLM/HCS08/Source/IIC/IIC.args" -ObjN="PLM/HCS08/Source/IIC/IIC_c.obj" "../PLM/HCS08/Source/IIC/IIC.c" -Lm="PLM/HCS08/Source/IIC/IIC_c.d" -LmCfg=xilmou'
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.args" -ObjN="PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.obj" "../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c" -Lm="PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.d" -LmCfg=xilmou'
+'Executing target #20 ../PLM/HCS08/Source/Flash/Flash.c'
+Object file: PLM/HCS08/Source/KBI/KBI_c.obj, format ELF/DWARF 2.0
+'Finished building: ../PLM/HCS08/Source/IRQ/IRQ.c'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-../PLM/HCS08/Source/Common/Utilities/Utilities.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Common/Utilities/Utilities.args" -ObjN="PLM/HCS08/Source/Common/Utilities/Utilities_c.obj" "../PLM/HCS08/Source/Common/Utilities/Utilities.c" -Lm="PLM/HCS08/Source/Common/Utilities/Utilities_c.d" -LmCfg=xilmou'
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/Flash/Flash_c.d'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap.c"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4OTAP_Interface.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/IIC\IIC.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/IIC\IIC.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
 Option -Lm: Updating make info to 'PLM/HCS08/Source/GPIO/GPIO_c.d'
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+'Invoking: HCS08 Compiler'
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+'Executing target #21 ../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c'
+Code Size: 187
+' '
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\GPIO.lst'
+'Invoking: HCS08 Compiler'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+' '
+Global objects: 15, Data Size (RAM): 8
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+Object file: PLM/HCS08/Source/GPIO/GPIO_c.obj, format ELF/DWARF 2.0
+Code Size: 297
+Global objects: 32, Data Size (RAM): 45, Const Data Size (ROM): 54
+Option -Lm: Updating make info to 'PLM/HCS08/Source/IIC/IIC_c.d'
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.args" -ObjN="PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.obj" "../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c" -Lm="PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.d" -LmCfg=xilmou
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\IIC.lst'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Flash/Flash.args" -ObjN="PLM/HCS08/Source/Flash/Flash_c.obj" "../PLM/HCS08/Source/Flash/Flash.c" -Lm="PLM/HCS08/Source/Flash/Flash_c.d" -LmCfg=xilmou
+'Invoking: HCS08 Compiler'
+'Finished building: ../PLM/HCS08/Source/GPIO/GPIO.c'
+'Building file: ../PLM/HCS08/Source/EEPROM/Eeprom.c'
+'Finished building: ../PLM/HCS08/Source/KBI/KBI.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.args" -ObjN="PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.obj" "../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c" -Lm="PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.d" -LmCfg=xilmou
+../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.args" -ObjN="PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.obj" "../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c" -Lm="PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.d" -LmCfg=xilmou'
+'Building file: ../PLM/HCS08/Source/Common/Utilities/Utilities.c'
+' '
+' '
+'Executing target #22 ../PLM/HCS08/Source/EEPROM/Eeprom.c'
+'Executing target #23 ../PLM/HCS08/Source/Common/Utilities/Utilities.c'
+../PLM/HCS08/Source/Flash/Flash.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Flash/Flash.args" -ObjN="PLM/HCS08/Source/Flash/Flash_c.obj" "../PLM/HCS08/Source/Flash/Flash.c" -Lm="PLM/HCS08/Source/Flash/Flash_c.d" -LmCfg=xilmou'
+../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c
+Command Line: '-ArgFile"PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.args" -ObjN="PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.obj" "../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c" -Lm="PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.d" -LmCfg=xilmou'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Flash\Flash.c"
+'Building file: ../PLM/HCS08/Source/Common/Sys/Start08.c'
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash\Flash.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
+'Invoking: HCS08 Compiler'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
 'Invoking: HCS08 Compiler'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/McuInit.args" -ObjN="PLM/HCS08/Source/Common/Sys/McuInit_c.obj" "../PLM/HCS08/Source/Common/Sys/McuInit.c" -Lm="PLM/HCS08/Source/Common/Sys/McuInit_c.d" -LmCfg=xilmou
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Utilities\Utilities.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-Object file: PLM/HCS08/Source/IIC/IIC_c.obj, format ELF/DWARF 2.0
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/Flash/Flash_c.d'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
 Option -Lm: Updating make info to 'PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.d'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Eeprom.lst'
 Object file: PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP_c.obj, format ELF/DWARF 2.0
 Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Eeprom4OTAP.lst'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
 HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
 HC08 Compiler: *** Processing ok ***
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-Object file: PLM/HCS08/Source/EEPROM/Eeprom_c.obj, format ELF/DWARF 2.0
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-Code Size: 8
-Global objects: 4
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
+Object file: PLM/HCS08/Source/IIC/IIC_c.obj, format ELF/DWARF 2.0
 Code Size: 774
 Global objects: 21, Data Size (RAM): 8
 HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
 HC08 Compiler: *** Processing ok ***
 Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Flash.lst'
+'Building file: ../PLM/HCS08/Source/Common/Sys/McuInit.c'
+'Executing target #25 ../PLM/HCS08/Source/Common/Sys/Start08.c'
+'Finished building: ../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/EEPROM/Eeprom.args" -ObjN="PLM/HCS08/Source/EEPROM/Eeprom_c.obj" "../PLM/HCS08/Source/EEPROM/Eeprom.c" -Lm="PLM/HCS08/Source/EEPROM/Eeprom_c.d" -LmCfg=xilmou
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Utilities/Utilities.args" -ObjN="PLM/HCS08/Source/Common/Utilities/Utilities_c.obj" "../PLM/HCS08/Source/Common/Utilities/Utilities.c" -Lm="PLM/HCS08/Source/Common/Utilities/Utilities_c.d" -LmCfg=xilmou
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap.h"
+'Executing target #24 ../PLM/HCS08/Source/Common/Sys/McuInit.c'
+../PLM/HCS08/Source/EEPROM/Eeprom.c
+Command Line: '-ArgFile"PLM/HCS08/Source/EEPROM/Eeprom.args" -ObjN="PLM/HCS08/Source/EEPROM/Eeprom_c.obj" "../PLM/HCS08/Source/EEPROM/Eeprom.c" -Lm="PLM/HCS08/Source/EEPROM/Eeprom_c.d" -LmCfg=xilmou'
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4OTAP_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+'Finished building: ../PLM/HCS08/Source/IIC/IIC.c'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
@@ -761,250 +729,328 @@ Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Soluti
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
 Option -Lm: Updating make info to 'PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.d'
-Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Utilities/Utilities_c.d'
-../PLM/HCS08/Source/Common/Sys/McuInit.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/McuInit.args" -ObjN="PLM/HCS08/Source/Common/Sys/McuInit_c.obj" "../PLM/HCS08/Source/Common/Sys/McuInit.c" -Lm="PLM/HCS08/Source/Common/Sys/McuInit_c.d" -LmCfg=xilmou'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\GPIO.lst'
-Object file: PLM/HCS08/Source/Flash/Flash_c.obj, format ELF/DWARF 2.0
-Code Size: 418
-Global objects: 18, Data Size (RAM): 1
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\McuInit.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-'Finished building: ../PLM/HCS08/Source/IIC/IIC.c'
 Object file: PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap_c.obj, format ELF/DWARF 2.0
-'Finished building: ../PLM/HCS08/Source/EEPROM/Eeprom.c'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Utilities.lst'
-Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/McuInit_c.d'
 Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Flash4Otap.lst'
 HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
 HC08 Compiler: *** Processing ok ***
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\McuInit.lst'
-'Finished building: ../PLM/HCS08/Source/EEPROM/Eeprom4OTAP/Eeprom4OTAP.c'
-Object file: PLM/HCS08/Source/GPIO/GPIO_c.obj, format ELF/DWARF 2.0
-Code Size: 297
-Global objects: 32, Data Size (RAM): 45, Const Data Size (ROM): 54
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-Object file: PLM/HCS08/Source/Common/Sys/McuInit_c.obj, format ELF/DWARF 2.0
-Code Size: 59
-Global objects: 10
-'Finished building: ../PLM/HCS08/Source/Flash/Flash.c'
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/EEPROM\Eeprom.c"
 ' '
-' '
-'Finished building: ../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c'
-'Finished building: ../PLM/HCS08/Source/Common/Sys/McuInit.c'
-' '
-' '
-'Finished building: ../PLM/HCS08/Source/GPIO/GPIO.c'
-'Building file: ../PLM/HCS08/Source/Common/Sys/Start08.c'
-'Building file: ../PLM/HCS08/Source/Common/Sys/mc13233c.c'
-' '
-' '
-' '
-'Building file: ../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c'
-'Building file: ../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c'
-Object file: PLM/HCS08/Source/Common/Utilities/Utilities_c.obj, format ELF/DWARF 2.0
-Code Size: 964
-Global objects: 58, Data Size (RAM): 187
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Executing target #26 ../PLM/HCS08/Source/Common/Sys/mc13233c.c'
-'Building file: ../PLM/HCS08/Source/Common/Sys/vectortable.c'
-'Executing target #25 ../PLM/HCS08/Source/Common/Sys/Start08.c'
-'Building file: ../PLM/HCS08/Source/CMT/Cmt.c'
-'Finished building: ../PLM/HCS08/Source/Common/Utilities/Utilities.c'
-'Building file: ../PLM/HCS08/Source/Buzzer/Buzzer.c'
-'Executing target #27 ../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c'
-'Executing target #28 ../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c'
-'Invoking: HCS08 Compiler'
-'Invoking: HCS08 Compiler'
-'Executing target #29 ../PLM/HCS08/Source/Common/Sys/vectortable.c'
-'Executing target #30 ../PLM/HCS08/Source/CMT/Cmt.c'
-' '
-'Executing target #31 ../PLM/HCS08/Source/Buzzer/Buzzer.c'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/Start08.args" -ObjN="PLM/HCS08/Source/Common/Sys/Start08_c.obj" "../PLM/HCS08/Source/Common/Sys/Start08.c" -Lm="PLM/HCS08/Source/Common/Sys/Start08_c.d" -LmCfg=xilmou
-'Invoking: HCS08 Compiler'
-'Invoking: HCS08 Compiler'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/mc13233c.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc13233c_c.obj" "../PLM/HCS08/Source/Common/Sys/mc13233c.c" -Lm="PLM/HCS08/Source/Common/Sys/mc13233c_c.d" -LmCfg=xilmou
-'Invoking: HCS08 Compiler'
-../PLM/HCS08/Source/Common/Sys/mc13233c.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/mc13233c.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc13233c_c.obj" "../PLM/HCS08/Source/Common/Sys/mc13233c.c" -Lm="PLM/HCS08/Source/Common/Sys/mc13233c_c.d" -LmCfg=xilmou'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/mc9s08gb60.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.obj" "../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c" -Lm="PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.d" -LmCfg=xilmou
-'Building file: ../PLM/HCS08/Source/Accelerometer/Accelerometer.c'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/mc9s08qe128.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.obj" "../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c" -Lm="PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.d" -LmCfg=xilmou
-../PLM/HCS08/Source/Common/Sys/Start08.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/Start08.args" -ObjN="PLM/HCS08/Source/Common/Sys/Start08_c.obj" "../PLM/HCS08/Source/Common/Sys/Start08.c" -Lm="PLM/HCS08/Source/Common/Sys/Start08_c.d" -LmCfg=xilmou'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/CMT/Cmt.args" -ObjN="PLM/HCS08/Source/CMT/Cmt_c.obj" "../PLM/HCS08/Source/CMT/Cmt.c" -Lm="PLM/HCS08/Source/CMT/Cmt_c.d" -LmCfg=xilmou
-'Invoking: HCS08 Compiler'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\mc13233c.c"
-'Invoking: HCS08 Compiler'
-Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/mc13233c_c.d'
-Object file: PLM/HCS08/Source/Common/Sys/mc13233c_c.obj, format ELF/DWARF 2.0
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/vectortable.args" -ObjN="PLM/HCS08/Source/Common/Sys/vectortable_c.obj" "../PLM/HCS08/Source/Common/Sys/vectortable.c" -Lm="PLM/HCS08/Source/Common/Sys/vectortable_c.d" -LmCfg=xilmou
-'Executing target #32 ../PLM/HCS08/Source/Accelerometer/Accelerometer.c'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\mc13233c.lst'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Buzzer/Buzzer.args" -ObjN="PLM/HCS08/Source/Buzzer/Buzzer_c.obj" "../PLM/HCS08/Source/Buzzer/Buzzer.c" -Lm="PLM/HCS08/Source/Buzzer/Buzzer_c.d" -LmCfg=xilmou
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-../PLM/HCS08/Source/CMT/Cmt.c
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\Start08.c"
-Command Line: '-ArgFile"PLM/HCS08/Source/CMT/Cmt.args" -ObjN="PLM/HCS08/Source/CMT/Cmt_c.obj" "../PLM/HCS08/Source/CMT/Cmt.c" -Lm="PLM/HCS08/Source/CMT/Cmt_c.d" -LmCfg=xilmou'
-HC08 Compiler: *** Processing ok ***
- "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\start08.h"
-  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c
-../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/mc9s08qe128.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.obj" "../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c" -Lm="PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.d" -LmCfg=xilmou'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/CMT\Cmt.c"
-'Finished building: ../PLM/HCS08/Source/Common/Sys/mc13233c.c'
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\non_bank.sgm"
- "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\non_bank.sgm"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-../PLM/HCS08/Source/Common/Sys/vectortable.c
-Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/Start08_c.d'
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/vectortable.args" -ObjN="PLM/HCS08/Source/Common/Sys/vectortable_c.obj" "../PLM/HCS08/Source/Common/Sys/vectortable.c" -Lm="PLM/HCS08/Source/Common/Sys/vectortable_c.d" -LmCfg=xilmou'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\mc9s08qe128.c"
- "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-' '
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.d'
-  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-Object file: PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.obj, format ELF/DWARF 2.0
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\mc9s08qe128.lst'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\vectortable.c"
-'Invoking: HCS08 Compiler'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Start08.lst'
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/mc9s08gb60.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.obj" "../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c" -Lm="PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.d" -LmCfg=xilmou'
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Cmt_Interface.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/CMT\Cmt.h"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\mc9s08gb60.c"
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Accelerometer/Accelerometer.args" -ObjN="PLM/HCS08/Source/Accelerometer/Accelerometer_c.obj" "../PLM/HCS08/Source/Accelerometer/Accelerometer.c" -Lm="PLM/HCS08/Source/Accelerometer/Accelerometer_c.d" -LmCfg=xilmou
-Option -Lm: Updating make info to 'PLM/HCS08/Source/CMT/Cmt_c.d'
-Global objects: 180, Data Size (RAM): 207
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Cmt.lst'
-../PLM/HCS08/Source/Buzzer/Buzzer.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Buzzer/Buzzer.args" -ObjN="PLM/HCS08/Source/Buzzer/Buzzer_c.obj" "../PLM/HCS08/Source/Buzzer/Buzzer.c" -Lm="PLM/HCS08/Source/Buzzer/Buzzer_c.d" -LmCfg=xilmou'
-Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.d'
-Object file: PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.obj, format ELF/DWARF 2.0
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\mc9s08gb60.lst'
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Building file: ../PLM/HCS08/Source/ASM/ASM.c'
-Object file: PLM/HCS08/Source/Common/Sys/Start08_c.obj, format ELF/DWARF 2.0
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Buzzer\Buzzer.c"
-Code Size: 139
-Global objects: 6, Data Size (RAM): 6
-'Executing target #33 ../PLM/HCS08/Source/ASM/ASM.c'
-Object file: PLM/HCS08/Source/CMT/Cmt_c.obj, format ELF/DWARF 2.0
-'Finished building: ../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c'
-'Finished building: ../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c'
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Buzzer\Buzzer.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Buzzer_Interface.h"
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-Code Size: 20
-Global objects: 12
-' '
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM\Eeprom.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Eeprom_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+Object file: PLM/HCS08/Source/Flash/Flash_c.obj, format ELF/DWARF 2.0
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+Code Size: 418
+../PLM/HCS08/Source/Common/Utilities/Utilities.c
+Global objects: 18, Data Size (RAM): 1
+Command Line: '-ArgFile"PLM/HCS08/Source/Common/Utilities/Utilities.args" -ObjN="PLM/HCS08/Source/Common/Utilities/Utilities_c.obj" "../PLM/HCS08/Source/Common/Utilities/Utilities.c" -Lm="PLM/HCS08/Source/Common/Utilities/Utilities_c.d" -LmCfg=xilmou'
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-'Invoking: HCS08 Compiler'
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/ASM/ASM.args" -ObjN="PLM/HCS08/Source/ASM/ASM_c.obj" "../PLM/HCS08/Source/ASM/ASM.c" -Lm="PLM/HCS08/Source/ASM/ASM_c.d" -LmCfg=xilmou
-' '
-'Building file: ../OTAP/OTAP.c'
-'Building file: ../PLM/HCS08/Source/ADC/ADC.c'
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-'Executing target #35 ../OTAP/OTAP.c'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+'Finished building: ../PLM/HCS08/Source/Flash/Flash4Otap/Flash4Otap.c'
+'Invoking: HCS08 Compiler'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Utilities\Utilities.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/EEPROM/Eeprom_c.d'
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Eeprom.lst'
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+Object file: PLM/HCS08/Source/EEPROM/Eeprom_c.obj, format ELF/DWARF 2.0
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
+Code Size: 8
+Global objects: 4
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Utilities/Utilities_c.d'
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Finished building: ../PLM/HCS08/Source/Flash/Flash.c'
+'Building file: ../PLM/HCS08/Source/Common/Sys/mc13233c.c'
+'Invoking: HCS08 Compiler'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/McuInit.args" -ObjN="PLM/HCS08/Source/Common/Sys/McuInit_c.obj" "../PLM/HCS08/Source/Common/Sys/McuInit.c" -Lm="PLM/HCS08/Source/Common/Sys/McuInit_c.d" -LmCfg=xilmou
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Utilities.lst'
+' '
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/Start08.args" -ObjN="PLM/HCS08/Source/Common/Sys/Start08_c.obj" "../PLM/HCS08/Source/Common/Sys/Start08.c" -Lm="PLM/HCS08/Source/Common/Sys/Start08_c.d" -LmCfg=xilmou
+'Finished building: ../PLM/HCS08/Source/EEPROM/Eeprom.c'
+' '
+../PLM/HCS08/Source/Common/Sys/McuInit.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/McuInit.args" -ObjN="PLM/HCS08/Source/Common/Sys/McuInit_c.obj" "../PLM/HCS08/Source/Common/Sys/McuInit.c" -Lm="PLM/HCS08/Source/Common/Sys/McuInit_c.d" -LmCfg=xilmou'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\McuInit.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/McuInit_c.d'
+'Building file: ../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\McuInit.lst'
+' '
+Object file: PLM/HCS08/Source/Common/Sys/McuInit_c.obj, format ELF/DWARF 2.0
+Code Size: 59
+Global objects: 10
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+../PLM/HCS08/Source/Common/Sys/Start08.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/Start08.args" -ObjN="PLM/HCS08/Source/Common/Sys/Start08_c.obj" "../PLM/HCS08/Source/Common/Sys/Start08.c" -Lm="PLM/HCS08/Source/Common/Sys/Start08_c.d" -LmCfg=xilmou'
+'Executing target #26 ../PLM/HCS08/Source/Common/Sys/mc13233c.c'
+' '
+'Building file: ../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c'
+'Finished building: ../PLM/HCS08/Source/Common/Sys/McuInit.c'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\Start08.c"
+ "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\start08.h"
+  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\non_bank.sgm"
+ "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\non_bank.sgm"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/Start08_c.d'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Start08.lst'
+Object file: PLM/HCS08/Source/Common/Utilities/Utilities_c.obj, format ELF/DWARF 2.0
+Code Size: 964
+Global objects: 58, Data Size (RAM): 187
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Invoking: HCS08 Compiler'
+Object file: PLM/HCS08/Source/Common/Sys/Start08_c.obj, format ELF/DWARF 2.0
+Code Size: 139
+Global objects: 6, Data Size (RAM): 6
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Building file: ../PLM/HCS08/Source/CMT/Cmt.c'
+'Executing target #27 ../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c'
+'Building file: ../PLM/HCS08/Source/Common/Sys/vectortable.c'
+'Executing target #28 ../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/mc13233c.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc13233c_c.obj" "../PLM/HCS08/Source/Common/Sys/mc13233c.c" -Lm="PLM/HCS08/Source/Common/Sys/mc13233c_c.d" -LmCfg=xilmou
+' '
+'Finished building: ../PLM/HCS08/Source/Common/Utilities/Utilities.c'
+'Finished building: ../PLM/HCS08/Source/Common/Sys/Start08.c'
+'Invoking: HCS08 Compiler'
+'Executing target #30 ../PLM/HCS08/Source/CMT/Cmt.c'
+'Executing target #29 ../PLM/HCS08/Source/Common/Sys/vectortable.c'
+'Invoking: HCS08 Compiler'
+../PLM/HCS08/Source/Common/Sys/mc13233c.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/mc13233c.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc13233c_c.obj" "../PLM/HCS08/Source/Common/Sys/mc13233c.c" -Lm="PLM/HCS08/Source/Common/Sys/mc13233c_c.d" -LmCfg=xilmou'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/mc9s08gb60.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.obj" "../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c" -Lm="PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.d" -LmCfg=xilmou
+' '
+'Building file: ../PLM/HCS08/Source/Buzzer/Buzzer.c'
+' '
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\mc13233c.c"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/mc13233c_c.d'
+Object file: PLM/HCS08/Source/Common/Sys/mc13233c_c.obj, format ELF/DWARF 2.0
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\mc13233c.lst'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/mc9s08qe128.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.obj" "../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c" -Lm="PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.d" -LmCfg=xilmou
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/mc9s08gb60.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.obj" "../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c" -Lm="PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.d" -LmCfg=xilmou'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\mc9s08gb60.c"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.d'
+Object file: PLM/HCS08/Source/Common/Sys/mc9s08gb60_c.obj, format ELF/DWARF 2.0
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\mc9s08gb60.lst'
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Invoking: HCS08 Compiler'
+../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/mc9s08qe128.args" -ObjN="PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.obj" "../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c" -Lm="PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.d" -LmCfg=xilmou'
+'Executing target #31 ../PLM/HCS08/Source/Buzzer/Buzzer.c'
+'Invoking: HCS08 Compiler'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\mc9s08qe128.c"
+ "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.d'
+Object file: PLM/HCS08/Source/Common/Sys/mc9s08qe128_c.obj, format ELF/DWARF 2.0
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\mc9s08qe128.lst'
+Global objects: 180, Data Size (RAM): 207
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Common/Sys/vectortable.args" -ObjN="PLM/HCS08/Source/Common/Sys/vectortable_c.obj" "../PLM/HCS08/Source/Common/Sys/vectortable.c" -Lm="PLM/HCS08/Source/Common/Sys/vectortable_c.d" -LmCfg=xilmou
+'Building file: ../PLM/HCS08/Source/ASM/ASM.c'
+'Building file: ../PLM/HCS08/Source/Accelerometer/Accelerometer.c'
+'Finished building: ../PLM/HCS08/Source/Common/Sys/mc13233c.c'
+'Finished building: ../PLM/HCS08/Source/Common/Sys/mc9s08gb60.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/CMT/Cmt.args" -ObjN="PLM/HCS08/Source/CMT/Cmt_c.obj" "../PLM/HCS08/Source/CMT/Cmt.c" -Lm="PLM/HCS08/Source/CMT/Cmt_c.d" -LmCfg=xilmou
+'Finished building: ../PLM/HCS08/Source/Common/Sys/mc9s08qe128.c'
+'Executing target #32 ../PLM/HCS08/Source/Accelerometer/Accelerometer.c'
+'Invoking: HCS08 Compiler'
+' '
+'Executing target #33 ../PLM/HCS08/Source/ASM/ASM.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Buzzer/Buzzer.args" -ObjN="PLM/HCS08/Source/Buzzer/Buzzer_c.obj" "../PLM/HCS08/Source/Buzzer/Buzzer.c" -Lm="PLM/HCS08/Source/Buzzer/Buzzer_c.d" -LmCfg=xilmou
+' '
+../PLM/HCS08/Source/CMT/Cmt.c
+Command Line: '-ArgFile"PLM/HCS08/Source/CMT/Cmt.args" -ObjN="PLM/HCS08/Source/CMT/Cmt_c.obj" "../PLM/HCS08/Source/CMT/Cmt.c" -Lm="PLM/HCS08/Source/CMT/Cmt_c.d" -LmCfg=xilmou'
+' '
+'Invoking: HCS08 Compiler'
+'Building file: ../PLM/HCS08/Source/ADC/ADC.c'
+'Invoking: HCS08 Compiler'
+'Building file: ../OTAP/OTAP.c'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/Accelerometer/Accelerometer.args" -ObjN="PLM/HCS08/Source/Accelerometer/Accelerometer_c.obj" "../PLM/HCS08/Source/Accelerometer/Accelerometer.c" -Lm="PLM/HCS08/Source/Accelerometer/Accelerometer_c.d" -LmCfg=xilmou
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/CMT\Cmt.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+../PLM/HCS08/Source/Buzzer/Buzzer.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Buzzer/Buzzer.args" -ObjN="PLM/HCS08/Source/Buzzer/Buzzer_c.obj" "../PLM/HCS08/Source/Buzzer/Buzzer.c" -Lm="PLM/HCS08/Source/Buzzer/Buzzer_c.d" -LmCfg=xilmou'
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+../PLM/HCS08/Source/Common/Sys/vectortable.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Common/Sys/vectortable.args" -ObjN="PLM/HCS08/Source/Common/Sys/vectortable_c.obj" "../PLM/HCS08/Source/Common/Sys/vectortable.c" -Lm="PLM/HCS08/Source/Common/Sys/vectortable_c.d" -LmCfg=xilmou'
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/ASM/ASM.args" -ObjN="PLM/HCS08/Source/ASM/ASM_c.obj" "../PLM/HCS08/Source/ASM/ASM.c" -Lm="PLM/HCS08/Source/ASM/ASM_c.d" -LmCfg=xilmou
+'Executing target #34 ../PLM/HCS08/Source/ADC/ADC.c'
+'Building file: ../Application/Source/main.c'
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Buzzer\Buzzer.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Buzzer\Buzzer.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Buzzer_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+'Executing target #36 ../Application/Source/main.c'
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+../PLM/HCS08/Source/Accelerometer/Accelerometer.c
+Command Line: '-ArgFile"PLM/HCS08/Source/Accelerometer/Accelerometer.args" -ObjN="PLM/HCS08/Source/Accelerometer/Accelerometer_c.obj" "../PLM/HCS08/Source/Accelerometer/Accelerometer.c" -Lm="PLM/HCS08/Source/Accelerometer/Accelerometer_c.d" -LmCfg=xilmou'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Common/Sys\vectortable.c"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Accelerometer\Accelerometer.c"
+  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Accelerometer\Accelerometer.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/Application/Configure\app_config.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\RTI_Interface.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Accelerometer_Interface.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
-../PLM/HCS08/Source/ASM/ASM.c
-Command Line: '-ArgFile"PLM/HCS08/Source/ASM/ASM.args" -ObjN="PLM/HCS08/Source/ASM/ASM_c.obj" "../PLM/HCS08/Source/ASM/ASM.c" -Lm="PLM/HCS08/Source/ASM/ASM_c.d" -LmCfg=xilmou'
-'Invoking: HCS08 Compiler'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"OTAP/OTAP.args" -ObjN="OTAP/OTAP_c.obj" "../OTAP/OTAP.c" -Lm="OTAP/OTAP_c.d" -LmCfg=xilmou
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+'Invoking: HCS08 Compiler'
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Cmt_Interface.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
+      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/CMT\Cmt.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/CMT/Cmt_c.d'
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+'Executing target #35 ../OTAP/OTAP.c'
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Cmt.lst'
+../PLM/HCS08/Source/ASM/ASM.c
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+         "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+         "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/ADC/ADC.args" -ObjN="PLM/HCS08/Source/ADC/ADC_c.obj" "../PLM/HCS08/Source/ADC/ADC.c" -Lm="PLM/HCS08/Source/ADC/ADC_c.d" -LmCfg=xilmou
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/Accelerometer/Accelerometer_c.d'
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Accelerometer.lst'
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+'Invoking: HCS08 Compiler'
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+Command Line: '-ArgFile"PLM/HCS08/Source/ASM/ASM.args" -ObjN="PLM/HCS08/Source/ASM/ASM_c.obj" "../PLM/HCS08/Source/ASM/ASM.c" -Lm="PLM/HCS08/Source/ASM/ASM_c.d" -LmCfg=xilmou'
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ASM_Interface.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
-'Executing target #34 ../PLM/HCS08/Source/ADC/ADC.c'
-'Finished building: ../PLM/HCS08/Source/Common/Sys/Start08.c'
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\KBI_Interface.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LED_Interface.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-'Finished building: ../PLM/HCS08/Source/CMT/Cmt.c'
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LPM_Interface.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
+Object file: PLM/HCS08/Source/CMT/Cmt_c.obj, format ELF/DWARF 2.0
+Code Size: 20
+Global objects: 12
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LVD_interface.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-../PLM/HCS08/Source/Accelerometer/Accelerometer.c
-Command Line: '-ArgFile"PLM/HCS08/Source/Accelerometer/Accelerometer.args" -ObjN="PLM/HCS08/Source/Accelerometer/Accelerometer_c.obj" "../PLM/HCS08/Source/Accelerometer/Accelerometer.c" -Lm="PLM/HCS08/Source/Accelerometer/Accelerometer_c.d" -LmCfg=xilmou'
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\TouchPad_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ADC_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Keyboard_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\CMT_Interface.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
+Object file: PLM/HCS08/Source/Accelerometer/Accelerometer_c.obj, format ELF/DWARF 2.0
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Accelerometer_Interface.h"
-' '
-../OTAP/OTAP.c
-Command Line: '-ArgFile"OTAP/OTAP.args" -ObjN="OTAP/OTAP_c.obj" "../OTAP/OTAP.c" -Lm="OTAP/OTAP_c.d" -LmCfg=xilmou'
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
-'Invoking: HCS08 Compiler'
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Eeprom_Interface.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\RTI_Interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LCD_Interface.h"
+Code Size: 6
+Global objects: 3
 Option -Lm: Updating make info to 'PLM/HCS08/Source/Buzzer/Buzzer_c.d'
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+'Invoking: HCS08 Compiler'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/ASM\ASM.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/ASM\ASM.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ASM_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"Application/Source/main.args" -ObjN="Application/Source/main_c.obj" "../Application/Source/main.c" -Lm="Application/Source/main_c.d" -LmCfg=xilmou
+   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/ASM/ASM_c.d'
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\ASM.lst'
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\RTI_Interface.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Buzzer.lst'
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"PLM/HCS08/Source/ADC/ADC.args" -ObjN="PLM/HCS08/Source/ADC/ADC_c.obj" "../PLM/HCS08/Source/ADC/ADC.c" -Lm="PLM/HCS08/Source/ADC/ADC_c.d" -LmCfg=xilmou
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\KBI_Interface.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LVD_Interface.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\OTAP_Interface.h"
@@ -1015,198 +1061,149 @@ Option -Lm: Updating make info to 'PLM/HCS08/Source/Buzzer/Buzzer_c.d'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap_Interface.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Buzzer.lst'
 Option -Lm: Updating make info to 'PLM/HCS08/Source/Common/Sys/vectortable_c.d'
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/ASM\ASM.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/ASM\ASM.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ASM_Interface.h"
+'Finished building: ../PLM/HCS08/Source/CMT/Cmt.c'
+../PLM/HCS08/Source/ADC/ADC.c
+Command Line: '-ArgFile"PLM/HCS08/Source/ADC/ADC.args" -ObjN="PLM/HCS08/Source/ADC/ADC_c.obj" "../PLM/HCS08/Source/ADC/ADC.c" -Lm="PLM/HCS08/Source/ADC/ADC_c.d" -LmCfg=xilmou'
+'Finished building: ../PLM/HCS08/Source/Accelerometer/Accelerometer.c'
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\vectortable.lst'
+Object file: PLM/HCS08/Source/Common/Sys/vectortable_c.obj, format ELF/DWARF 2.0
+Code Size: 3
+Global objects: 15, Const Data Size (ROM): 64
+Object file: PLM/HCS08/Source/Buzzer/Buzzer_c.obj, format ELF/DWARF 2.0
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+Code Size: 639
+Global objects: 33, Data Size (RAM): 24
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"OTAP/OTAP.args" -ObjN="OTAP/OTAP_c.obj" "../OTAP/OTAP.c" -Lm="OTAP/OTAP_c.d" -LmCfg=xilmou
+' '
+'Finished building: ../PLM/HCS08/Source/Common/Sys/vectortable.c'
+'Finished building: ../PLM/HCS08/Source/Buzzer/Buzzer.c'
+' '
+../Application/Source/main.c
+Command Line: '-ArgFile"Application/Source/main.args" -ObjN="Application/Source/main_c.obj" "../Application/Source/main.c" -Lm="Application/Source/main_c.d" -LmCfg=xilmou'
+'Building file: ../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c'
+' '
+' '
+'Building file: ../.metadata/.plugins/org.eclipse.cdt.make.core/specs.cpp'
+'Executing target #37 ../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c'
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/ADC\ADC.c"
+ "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/ADC\ADC.h"
+  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ADC_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
+"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../Application/Source\main.c"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
+     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
+      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+../OTAP/OTAP.c
+Command Line: '-ArgFile"OTAP/OTAP.args" -ObjN="OTAP/OTAP_c.obj" "../OTAP/OTAP.c" -Lm="OTAP/OTAP_c.d" -LmCfg=xilmou'
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
+Option -Lm: Updating make info to 'PLM/HCS08/Source/ADC/ADC_c.d'
 "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../OTAP\OTAP.c"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\OTAP.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\OTAP_Interface.h"
    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+'Invoking: HCS08 Compiler'
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-'Building file: ../Application/Source/main.c'
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/ASM/ASM_c.d'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\vectortable.lst'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Interface\SMAC_Interface.h"
-Object file: PLM/HCS08/Source/Common/Sys/vectortable_c.obj, format ELF/DWARF 2.0
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-../PLM/HCS08/Source/ADC/ADC.c
-Command Line: '-ArgFile"PLM/HCS08/Source/ADC/ADC.args" -ObjN="PLM/HCS08/Source/ADC/ADC_c.obj" "../PLM/HCS08/Source/ADC/ADC.c" -Lm="PLM/HCS08/Source/ADC/ADC_c.d" -LmCfg=xilmou'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Eeprom_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-'Executing target #36 ../Application/Source/main.c'
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-Code Size: 3
-Global objects: 15, Const Data Size (ROM): 64
-' '
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/Accelerometer\Accelerometer.c"
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../PLM/HCS08/Source/ADC\ADC.c"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/ADC\ADC.h"
- "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Accelerometer\Accelerometer.h"
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Accelerometer_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
-'Invoking: HCS08 Compiler'
-'Building file: ../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-Option -Lm: Updating make info to 'OTAP/OTAP_c.d'
-  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ADC_Interface.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\ASM.lst'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-     "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile"Application/Source/main.args" -ObjN="Application/Source/main_c.obj" "../Application/Source/main.c" -Lm="Application/Source/main_c.d" -LmCfg=xilmou
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
-     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
-      "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
-       "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-        "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
-         "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
-         "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_config.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/ADC/ADC_c.d'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\ADC.lst'
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
-   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
-    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
-Option -Lm: Updating make info to 'PLM/HCS08/Source/Accelerometer/Accelerometer_c.d'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\OTAP.lst'
-Object file: PLM/HCS08/Source/ADC/ADC_c.obj, format ELF/DWARF 2.0
-Code Size: 10
-Global objects: 6
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Executing target #37 ../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c'
-Object file: OTAP/OTAP_c.obj, format ELF/DWARF 2.0
-Code Size: 4
-Global objects: 4
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-../Application/Source/main.c
-Command Line: '-ArgFile"Application/Source/main.args" -ObjN="Application/Source/main_c.obj" "../Application/Source/main.c" -Lm="Application/Source/main_c.d" -LmCfg=xilmou'
-'Invoking: HCS08 Compiler'
-"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile".metadata/.plugins/org.eclipse.cdt.make.core/specs.args" -ObjN=".metadata/.plugins/org.eclipse.cdt.make.core/specs_c.obj" "../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c" -Lm=".metadata/.plugins/org.eclipse.cdt.make.core/specs_c.d" -LmCfg=xilmou
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../Application/Source\main.c"
+'Executing target #38 ../.metadata/.plugins/org.eclipse.cdt.make.core/specs.cpp'
  "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\hidef.h"
   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stddef.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\stdtypes.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Common/Sys\McuInit.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\derivative.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\board_config.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\IrqControlLib.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
-Object file: PLM/HCS08/Source/Buzzer/Buzzer_c.obj, format ELF/DWARF 2.0
-Code Size: 639
-Global objects: 33, Data Size (RAM): 24
   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-'Finished building: ../PLM/HCS08/Source/ADC/ADC.c'
-'Finished building: ../PLM/HCS08/Source/Common/Sys/vectortable.c'
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\Accelerometer.lst'
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Radio/PhyMC1323x\PhyPacketProcessor.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\EmbeddedTypes.h"
   "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\string.h"
    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/include\libdefs.h"
-'Finished building: ../OTAP/OTAP.c'
-../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c
-Command Line: '-ArgFile".metadata/.plugins/org.eclipse.cdt.make.core/specs.args" -ObjN=".metadata/.plugins/org.eclipse.cdt.make.core/specs_c.obj" "../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c" -Lm=".metadata/.plugins/org.eclipse.cdt.make.core/specs_c.d" -LmCfg=xilmou'
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
+    "C:/Freescale/CW MCU v10.2/MCU/lib/hc08c/device/include\mc9s08qe128.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\ADC.lst'
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Interface\SMAC_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Interface\SMAC_Interface.h"
+Object file: PLM/HCS08/Source/ASM/ASM_c.obj, format ELF/DWARF 2.0
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\Utilities_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/SMAC/Generic\SMAC_config.h"
-' '
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\UART_Interface.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Radio_Interface.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PLM_Config.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Eeprom_Interface.h"
+    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
+     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP_Interface.h"
+   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap_Interface.h"
+Option -Lm: Updating make info to 'OTAP/OTAP_c.d'
+Object file: PLM/HCS08/Source/ADC/ADC_c.obj, format ELF/DWARF 2.0
+Code Size: 10
+Global objects: 6
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
+Code Size: 1180
+Global objects: 28, Data Size (RAM): 53, Const Data Size (ROM): 256
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\SPI_Interface.h"
+Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\OTAP.lst'
    "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\GPIO_interface.h"
     "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\PortConfig.h"
      "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/Generic/Interface\TargetMC1320xQE128EVB.h"
+"C:/Freescale/CW MCU v10.2/MCU/prog/chc08" -ArgFile".metadata/.plugins/org.eclipse.cdt.make.core/specs.args" -ObjN=".metadata/.plugins/org.eclipse.cdt.make.core/specs_c.obj" "../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c" -Lm=".metadata/.plugins/org.eclipse.cdt.make.core/specs_c.d" -LmCfg=xilmou
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IRQ_Interface.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/Application/Configure\app_config.h"
-'Finished building: ../PLM/HCS08/Source/Buzzer/Buzzer.c'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\RTI_Interface.h"
+Object file: OTAP/OTAP_c.obj, format ELF/DWARF 2.0
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Timer_Interface.h"
+Code Size: 4
+Global objects: 4
+HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
+HC08 Compiler: *** Processing ok ***
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ASM_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Flash_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\IIC_Interface.h"
-Object file: PLM/HCS08/Source/ASM/ASM_c.obj, format ELF/DWARF 2.0
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\KBI_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LED_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LPM_Interface.h"
-Code Size: 1180
-Global objects: 28, Data Size (RAM): 53, Const Data Size (ROM): 256
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LVD_interface.h"
-' '
-"C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../.metadata/.plugins/org.eclipse.cdt.make.core\specs.c"
-Option -Lm: Updating make info to '.metadata/.plugins/org.eclipse.cdt.make.core/specs_c.d'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\TouchPad_Interface.h"
-Object file: .metadata/.plugins/org.eclipse.cdt.make.core/specs_c.obj, format ELF/DWARF 2.0
-Option -Lasm: Generating listing file 'C:\Users\hbarba\repos\digitales\My Solution\Generic Demo\Generic Demo\specs.lst'
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
-HC08 Compiler: *** Processing ok ***
-HC08 Compiler: *** 0 error(s), 0 warning(s), 0 information message(s) ***
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\ADC_Interface.h"
-HC08 Compiler: *** Processing ok ***
-' '
-Object file: PLM/HCS08/Source/Accelerometer/Accelerometer_c.obj, format ELF/DWARF 2.0
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Keyboard_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\CMT_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Accelerometer_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\Eeprom_Interface.h"
-'Finished building: ../PLM/HCS08/Source/ASM/ASM.c'
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Interface\LCD_Interface.h"
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\OTAP_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/EEPROM/Eeprom4OTAP\Eeprom4OTAP_Interface.h"
   "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/PLM/HCS08/Source/Flash/Flash4Otap\Flash4Otap_Interface.h"
-' '
+'Finished building: ../PLM/HCS08/Source/ASM/ASM.c'
+'Finished building: ../PLM/HCS08/Source/ADC/ADC.c'
  "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/UMAC\uMAc_Interface.h"
+'Invoking: HCS08 Compiler'
 Option -Lm: Updating make info to 'Application/Source/main_c.d'
-'Finished building: ../.metadata/.plugins/org.eclipse.cdt.make.core/specs.c'
 C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../Application/Source\main.c:108:warning:C1858 Partial implicit parameter declaration
 C:/Users/hbarba/repos/digitales/My Solution/Generic Demo/OTAP\../Application/Source\main.c:119:warning:C1858 Partial implicit parameter declaration

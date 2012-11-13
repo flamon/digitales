@@ -15,6 +15,8 @@
 #include "PLM_config.h"
 
 
+#define MyID 0
+
 //Definiciones
 typedef enum{
 	uMac_NoInit = 0,
@@ -53,9 +55,16 @@ static uMac_Packet * uMac_TxPacket;
 bool_t			bTxDone;
 bool_t			bRxDone;
 bool_t			bDoTx;
+bool_t			bToggle = TRUE;
 
 uMac_nodeType uMactype;
-uint8_t uMacdest = 1;
+uint8_t uMacdest = 1, i = 0;
+
+uint16_t ChannelsToScan = 0xFFF;
+uint8_t ChannelsEnergy[16];
+channels_t Channels[] = {gChannel11_c, gChannel12_c, gChannel13_c, gChannel14_c, gChannel15_c,
+			gChannel16_c, gChannel17_c, gChannel18_c, gChannel19_c, gChannel20_c, gChannel21_c,
+			gChannel22_c, gChannel23_c, gChannel24_c, gChannel25_c, gChannel26_c};
 
 //Prototipos
 //void MLMEScanComfirm(channels_t ClearestChann); //Poner tambien
@@ -63,10 +72,10 @@ void InitSmac(void); //Poner en memoria bankeada******
 void uMac_Txf(void);
 
 void Init_uMac(/*uMac_nodeType type, uint8_t dest, uMac_txCallBack TxCallBack, uMac_rxCallBack RxCallBack*/) {
-	Led_PrintValue(0x08);
 	uMac_On = TRUE;
-	uMactype = type;
-	uMacdest = dest;
+	//uMactype = type;
+	//uMacdest = dest;
+	InitSmac();
 	uMac_RxPacket = (uMac_Packet *)AppRxPacket->smacPdu.u8Data;
 	uMac_TxPacket = (uMac_Packet *)AppTxPacket->smacPdu.u8Data;
 	uMac_Current_State = uMac_NoInit;
@@ -77,30 +86,29 @@ void uMac_Txf() {
 	bDoTx = TRUE;
 }
 
-void uMac_Engine(){
-	uint16_t ChannelsToScan = 0xFFF;
-	uint8_t ChannelsEnergy[16], i = 0;
-	channels_t Channels[] = {gChannel11_c, gChannel12_c, gChannel13_c, gChannel14_c, gChannel15_c,
-			gChannel16_c, gChannel17_c, gChannel18_c, gChannel19_c, gChannel20_c, gChannel21_c,
-			gChannel22_c, gChannel23_c, gChannel24_c, gChannel25_c, gChannel26_c};
-	
+void uMac_Engine(){	
 	switch (uMac_Current_State) {
 		case uMac_NoInit:
 			if(uMac_On == TRUE) {
 				uMac_On = FALSE;
-				InitSmac();
 				(void) MLMESetChannelRequest(Channels[i++]);
 				uMac_TxPacket->Dest_Add = uMacdest;
 				uMac_TxPacket->Packet_Type = 0;
 				uMac_TxPacket->Pan_ID = 10;
 				uMac_TxPacket->Source_Add = 0;
+				//for (;;) 
 				(void) MCPSDataRequest(AppTxPacket);
-				uMac_Current_State = uMac_Init;
+				//while (bTxDone != TRUE) {
+				//	bTxDone = FALSE;
+					uMac_Current_State = uMac_Init;
+				//}
 			}
 			break;
 		case uMac_Init:
-			(void) MLMERXEnableRequest(AppRxPacket, 0); 
-			uMac_Current_State = uMac_WaitRx;
+			if (bTxDone == TRUE) {
+				(void) MLMERXEnableRequest(AppRxPacket, 100); 
+				uMac_Current_State = uMac_WaitRx;
+			}
 			break;
 		case uMac_WaitRx:
 				if(bRxDone == TRUE) {
@@ -108,27 +116,54 @@ void uMac_Engine(){
 					//Analizar el paquete
 					if (AppRxPacket->rxStatus == rxSuccessStatus_c) {
 						if (uMac_RxPacket->Pan_ID == 10) {
-							
-							if (uMac_RxPacket->Packet_Type != 0) {
-								// Llamar a la callback
+							if (uMac_RxPacket->Dest_Add == MyID) {
+								switch (uMac_RxPacket->Source_Add) {
+								case 1:
+									Led_PrintValue(0x08);
+									break;
+								case 2:
+									Led_PrintValue(0x06);
+									break;
+								case 3:
+									Led_PrintValue(0x03);
+									break;
+								}
+																
+								/*if (bToggle == TRUE) {
+									Led_PrintValue(0x08);
+									bToggle = FALSE;
+								} else {
+									Led_PrintValue(0x00);
+									bToggle = TRUE;
+								}*/
+								if (uMac_RxPacket->Packet_Type != 0) {
+									// Llamar a la callback
+								}
+								(void) MLMERXEnableRequest(AppRxPacket, 0);
 							}
 						} else {
 							uMac_Current_State = uMac_NoInit;
-							break;
+							uMac_On = TRUE;
 						}
+					} else if (AppRxPacket->rxStatus == rxTimeOutStatus_c) {
+						uMac_Current_State = uMac_NoInit;
+						uMac_On = TRUE;
 					}
 				}
 				if (bDoTx == TRUE) {
 					bDoTx = FALSE;
+					// Deshabilitar la recepcion antes de transmitir (necesario por SMAC)
+					(void) MLMERXDisableRequest();
 					(void) MCPSDataRequest(AppTxPacket);
+					uMac_Current_State = uMac_Tx;
 				}
-				(void) MLMERXEnableRequest(AppRxPacket, 0);
-				// uMac_Current_State = uMac_Tx;
+				
 				break;
 		case uMac_Tx:
-			if(bTxDone==TRUE){
+			if(bTxDone == TRUE){
 				bTxDone = FALSE;
 				uMac_Current_State = uMac_Init;
+				(void) MLMERXEnableRequest(AppRxPacket, 0);
 			}
 			break;
 	}

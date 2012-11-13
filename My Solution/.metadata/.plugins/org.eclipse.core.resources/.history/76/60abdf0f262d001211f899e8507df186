@@ -1,0 +1,142 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+#Progress monitor hint: 38
+first : all
+-include ../makefile.init
+
+# This file contains definitions of environment variables used in the makefiles and .args files if exist.
+-include makefile.local
+
+RM := "$(Gnu_Make_Install_DirEnv)/rm" -f
+
+# All of the sources participating in the build are defined here
+-include sources.mk
+-include subdir.mk
+-include UMAC/subdir.mk
+-include SMAC/Source/subdir.mk
+-include PLM/HCS08/Source/TouchPad/subdir.mk
+-include PLM/HCS08/Source/TPM/subdir.mk
+-include PLM/HCS08/Source/SPI/subdir.mk
+-include PLM/HCS08/Source/SCI/subdir.mk
+-include PLM/HCS08/Source/Radio/PhyMC1320x/subdir.mk
+-include PLM/HCS08/Source/Radio/PhyMC1320x/MC1320xDriver/subdir.mk
+-include PLM/HCS08/Source/RTI/subdir.mk
+-include PLM/HCS08/Source/LVD/subdir.mk
+-include PLM/HCS08/Source/LPM/subdir.mk
+-include PLM/HCS08/Source/LED/subdir.mk
+-include PLM/HCS08/Source/LCD/subdir.mk
+-include PLM/HCS08/Source/Keyboard/subdir.mk
+-include PLM/HCS08/Source/KBI/subdir.mk
+-include PLM/HCS08/Source/IRQ/subdir.mk
+-include PLM/HCS08/Source/IIC/subdir.mk
+-include PLM/HCS08/Source/GPIO/subdir.mk
+-include PLM/HCS08/Source/Flash/Flash4Otap/subdir.mk
+-include PLM/HCS08/Source/Flash/subdir.mk
+-include PLM/HCS08/Source/EEPROM/Eeprom4OTAP/subdir.mk
+-include PLM/HCS08/Source/EEPROM/subdir.mk
+-include PLM/HCS08/Source/Common/Utilities/subdir.mk
+-include PLM/HCS08/Source/Common/Sys/subdir.mk
+-include PLM/HCS08/Source/CMT/subdir.mk
+-include PLM/HCS08/Source/Buzzer/subdir.mk
+-include PLM/HCS08/Source/Accelerometer/subdir.mk
+-include PLM/HCS08/Source/ASM/subdir.mk
+-include PLM/HCS08/Source/ADC/subdir.mk
+-include OTAP/subdir.mk
+-include Application/Source/subdir.mk
+-include .metadata/.plugins/org.eclipse.cdt.make.core/subdir.mk
+-include objects.mk
+
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(strip $(C++_DEPS)),)
+-include $(C++_DEPS)
+endif
+ifneq ($(strip $(C_DEPS)),)
+-include $(C_DEPS)
+endif
+ifneq ($(strip $(CC_DEPS)),)
+-include $(CC_DEPS)
+endif
+ifneq ($(strip $(CPP_DEPS)),)
+-include $(CPP_DEPS)
+endif
+ifneq ($(strip $(CXX_DEPS)),)
+-include $(CXX_DEPS)
+endif
+ifneq ($(strip $(C_UPPER_DEPS)),)
+-include $(C_UPPER_DEPS)
+endif
+endif
+
+-include ../makefile.defs
+
+# Add inputs and outputs from these tool invocations to the build variables 
+EXECUTABLES += \
+Generic\ Demo.abs \
+
+EXECUTABLES_QUOTED += \
+"Generic Demo.abs" \
+
+EXECUTABLES_OS_FORMAT += \
+Generic Demo.abs \
+
+BURNER_OUTPUT_OUTPUTS += \
+Generic\ Demo.abs.s19 \
+
+BURNER_OUTPUT_OUTPUTS_QUOTED += \
+"Generic Demo.abs.s19" \
+
+BURNER_OUTPUT_OUTPUTS_OS_FORMAT += \
+Generic Demo.abs.s19 \
+
+
+# All Target
+call-burner := 0
+ifneq ($(strip $(EXECUTABLES)),)
+ifneq ($(strip $(BBL_SRCS_QUOTED)),)
+call-burner := 1
+endif
+endif
+ifeq ($(call-burner),1)
+all: pre-build main-build
+
+# Main-build Target
+main-build: Generic\ Demo.abs Generic\ Demo.abs.s19
+else
+all: pre-build main-build
+
+# Main-build Target
+main-build: Generic\ Demo.abs
+endif
+
+# Tool invocations
+Generic\ Demo.abs: $(OBJS) $(USER_OBJS) pre.prm pre-build
+	@echo 'Building target: $@'
+	@echo 'Executing target #39 $@'
+	@echo 'Invoking: Linker'
+	"$(HC08ToolsEnv)/linker" -ArgFile"Generic Demo.args" -O"Generic Demo.abs"
+	@echo 'Finished building target: $@'
+	@echo ' '
+
+Generic\ Demo.abs.s19: $(BBL_SRCS) $(EXECUTABLES) pre-build
+	@echo 'Executing target #40 $@'
+	@echo 'Invoking: Burner'
+	"$(HC08ToolsEnv)/burner" -ArgFile"Generic Demo.abs.args" -f="$<" -env"ABS_FILE=$(strip $(EXECUTABLES_OS_FORMAT))"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+# Other Targets
+clean:
+	-$(RM) "./*/*/*/*.obj" "./*/*/*.obj" "./*/*.obj" "./*/*/*/*/*.obj" "./*/*/*/*/*/*.obj" "./*/*/*/*/*/*/*.obj"  "./*/*/*/*.d"  $(CC_DEPS_QUOTED) $(CXX_DEPS_QUOTED) $(BURNER_OUTPUT_OUTPUTS_QUOTED) $(C_UPPER_DEPS_QUOTED) $(C++_DEPS_QUOTED) $(EXECUTABLES_QUOTED) "./*/*/*/*.d" "./*/*/*.d" "./*/*.d" "./*/*/*/*/*.d" "./*/*/*/*/*/*.d" "./*/*/*/*/*/*/*.d"  Generic Demo.abs
+	-@echo ' '
+
+pre-build:
+	-@echo 'Precompile the .prm file'
+	-"C:\Freescale\CW MCU v10.2\eclipse\../MCU/prog/chc08.exe" "C:/Users/hbarba/repos/digitales/My Solution/Generic Demo\PLM\HCS08\PRM\Linker_QE128_far_banked.prm" -LpX -Lp=pre.prm
+	-@echo ' '
+
+.PHONY: all clean dependents
+.SECONDARY:
+
+-include ../makefile.targets

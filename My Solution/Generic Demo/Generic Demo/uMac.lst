@@ -55,347 +55,342 @@ ANSI-C/cC++ Compiler for HC08 V-5.0.39 Build 11346, Dec 13 2011
    53:  bool_t			bTxDone;
    54:  bool_t			bRxDone;
    55:  bool_t			bDoTx;
-   56:  
-   57:  uMac_nodeType uMactype;
-   58:  uint8_t uMacdest = 1;
-   59:  
-   60:  //Prototipos
-   61:  //void MLMEScanComfirm(channels_t ClearestChann); //Poner tambien
-   62:  void InitSmac(void); //Poner en memoria bankeada******
-   63:  void uMac_Txf(void);
-   64:  
-   65:  void Init_uMac(/*uMac_nodeType type, uint8_t dest, uMac_txCallBack TxCallBack, uMac_rxCallBack RxCallBack*/) {
-   66:  	Led_PrintValue(0x08);
-  0000 a608     [2]             LDA   #8
-  0002 ac000000 [8]             CALL  Led_PrintValue
-   67:  	uMac_On = TRUE;
-  0006 a601     [2]             LDA   #1
-  0008 c70000   [4]             STA   uMac_On
-   68:  	//uMactype = type;
-   69:  	//uMacdest = dest;
-   70:  	uMac_RxPacket = (uMac_Packet *)AppRxPacket->smacPdu.u8Data;
-  000b 320000   [5]             LDHX  AppRxPacket
-  000e af05     [2]             AIX   #5
-  0010 960000   [5]             STHX  uMac_RxPacket
-   71:  	uMac_TxPacket = (uMac_Packet *)AppTxPacket->smacPdu.u8Data;
-  0013 320000   [5]             LDHX  AppTxPacket
-  0016 af03     [2]             AIX   #3
-  0018 960000   [5]             STHX  uMac_TxPacket
-   72:  	uMac_Current_State = uMac_NoInit;
-  001b 4f       [1]             CLRA  
-  001c c70000   [4]             STA   uMac_Current_State
-   73:  	//guardar tipo de nodo y callbacks
-   74:  }
-  001f 8d       [7]             RTC   
-   75:  
-   76:  void uMac_Txf() {
-   77:  	bDoTx = TRUE;
+   56:  bool_t			bToggle = TRUE;
+   57:  
+   58:  uMac_nodeType uMactype;
+   59:  uint8_t uMacdest = 1, i = 0;
+   60:  
+   61:  uint16_t ChannelsToScan = 0xFFF;
+   62:  uint8_t ChannelsEnergy[16];
+   63:  channels_t Channels[] = {gChannel11_c, gChannel12_c, gChannel13_c, gChannel14_c, gChannel15_c,
+   64:  			gChannel16_c, gChannel17_c, gChannel18_c, gChannel19_c, gChannel20_c, gChannel21_c,
+   65:  			gChannel22_c, gChannel23_c, gChannel24_c, gChannel25_c, gChannel26_c};
+   66:  
+   67:  //Prototipos
+   68:  //void MLMEScanComfirm(channels_t ClearestChann); //Poner tambien
+   69:  void InitSmac(void); //Poner en memoria bankeada******
+   70:  void uMac_Txf(void);
+   71:  
+   72:  void Init_uMac(/*uMac_nodeType type, uint8_t dest, uMac_txCallBack TxCallBack, uMac_rxCallBack RxCallBack*/) {
+   73:  	uMac_On = TRUE;
+  0000 a601     [2]             LDA   #1
+  0002 c70000   [4]             STA   uMac_On
+   74:  	//uMactype = type;
+   75:  	//uMacdest = dest;
+   76:  	InitSmac();
+  0005 ac000000 [8]             CALL  InitSmac
+   77:  	uMac_RxPacket = (uMac_Packet *)AppRxPacket->smacPdu.u8Data;
+  0009 320000   [5]             LDHX  AppRxPacket
+  000c af05     [2]             AIX   #5
+  000e 960000   [5]             STHX  uMac_RxPacket
+   78:  	uMac_TxPacket = (uMac_Packet *)AppTxPacket->smacPdu.u8Data;
+  0011 320000   [5]             LDHX  AppTxPacket
+  0014 af03     [2]             AIX   #3
+  0016 960000   [5]             STHX  uMac_TxPacket
+   79:  	uMac_Current_State = uMac_NoInit;
+  0019 4f       [1]             CLRA  
+  001a c70000   [4]             STA   uMac_Current_State
+   80:  	//guardar tipo de nodo y callbacks
+   81:  }
+  001d 8d       [7]             RTC   
+   82:  
+   83:  void uMac_Txf() {
+   84:  	bDoTx = TRUE;
   0000 a601     [2]             LDA   #1
   0002 c70000   [4]             STA   bDoTx
-   78:  }
+   85:  }
   0005 8d       [7]             RTC   
-   79:  
-   80:  void uMac_Engine(){
-  0000 a7ef     [2]             AIS   #-17
-   81:  	uint16_t ChannelsToScan = 0xFFF;
-   82:  	uint8_t ChannelsEnergy[16], i = 0;
-  0002 95       [2]             TSX   
-  0003 7f       [4]             CLR   ,X
-   83:  	channels_t Channels[] = {gChannel11_c, gChannel12_c, gChannel13_c, gChannel14_c, gChannel15_c,
-  0004 a60b     [2]             LDA   #11
-  0006 e701     [3]             STA   1,X
-  0008 4c       [1]             INCA  
-  0009 e702     [3]             STA   2,X
-  000b 4c       [1]             INCA  
-  000c e703     [3]             STA   3,X
-  000e 4c       [1]             INCA  
-  000f e704     [3]             STA   4,X
-  0011 4c       [1]             INCA  
-  0012 e705     [3]             STA   5,X
-   84:  			gChannel16_c, gChannel17_c, gChannel18_c, gChannel19_c, gChannel20_c, gChannel21_c,
-  0014 4c       [1]             INCA  
-  0015 e706     [3]             STA   6,X
-  0017 4c       [1]             INCA  
-  0018 e707     [3]             STA   7,X
-  001a 4c       [1]             INCA  
-  001b e708     [3]             STA   8,X
-  001d 4c       [1]             INCA  
-  001e e709     [3]             STA   9,X
-  0020 4c       [1]             INCA  
-  0021 e70a     [3]             STA   10,X
-  0023 4c       [1]             INCA  
-  0024 e70b     [3]             STA   11,X
-   85:  			gChannel22_c, gChannel23_c, gChannel24_c, gChannel25_c, gChannel26_c};
-  0026 4c       [1]             INCA  
-  0027 e70c     [3]             STA   12,X
-  0029 4c       [1]             INCA  
-  002a e70d     [3]             STA   13,X
-  002c 4c       [1]             INCA  
-  002d e70e     [3]             STA   14,X
-  002f 4c       [1]             INCA  
-  0030 e70f     [3]             STA   15,X
-  0032 4c       [1]             INCA  
-  0033 e710     [3]             STA   16,X
-   86:  	
-   87:  	switch (uMac_Current_State) {
-  0035 c60000   [4]             LDA   uMac_Current_State
-  0038 a104     [2]             CMP   #4
-  003a 220f     [3]             BHI   L4B ;abs = 004b
-  003c 4d       [1]             TSTA  
-  003d 270e     [3]             BEQ   L4D ;abs = 004d
-  003f 410144   [4]             CBEQA #1,L86 ;abs = 0086
-  0042 410249   [4]             CBEQA #2,L8E ;abs = 008e
-  0045 a104     [2]             CMP   #4
-  0047 2675     [3]             BNE   LBE ;abs = 00be
-  0049 2075     [3]             BRA   LC0 ;abs = 00c0
-  004b          L4B:    
-  004b 2071     [3]             BRA   LBE ;abs = 00be
-  004d          L4D:    
-   88:  		case uMac_NoInit:
-   89:  			if(uMac_On == TRUE) {
-  004d c60000   [4]             LDA   uMac_On
-  0050 4b6c     [4]             DBNZA LBE ;abs = 00be
-   90:  				uMac_On = FALSE;
-  0052 4f       [1]             CLRA  
-  0053 c70000   [4]             STA   uMac_On
-   91:  				InitSmac();
-  0056 ac000000 [8]             CALL  InitSmac
+   86:  
+   87:  void uMac_Engine(){	
+   88:  	switch (uMac_Current_State) {
+  0000 c60000   [4]             LDA   uMac_Current_State
+  0003 a104     [2]             CMP   #4
+  0005 2210     [3]             BHI   L17 ;abs = 0017
+  0007 4d       [1]             TSTA  
+  0008 270e     [3]             BEQ   L18 ;abs = 0018
+  000a 41013f   [4]             CBEQA #1,L4C ;abs = 004c
+  000d 41024a   [4]             CBEQA #2,L5A ;abs = 005a
+  0010 a104     [2]             CMP   #4
+  0012 2603     [3]             BNE   L17 ;abs = 0017
+  0014 cc00ad   [4]             JMP   LAD ;abs = 00ad
+  0017          L17:    
+  0017 8d       [7]             RTC   
+  0018          L18:    
+   89:  		case uMac_NoInit:
+   90:  			if(uMac_On == TRUE) {
+  0018 c60000   [4]             LDA   uMac_On
+  001b 4a       [1]             DECA  
+  001c 2632     [3]             BNE   L50 ;abs = 0050
+   91:  				uMac_On = FALSE;
+  001e 4f       [1]             CLRA  
+  001f c70000   [4]             STA   uMac_On
    92:  				(void) MLMESetChannelRequest(Channels[i++]);
-  005a 95       [2]             TSX   
-  005b af01     [2]             AIX   #1
-  005d 9f       [1]             TXA   
-  005e 9eeb01   [4]             ADD   1,SP
-  0061 87       [2]             PSHA  
-  0062 8b       [2]             PSHH  
-  0063 86       [3]             PULA  
-  0064 a900     [2]             ADC   #0
-  0066 87       [2]             PSHA  
-  0067 8a       [3]             PULH  
-  0068 88       [3]             PULX  
-  0069 f6       [3]             LDA   ,X
-  006a ac000000 [8]             CALL  MLMESetChannelRequest
+  0022 c60000   [4]             LDA   i
+  0025 97       [1]             TAX   
+  0026 4c       [1]             INCA  
+  0027 c70000   [4]             STA   i
+  002a 8c       [1]             CLRH  
+  002b d60000   [4]             LDA   @Channels,X
+  002e ac000000 [8]             CALL  MLMESetChannelRequest
    93:  				uMac_TxPacket->Dest_Add = uMacdest;
-  006e c60000   [4]             LDA   uMacdest
-  0071 320000   [5]             LDHX  uMac_TxPacket
-  0074 e703     [3]             STA   3,X
+  0032 c60000   [4]             LDA   uMacdest
+  0035 320000   [5]             LDHX  uMac_TxPacket
+  0038 e703     [3]             STA   3,X
    94:  				uMac_TxPacket->Packet_Type = 0;
-  0076 6f01     [5]             CLR   1,X
+  003a 6f01     [5]             CLR   1,X
    95:  				uMac_TxPacket->Pan_ID = 10;
-  0078 a60a     [2]             LDA   #10
-  007a f7       [2]             STA   ,X
+  003c a60a     [2]             LDA   #10
+  003e f7       [2]             STA   ,X
    96:  				uMac_TxPacket->Source_Add = 0;
-  007b 6f02     [5]             CLR   2,X
-   97:  				(void) MCPSDataRequest(AppTxPacket);
-  007d 320000   [5]             LDHX  AppTxPacket
-  0080 ac000000 [8]             CALL  MCPSDataRequest
-  0084 2043     [3]             BRA   LC9 ;abs = 00c9
-  0086          L86:    
-  0086 ac0000d1 [8]             CALL  uMac_Engine:209
-   98:  				uMac_Current_State = uMac_Init;
-   99:  			}
-  100:  			break;
-  101:  		case uMac_Init:
-  102:  			(void) MLMERXEnableRequest(AppRxPacket, 0); 
-  103:  			uMac_Current_State = uMac_WaitRx;
-  008a a602     [2]             LDA   #2
+  003f 6f02     [5]             CLR   2,X
+   97:  				//for (;;) 
+   98:  				(void) MCPSDataRequest(AppTxPacket);
+  0041 320000   [5]             LDHX  AppTxPacket
+  0044 ac000000 [8]             CALL  MCPSDataRequest
+   99:  				//while (bTxDone != TRUE) {
+  100:  				//	bTxDone = FALSE;
+  101:  					uMac_Current_State = uMac_Init;
+  0048 a601     [2]             LDA   #1
+  004a 205d     [3]             BRA   LA9 ;abs = 00a9
+  004c          L4C:    
+  102:  				//}
+  103:  			}
   104:  			break;
-  008c 203d     [3]             BRA   LCB ;abs = 00cb
-  008e          L8E:    
-  105:  		case uMac_WaitRx:
-  106:  				if(bRxDone == TRUE) {
-  008e c60000   [4]             LDA   bRxDone
-  0091 4b17     [4]             DBNZA LAA ;abs = 00aa
-  107:  					bRxDone = FALSE;
-  0093 4f       [1]             CLRA  
-  0094 c70000   [4]             STA   bRxDone
-  108:  					//Analizar el paquete
-  109:  					if (AppRxPacket->rxStatus == rxSuccessStatus_c) {
-  0097 320000   [5]             LDHX  AppRxPacket
-  009a e601     [3]             LDA   1,X
-  009c a102     [2]             CMP   #2
-  009e 260a     [3]             BNE   LAA ;abs = 00aa
-  110:  						if (uMac_RxPacket->Pan_ID == 10) {
-  00a0 320000   [5]             LDHX  uMac_RxPacket
-  00a3 f6       [3]             LDA   ,X
-  00a4 410a03   [4]             CBEQA #10,LAA ;abs = 00aa
-  111:  							
-  112:  							if (uMac_RxPacket->Packet_Type != 0) {
-  113:  								// Llamar a la callback
-  114:  							}
-  115:  						} else {
-  116:  							uMac_Current_State = uMac_NoInit;
-  00a7 4f       [1]             CLRA  
-  117:  							break;
-  00a8 2021     [3]             BRA   LCB ;abs = 00cb
-  00aa          LAA:    
-  118:  						}
-  119:  					}
-  120:  				}
-  121:  				if (bDoTx == TRUE) {
-  00aa c60000   [4]             LDA   bDoTx
-  00ad 4b0b     [4]             DBNZA LBA ;abs = 00ba
-  122:  					bDoTx = FALSE;
-  00af 4f       [1]             CLRA  
-  00b0 c70000   [4]             STA   bDoTx
-  123:  					(void) MCPSDataRequest(AppTxPacket);
-  00b3 320000   [5]             LDHX  AppTxPacket
-  00b6 ac000000 [8]             CALL  MCPSDataRequest
-  00ba          LBA:    
-  00ba ac0000d1 [8]             CALL  uMac_Engine:209
+  105:  		case uMac_Init:
+  106:  			if (bTxDone == TRUE) {
+  004c c60000   [4]             LDA   bTxDone
+  004f 4a       [1]             DECA  
+  0050          L50:    
+  0050 266c     [3]             BNE   LBE ;abs = 00be
+  0052 ac0000bf [8]             CALL  uMac_Engine:191
+  107:  				(void) MLMERXEnableRequest(AppRxPacket, 0); 
+  108:  				uMac_Current_State = uMac_WaitRx;
+  0056 a602     [2]             LDA   #2
+  0058 204f     [3]             BRA   LA9 ;abs = 00a9
+  005a          L5A:    
+  109:  			}
+  110:  			break;
+  111:  		case uMac_WaitRx:
+  112:  				if(bRxDone == TRUE) {
+  005a c60000   [4]             LDA   bRxDone
+  005d 4b38     [4]             DBNZA L97 ;abs = 0097
+  113:  					bRxDone = FALSE;
+  005f 4f       [1]             CLRA  
+  0060 c70000   [4]             STA   bRxDone
+  114:  					//Analizar el paquete
+  115:  					if (AppRxPacket->rxStatus == rxSuccessStatus_c) {
+  0063 320000   [5]             LDHX  AppRxPacket
+  0066 ee01     [3]             LDX   1,X
+  0068 8c       [1]             CLRH  
+  0069 650002   [3]             CPHX  #2
+  006c 2625     [3]             BNE   L93 ;abs = 0093
+  116:  						if (uMac_RxPacket->Pan_ID == 10) {
+  006e 320000   [5]             LDHX  uMac_RxPacket
+  0071 f6       [3]             LDA   ,X
+  0072 a10a     [2]             CMP   #10
+  0074 261a     [3]             BNE   L90 ;abs = 0090
+  117:  							if (bToggle == TRUE) {
+  0076 c60000   [4]             LDA   bToggle
+  0079 4b09     [4]             DBNZA L84 ;abs = 0084
+  118:  								Led_PrintValue(0x08);
+  007b a608     [2]             LDA   #8
+  007d ac000000 [8]             CALL  Led_PrintValue
+  119:  								bToggle = FALSE;
+  0081 4f       [1]             CLRA  
+  120:  							} else {
+  0082 2007     [3]             BRA   L8B ;abs = 008b
+  0084          L84:    
+  121:  								Led_PrintValue(0x00);
+  0084 4f       [1]             CLRA  
+  0085 ac000000 [8]             CALL  Led_PrintValue
+  122:  								bToggle = TRUE;
+  0089 a601     [2]             LDA   #1
+  008b          L8B:    
+  008b c70000   [4]             STA   bToggle
+  123:  							}
+  124:  							if (uMac_RxPacket->Packet_Type != 0) {
+  008e 2003     [3]             BRA   L93 ;abs = 0093
+  0090          L90:    
+  125:  								// Llamar a la callback
+  126:  							}
+  127:  						} else {
+  128:  							uMac_Current_State = uMac_NoInit;
+  0090 4f       [1]             CLRA  
+  129:  							break;
+  0091 2016     [3]             BRA   LA9 ;abs = 00a9
+  0093          L93:    
+  0093 ac0000bf [8]             CALL  uMac_Engine:191
+  0097          L97:    
+  130:  						}
+  131:  					}
+  132:  					
+  133:  					(void) MLMERXEnableRequest(AppRxPacket, 0);
+  134:  				}
+  135:  				if (bDoTx == TRUE) {
+  0097 c60000   [4]             LDA   bDoTx
+  009a 4b22     [4]             DBNZA LBE ;abs = 00be
+  136:  					bDoTx = FALSE;
+  009c 4f       [1]             CLRA  
+  009d c70000   [4]             STA   bDoTx
+  137:  					(void) MCPSDataRequest(AppTxPacket);
+  00a0 320000   [5]             LDHX  AppTxPacket
+  00a3 ac000000 [8]             CALL  MCPSDataRequest
+  138:  					uMac_Current_State = uMac_Tx;
+  00a7 a604     [2]             LDA   #4
+  00a9          LA9:    
+  00a9 c70000   [4]             STA   uMac_Current_State
+  00ac          LAC:    
+  00ac 8d       [7]             RTC   
+  00ad          LAD:    
+  139:  				}
+  140:  				
+  141:  				break;
+  142:  		case uMac_Tx:
+  143:  			if(bTxDone == TRUE){
+  00ad c60000   [4]             LDA   bTxDone
+  00b0 4b0c     [4]             DBNZA LBE ;abs = 00be
+  144:  				bTxDone = FALSE;
+  00b2 4f       [1]             CLRA  
+  00b3 c70000   [4]             STA   bTxDone
+  145:  				uMac_Current_State = uMac_Init;
+  00b6 4c       [1]             INCA  
+  00b7 c70000   [4]             STA   uMac_Current_State
+  00ba ac0000bf [8]             CALL  uMac_Engine:191
   00be          LBE:    
-  124:  				}
-  125:  				(void) MLMERXEnableRequest(AppRxPacket, 0);
-  126:  				// uMac_Current_State = uMac_Tx;
-  127:  				break;
-  00be 200e     [3]             BRA   LCE ;abs = 00ce
-  00c0          LC0:    
-  128:  		case uMac_Tx:
-  129:  			if(bTxDone==TRUE){
-  00c0 c60000   [4]             LDA   bTxDone
-  00c3 4b09     [4]             DBNZA LCE ;abs = 00ce
-  130:  				bTxDone = FALSE;
-  00c5 4f       [1]             CLRA  
-  00c6 c70000   [4]             STA   bTxDone
-  00c9          LC9:    
-  131:  				uMac_Current_State = uMac_Init;
-  00c9 a601     [2]             LDA   #1
-  00cb          LCB:    
-  00cb c70000   [4]             STA   uMac_Current_State
-  00ce          LCE:    
-  132:  			}
-  133:  			break;
-  134:  	}
-  135:  }
-  00ce a711     [2]             AIS   #17
-  00d0 8d       [7]             RTC   
-  00d1          LD1:    
-  00d1 320000   [5]             LDHX  AppRxPacket
-  00d4 89       [2]             PSHX  
-  00d5 8b       [2]             PSHH  
-  00d6 4f       [1]             CLRA  
-  00d7 87       [2]             PSHA  
-  00d8 87       [2]             PSHA  
-  00d9 87       [2]             PSHA  
-  00da 87       [2]             PSHA  
-  00db ac000000 [8]             CALL  MLMERXEnableRequest
-  00df a706     [2]             AIS   #6
-  00e1 8d       [7]             RTC   
-  136:  
-  137:  /************************************************************************************
-  138:  *
-  139:  * InitSmac
-  140:  *
-  141:  ************************************************************************************/
-  142:  void InitSmac(void)
-  143:  {
-  144:      AppTxPacket = (txPacket_t*)gau8TxDataBuffer;
+  146:  				(void) MLMERXEnableRequest(AppRxPacket, 0);
+  147:  			}
+  148:  			break;
+  149:  	}
+  150:  }
+  00be 8d       [7]             RTC   
+  00bf          LBF:    
+  00bf 320000   [5]             LDHX  AppRxPacket
+  00c2 89       [2]             PSHX  
+  00c3 8b       [2]             PSHH  
+  00c4 4f       [1]             CLRA  
+  00c5 87       [2]             PSHA  
+  00c6 87       [2]             PSHA  
+  00c7 87       [2]             PSHA  
+  00c8 87       [2]             PSHA  
+  00c9 ac000000 [8]             CALL  MLMERXEnableRequest
+  00cd a706     [2]             AIS   #6
+  00cf 8d       [7]             RTC   
+  151:  
+  152:  /************************************************************************************
+  153:  *
+  154:  * InitSmac
+  155:  *
+  156:  ************************************************************************************/
+  157:  void InitSmac(void)
+  158:  {
+  159:      AppTxPacket = (txPacket_t*)gau8TxDataBuffer;
   0000 450000   [3]             LDHX  @gau8TxDataBuffer
   0003 960000   [5]             STHX  AppTxPacket
-  145:      AppRxPacket = (rxPacket_t*)gau8RxDataBuffer; 
+  160:      AppRxPacket = (rxPacket_t*)gau8RxDataBuffer; 
   0006 450000   [3]             LDHX  @gau8RxDataBuffer
   0009 960000   [5]             STHX  AppRxPacket
-  146:      AppRxPacket->u8MaxDataLength = gMaxSmacSDULenght_c;
+  161:      AppRxPacket->u8MaxDataLength = gMaxSmacSDULenght_c;
   000c a67b     [2]             LDA   #123
   000e f7       [2]             STA   ,X
-  147:      // AppTxPacket->smacPdu.u8Data[0] = 'T';
-  148:     /* */
-  149:      AppTxPacket->u8DataLength = 10;
+  162:      // AppTxPacket->smacPdu.u8Data[0] = 'T';
+  163:     /* */
+  164:      AppTxPacket->u8DataLength = 10;
   000f a60a     [2]             LDA   #10
   0011 450000   [3]             LDHX  @gau8TxDataBuffer
   0014 f7       [2]             STA   ,X
-  150:      
-  151:      
-  152:      (void)MLMERadioInit();
+  165:      
+  166:      
+  167:      (void)MLMERadioInit();
   0015 ac000000 [8]             CALL  MLMERadioInit
-  153:      (void)MLMESetClockRate(gClko16MHz_c);
+  168:      (void)MLMESetClockRate(gClko16MHz_c);
   0019 4f       [1]             CLRA  
   001a ac000000 [8]             CALL  MLMESetClockRate
-  154:      (void)MCU_UseExternalClock();
+  169:      (void)MCU_UseExternalClock();
   001e ac000000 [8]             CALL  MCU_UseExternalClock
-  155:      
-  156:      (void)MLMESetTmrPrescale(gTimeBase250kHz_c);
+  170:      
+  171:      (void)MLMESetTmrPrescale(gTimeBase250kHz_c);
   0022 a603     [2]             LDA   #3
   0024 ac000000 [8]             CALL  MLMESetTmrPrescale
   0028          L28:    
-  157:      while (gErrorNoError_c != MLMESetChannelRequest(gDefaultChannelNumber_c));
+  172:      while (gErrorNoError_c != MLMESetChannelRequest(gDefaultChannelNumber_c));
   0028 a60f     [2]             LDA   #15
   002a ac000000 [8]             CALL  MLMESetChannelRequest
   002e 4d       [1]             TSTA  
   002f 26f7     [3]             BNE   L28 ;abs = 0028
-  158:      (void)MLMEPAOutputAdjust(gDefaultOutputPower_c);
+  173:      (void)MLMEPAOutputAdjust(gDefaultOutputPower_c);
   0031 a608     [2]             LDA   #8
   0033 ac000000 [8]             CALL  MLMEPAOutputAdjust
-  159:      (void)MLMEFEGainAdjust(gGainOffset_c);
+  174:      (void)MLMEFEGainAdjust(gGainOffset_c);
   0037 a69b     [2]             LDA   #-101
   0039 ac000000 [8]             CALL  MLMEFEGainAdjust
-  160:   }
+  175:   }
   003d 8d       [7]             RTC   
-  161:  
-  162:  /* Place it in NON_BANKED memory */
-  163:  #ifdef MEMORY_MODEL_BANKED
-  164:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
-  165:  #else
-  166:  #pragma CODE_SEG DEFAULT
-  167:  #endif /* MEMORY_MODEL_BANKED */
-  168:  
-  169:  /************************************************************************************
-  170:  * MLMEScanComfirm
-  171:  * 
-  172:  *
-  173:  *
-  174:  ************************************************************************************/
-  175:  void MLMEScanComfirm(channels_t ClearestChann)
-  176:  {
-  177:    bestChannel = ClearestChann; 
+  176:  
+  177:  /* Place it in NON_BANKED memory */
+  178:  #ifdef MEMORY_MODEL_BANKED
+  179:  #pragma CODE_SEG __NEAR_SEG NON_BANKED
+  180:  #else
+  181:  #pragma CODE_SEG DEFAULT
+  182:  #endif /* MEMORY_MODEL_BANKED */
+  183:  
+  184:  /************************************************************************************
+  185:  * MLMEScanComfirm
+  186:  * 
+  187:  *
+  188:  *
+  189:  ************************************************************************************/
+  190:  void MLMEScanComfirm(channels_t ClearestChann)
+  191:  {
+  192:    bestChannel = ClearestChann; 
   0000 c70000   [4]             STA   bestChannel
-  178:    bScanDone = TRUE;
+  193:    bScanDone = TRUE;
   0003 a601     [2]             LDA   #1
   0005 c70000   [4]             STA   bScanDone
-  179:  }
+  194:  }
   0008 81       [6]             RTS   
-  180:  
-  181:  /************************************************************************************
-  182:  * MCPSDataIndication
-  183:  * 
-  184:  *
-  185:  *
-  186:  ************************************************************************************/
-  187:  void MCPSDataIndication(rxPacket_t *gsRxPacket)
-  188:  {  
-  189:    //Otap_OpcMCPSDataIndication(gsRxPacket);
-  190:    bRxDone = TRUE;
+  195:  
+  196:  /************************************************************************************
+  197:  * MCPSDataIndication
+  198:  * 
+  199:  *
+  200:  *
+  201:  ************************************************************************************/
+  202:  void MCPSDataIndication(rxPacket_t *gsRxPacket)
+  203:  {  
+  204:    //Otap_OpcMCPSDataIndication(gsRxPacket);
+  205:    bRxDone = TRUE;
   0000 a601     [2]             LDA   #1
   0002 c70000   [4]             STA   bRxDone
-  191:  }
+  206:  }
   0005 81       [6]             RTS   
-  192:  
-  193:  /************************************************************************************
-  194:  * MCPSDataComfirm
-  195:  * 
-  196:  *
-  197:  *
-  198:  ************************************************************************************/
-  199:  void MCPSDataComfirm(txStatus_t TransmissionResult)
-  200:  {  
-  201:      //Otap_OpcMCPSDataComfirm(&TransmissionResult);
-  202:      bTxDone = TRUE;
+  207:  
+  208:  /************************************************************************************
+  209:  * MCPSDataComfirm
+  210:  * 
+  211:  *
+  212:  *
+  213:  ************************************************************************************/
+  214:  void MCPSDataComfirm(txStatus_t TransmissionResult)
+  215:  {  
+  216:      //Otap_OpcMCPSDataComfirm(&TransmissionResult);
+  217:      bTxDone = TRUE;
   0000 a601     [2]             LDA   #1
   0002 c70000   [4]             STA   bTxDone
-  203:  }
+  218:  }
   0005 81       [6]             RTS   
-  204:  
-  205:  void MLMEResetIndication(void)
-  206:  {
-  207:    
-  208:  }
+  219:  
+  220:  void MLMEResetIndication(void)
+  221:  {
+  222:    
+  223:  }
   0000 81       [6]             RTS   
-  209:  
-  210:  
-  211:  void MLMEWakeComfirm(void)
-  212:  {
-  213:    
-  214:  }
+  224:  
+  225:  
+  226:  void MLMEWakeComfirm(void)
+  227:  {
+  228:    
+  229:  }
   0000 81       [6]             RTS   
-  215:  
-  216:  
-  217:  #pragma CODE_SEG DEFAULT
+  230:  
+  231:  
+  232:  #pragma CODE_SEG DEFAULT
