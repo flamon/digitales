@@ -15,7 +15,7 @@
 #include "PLM_config.h"
 
 
-#define MyID 0
+#define MyID 1
 
 //Definiciones
 typedef enum{
@@ -58,7 +58,7 @@ bool_t			bDoTx;
 bool_t			bToggle = TRUE;
 
 uMac_nodeType uMactype;
-uint8_t uMacdest = 1, i = 0;
+uint8_t uMacbroad = 254, i = 0;
 
 uint16_t ChannelsToScan = 0xFFF;
 uint8_t ChannelsEnergy[16];
@@ -92,16 +92,12 @@ void uMac_Engine(){
 			if(uMac_On == TRUE) {
 				uMac_On = FALSE;
 				(void) MLMESetChannelRequest(Channels[i++]);
-				uMac_TxPacket->Dest_Add = uMacdest;
+				uMac_TxPacket->Dest_Add = uMacbroad;
 				uMac_TxPacket->Packet_Type = 0;
 				uMac_TxPacket->Pan_ID = 10;
-				uMac_TxPacket->Source_Add = 0;
-				//for (;;) 
+				uMac_TxPacket->Source_Add = MyID;
 				(void) MCPSDataRequest(AppTxPacket);
-				//while (bTxDone != TRUE) {
-				//	bTxDone = FALSE;
-					uMac_Current_State = uMac_Init;
-				//}
+				uMac_Current_State = uMac_Init;
 			}
 			break;
 		case uMac_Init:
@@ -113,10 +109,10 @@ void uMac_Engine(){
 		case uMac_WaitRx:
 				if(bRxDone == TRUE) {
 					bRxDone = FALSE;
-					//Analizar el paquete
 					if (AppRxPacket->rxStatus == rxSuccessStatus_c) {
 						if (uMac_RxPacket->Pan_ID == 10) {
-							if (uMac_RxPacket->Dest_Add == MyID) {
+							if (uMac_RxPacket->Dest_Add == MyID
+									|| uMac_RxPacket->Dest_Add == uMacbroad) {
 								switch (uMac_RxPacket->Source_Add) {
 								case 1:
 									Led_PrintValue(0x08);
@@ -128,17 +124,11 @@ void uMac_Engine(){
 									Led_PrintValue(0x03);
 									break;
 								}
-																
-								/*if (bToggle == TRUE) {
-									Led_PrintValue(0x08);
-									bToggle = FALSE;
-								} else {
-									Led_PrintValue(0x00);
-									bToggle = TRUE;
-								}*/
+								
 								if (uMac_RxPacket->Packet_Type != 0) {
 									// Llamar a la callback
 								}
+								
 								(void) MLMERXEnableRequest(AppRxPacket, 0);
 							}
 						} else {
