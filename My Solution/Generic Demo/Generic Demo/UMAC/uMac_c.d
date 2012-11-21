@@ -1,5 +1,4 @@
 
-
 UMAC/uMac_c.obj: \
 	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/OTAP/../UMAC/uMac.c \
 	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/PLM/HCS08/Source/Common/Sys/McuInit.h \

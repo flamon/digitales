@@ -43,7 +43,7 @@ _startupData is allocated at 0x2080 and uses 6 Bytes
 extern struct _tagStartup {
   unsigned nofZeroOut     1
   _Range   pZeroOut       0x300     884
-  _Copy    *toCopyDownBeg 0x3EA4
+  _Copy    *toCopyDownBeg 0x3EA7
 } _startupData;
 
 *********************************************************************************************
@@ -52,10 +52,10 @@ Section Name                    Size  Type     From       To       Segment
 ---------------------------------------------------------------------------------------------
 .data                             65   R/W      0x300      0x340   APP_RAM_1
 NON_BANKED                      4536     R     0x20B0     0x3267   APP_CODE_0
-.copy                             71     R     0x3EA4     0x3EEA   APP_CODE_0
+.copy                             71     R     0x3EA7     0x3EED   APP_CODE_0
 .rodata                          138     R     0x3268     0x32F1   APP_CODE_0
 .rodata1                          41     R     0x32F2     0x331A   APP_CODE_0
-.text                           2814     R     0x33A6     0x3EA3   APP_CODE_0
+.text                           2817     R     0x33A6     0x3EA6   APP_CODE_0
 .startData                        26     R     0x2080     0x2099   APP_STARTUP_STRUC_FLASH
 .stack                           512   R/W      0x100      0x2FF   APP_STACK_RAM
 .abs_section_0                     1   N/I        0x0        0x0   .absSeg0
@@ -245,7 +245,7 @@ NON_BANKED                      4536     R     0x20B0     0x3267   APP_CODE_0
 RES_RESET_VECTOR_FLASH_vect          2     R     0xFFFE     0xFFFF   RES_RESET_VECTOR_FLASH
 
 Summary of section sizes per section type:
-READ_ONLY (R):        1E95 (dec:     7829)
+READ_ONLY (R):        1E98 (dec:     7832)
 READ_WRITE (R/W):      574 (dec:     1396)
 NO_INIT (N/I):          CF (dec:      207)
 
@@ -262,8 +262,8 @@ OBJECT-ALLOCATION SECTION
 MODULE:                 -- uMac_c.obj --
 - PROCEDURES:
      Init_uMac                                 33A6      1E      30       2   .text       
-     uMac_Engine                               33C4     105     261       7   .text       
-     InitSmac                                  34C9      3E      62       2   .text       
+     uMac_Engine                               33C4     10B     267       7   .text       
+     InitSmac                                  34CF      3B      59       2   .text       
      MLMEScanComfirm                           20B0       9       9       2   NON_BANKED  
      MCPSDataIndication                        20B9       6       6       3   NON_BANKED  
      MCPSDataComfirm                           20BF       6       6       1   NON_BANKED  
@@ -273,33 +273,33 @@ MODULE:                 -- uMac_c.obj --
      uMacbroad                                  300       1       1       2   .data       
      Channels                                   301      10      16       1   .data       
      uMac_On                                    341       1       1       4   .bss        
-     i                                          342       1       1       2   .bss        
+     ui                                         342       1       1       2   .bss        
      uMac_Current_State                         343       1       1       5   .bss        
      gau8RxDataBuffer                           344      82     130       1   .bss        
-     gau8TxDataBuffer                           3C6      80     128       2   .bss        
+     gau8TxDataBuffer                           3C6      80     128       1   .bss        
      AppTxPacket                                446       2       2       4   .bss        
      AppRxPacket                                448       2       2       5   .bss        
      uMac_RxPacket                              44A       2       2       3   .bss        
      uMac_TxPacket                              44C       2       2       2   .bss        
-     bestChannel                                5CE       1       1       1   .common     
-     bScanDone                                  5CF       1       1       1   .common     
-     bTxDone                                    5D0       1       1       4   .common     
-     bRxDone                                    5D1       1       1       3   .common     
-     bDoTx                                      5D2       1       1       2   .common     
+     bTxDone                                    5CE       1       1       5   .common     
+     bRxDone                                    5CF       1       1       3   .common     
+     bScanDone                                  5D0       1       1       1   .common     
+     bDoTx                                      5D1       1       1       2   .common     
+     bestChannel                                5D2       1       1       1   .common     
 MODULE:                 -- SMAC_c.obj --
 - PROCEDURES:
-     MCPSDataRequest                           3507      4B      75       4   .text       
-     MLMERXEnableRequest                       3552      9A     154       4   .text       
-     MLMERXDisableRequest                      35EC      22      34       2   .text       
-     MLMERadioInit                             360E      61      97       2   .text       
-     MLMEFEGainAdjust                          366F       D      13       2   .text       
-     MLMESetChannelRequest                     367C      38      56       4   .text       
-     MLMEPAOutputAdjust                        36B4      2C      44       2   .text       
-     MLMESetClockRate                          36E0       4       4       2   .text       
-     MLMESetTmrPrescale                        36E4      1C      28       2   .text       
-     SmacScanTheNextChannel                    3700      60      96       6   .text       
-     SmacSetRxTimeout                          3760      27      39       4   .text       
-     SmacFormatTxPacket                        3787      29      41       2   .text       
+     MCPSDataRequest                           350A      4B      75       4   .text       
+     MLMERXEnableRequest                       3555      9A     154       4   .text       
+     MLMERXDisableRequest                      35EF      22      34       2   .text       
+     MLMERadioInit                             3611      61      97       2   .text       
+     MLMEFEGainAdjust                          3672       D      13       2   .text       
+     MLMESetChannelRequest                     367F      38      56       4   .text       
+     MLMEPAOutputAdjust                        36B7      2C      44       2   .text       
+     MLMESetClockRate                          36E3       4       4       2   .text       
+     MLMESetTmrPrescale                        36E7      1C      28       2   .text       
+     SmacScanTheNextChannel                    3703      60      96       6   .text       
+     SmacSetRxTimeout                          3763      27      39       4   .text       
+     SmacFormatTxPacket                        378A      29      41       2   .text       
      PhyPdDataConfirm                          20C7      5F      95       1   NON_BANKED  
      PhyPdDataIndication                       2126      81     129       1   NON_BANKED  
      PhyPlmeCcaConfirm                         21A7      4A      74       1   NON_BANKED  
@@ -349,14 +349,14 @@ MODULE:                 -- SPI_c.obj --
      gpfSpi1CallBack                            5D4       2       2       4   .common     
 MODULE:                 -- UART_c.obj --
 - PROCEDURES:
-     Uart_Init                                 37B0      A9     169       7   .text       
-     Uart_ClearErrors                          3859      1B      27       2   .text       
-     Uart_Configure                            3874      82     130       2   .text       
-     Uart_GetBytesFromRxBuffer                 38F6      AD     173       2   .text       
-     Uart_RegisterRxCallBack                   39A3      2C      44       2   .text       
-     Uart_RegisterTxCallBack                   39CF      30      48       2   .text       
-     Uart_BlockingStringTx                     39FF      33      51       2   .text       
-     Uart_BlockingByteTx                       3A32      28      40       2   .text       
+     Uart_Init                                 37B3      A9     169       7   .text       
+     Uart_ClearErrors                          385C      1B      27       2   .text       
+     Uart_Configure                            3877      82     130       2   .text       
+     Uart_GetBytesFromRxBuffer                 38F9      AD     173       2   .text       
+     Uart_RegisterRxCallBack                   39A6      2C      44       2   .text       
+     Uart_RegisterTxCallBack                   39D2      30      48       2   .text       
+     Uart_BlockingStringTx                     3A02      33      51       2   .text       
+     Uart_BlockingByteTx                       3A35      28      40       2   .text       
      Uart2_TxIsr                               2573      37      55       1   NON_BANKED  
      Uart2_RxIsr                               25AA      61      97       1   NON_BANKED  
      Uart2_ErrorIsr                            260B       1       1       1   NON_BANKED  
@@ -435,15 +435,15 @@ MODULE:                 -- LVD_c.obj --
      LvdCllbk                                   5AF       2       2       1   .bss        
 MODULE:                 -- LED_c.obj --
 - PROCEDURES:
-     Led_PrintValue                            3A5A      41      65       2   .text       
-     Led_OffAll                                3A9B      21      33       2   .text       
+     Led_PrintValue                            3A5D      41      65       2   .text       
+     Led_OffAll                                3A9E      21      33       2   .text       
 - VARIABLES:
 MODULE:                 -- LCD_c.obj --
 - PROCEDURES:
-     Lcd_Init                                  3ABC      95     149      20   .text       
-     Lcd_Config                                3B51      59      89       6   .text       
-     LcdWriteCmd                               3BAA      18      24       8   .text       
-     LcdSetPort                                3BC2      3B      59       4   .text       
+     Lcd_Init                                  3ABF      95     149      20   .text       
+     Lcd_Config                                3B54      59      89       6   .text       
+     LcdWriteCmd                               3BAD      18      24       8   .text       
+     LcdSetPort                                3BC5      3B      59       4   .text       
 - VARIABLES:
      mLcdStatus                                 5B1       1       1       5   .bss        
      mu8LcdString                               5B2       2       2       1   .bss        
@@ -453,16 +453,16 @@ MODULE:                 -- LCD_c.obj --
      gpfLcdCallBack                             665       2       2       2   .common     
 MODULE:                 -- KBI_c.obj --
 - PROCEDURES:
-     Kbi_Config                                3BFD      40      64       2   .text       
-     Kbi_Init                                  3C3D      2F      47       2   .text       
-     Kbi_PortValue                             3C6C      2B      43       4   .text       
+     Kbi_Config                                3C00      40      64       2   .text       
+     Kbi_Init                                  3C40      2F      47       2   .text       
+     Kbi_PortValue                             3C6F      2B      43       4   .text       
      KBI1_ISR                                  2EDE      21      33       1   NON_BANKED  
 - VARIABLES:
      gpKbiControl                               319       4       4       1   .data       
      pKbiCallback                               5B7       4       4       4   .bss        
 MODULE:                 -- IRQ_c.obj --
 - PROCEDURES:
-     IRQ_Init                                  3C97       9       9       4   .text       
+     IRQ_Init                                  3C9A       9       9       4   .text       
      IRQ_Isr                                   2EFF       B      11       1   NON_BANKED  
 - VARIABLES:
      IrqCallBack                                5BB       2       2       2   .bss        
@@ -478,11 +478,11 @@ MODULE:                 -- IIC_c.obj --
      bIicDeviceAddressFlag                      5C3       1       1       2   .bss        
 MODULE:                 -- GPIO_c.obj --
 - PROCEDURES:
-     Gpio_Init                                 3CA0      77     119       2   .text       
-     Gpio_PortWrite                            3D17       B      11       2   .text       
-     Gpio_PinSet                               3D22      1F      31      18   .text       
-     Gpio_PinClear                             3D41      1F      31      30   .text       
-     Gpio_PinToggle                            3D60       9       9       4   .text       
+     Gpio_Init                                 3CA3      77     119       2   .text       
+     Gpio_PortWrite                            3D1A       B      11       2   .text       
+     Gpio_PinSet                               3D25      1F      31      18   .text       
+     Gpio_PinClear                             3D44      1F      31      30   .text       
+     Gpio_PinToggle                            3D63       9       9       4   .text       
 - VARIABLES:
      GpioDataHandling                          32BC      12      18       2   .rodata     
      GpioConfigPort                            32CE      1B      27       3   .rodata     
@@ -492,13 +492,13 @@ MODULE:                 -- GPIO_c.obj --
      gGpioPortLogic                             5C4       9       9       4   .bss        
 MODULE:                 -- Utilities_c.obj --
 - PROCEDURES:
-     Delay_ms                                  3D69      46      70       4   .text       
-     Delay_us                                  3DAF      38      56       6   .text       
+     Delay_ms                                  3D6C      46      70       4   .text       
+     Delay_us                                  3DB2      38      56       6   .text       
 - VARIABLES:
 MODULE:                 -- McuInit_c.obj --
 - PROCEDURES:
-     MCUInit                                   3DE7       B      11       2   .text       
-     MCU_UseExternalClock                      3DF2       A      10       2   .text       
+     MCUInit                                   3DEA       B      11       2   .text       
+     MCU_UseExternalClock                      3DF5       A      10       2   .text       
 - VARIABLES:
 MODULE:                 -- Start08_c.obj --
 - PROCEDURES:
@@ -699,13 +699,13 @@ MODULE:                 -- vectortable_c.obj --
      ISR_vectors                               FFC0      3E      62       0   .abs_section_ffc0
 MODULE:                 -- OTAP_c.obj --
 - PROCEDURES:
-     Otap_OpcMain                              3DFC       1       1       2   .text       
-     Otap_OpcInit                              3DFD       1       1       2   .text       
+     Otap_OpcMain                              3DFF       1       1       2   .text       
+     Otap_OpcInit                              3E00       1       1       2   .text       
 - VARIABLES:
 MODULE:                 -- main_c.obj --
 - PROCEDURES:
-     main                                      3DFE      22      34       2   .text       
-     InitProject                               3E20      84     132       2   .text       
+     main                                      3E01      22      34       2   .text       
+     InitProject                               3E23      84     132       2   .text       
      UartTxCallback                            2F9D       6       6       1   NON_BANKED  
      UartRxCallback                            2FA3      1D      29       1   NON_BANKED  
      KbiCallback                               2FC0      2B      43       1   NON_BANKED  
@@ -748,7 +748,7 @@ MODULE:                 -- rtshc08.o (ansibim.lib) --
 MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
-  uMac_c.obj                                 291    376      0
+  uMac_c.obj                                 291    379      0
   SMAC_c.obj                                  21   1208      0
   Timer_c.obj                                 48    240      0
   SPI_c.obj                                    6    429      0
@@ -790,7 +790,7 @@ SECTION: ".data"
   uMacbroad Channels mu8TmrStartRegs maUartStartOfModule gpKbiControl 
   gpGpioPortData gpGpioPullDown 
 SECTION: ".bss"
-  uMac_On i uMac_Current_State gau8RxDataBuffer gau8TxDataBuffer AppTxPacket 
+  uMac_On ui uMac_Current_State gau8RxDataBuffer gau8TxDataBuffer AppTxPacket 
   AppRxPacket uMac_RxPacket uMac_TxPacket smacTimeout smacChannelsBeingScanned 
   smacEdValue smacState smacLastDataRxParams smacCurrentChannel 
   smacScanCurrentChannel smacClearestChann pTestPacket smacProccesPacketPtr 
@@ -834,7 +834,7 @@ SECTION: "NON_BANKED"
   _LDIVMOD _LDIVU_k_is_k_div_j _LCMP_k_rel_j _ILSL _LADD _LADD_RC _LMUL_RC 
   _LDIVU_RC _LLSL _LCMP _POP32 
 SECTION: ".common"
-  bestChannel bScanDone bTxDone bRxDone bDoTx smacFlags gpfSpi1CallBack 
+  bTxDone bRxDone bScanDone bDoTx bestChannel smacFlags gpfSpi1CallBack 
   gu16RadioIrqStatus mRadioDriverState mpfRadioProcessCallback 
   mpfRadioEventCallback mau8RadioDataBuffer mpu8RadioRxPointer 
   mau8RadioDataLength mu16WrittingRegisterValue mpu16ReadingRegisterPointer 
@@ -1313,10 +1313,10 @@ OBJECT LIST SORTED BY ADDRESS
      gpGpioPortData                             31D      12      18       7   .data       
      gpGpioPullDown                             32F      12      18       1   .data       
      uMac_On                                    341       1       1       4   .bss        
-     i                                          342       1       1       2   .bss        
+     ui                                         342       1       1       2   .bss        
      uMac_Current_State                         343       1       1       5   .bss        
      gau8RxDataBuffer                           344      82     130       1   .bss        
-     gau8TxDataBuffer                           3C6      80     128       2   .bss        
+     gau8TxDataBuffer                           3C6      80     128       1   .bss        
      AppTxPacket                                446       2       2       4   .bss        
      AppRxPacket                                448       2       2       5   .bss        
      uMac_RxPacket                              44A       2       2       3   .bss        
@@ -1367,11 +1367,11 @@ OBJECT LIST SORTED BY ADDRESS
      bIicDeviceAddressFlag                      5C3       1       1       2   .bss        
      gGpioPortLogic                             5C4       9       9       4   .bss        
      KeyPressed                                 5CD       1       1       1   .bss        
-     bestChannel                                5CE       1       1       1   .common     
-     bScanDone                                  5CF       1       1       1   .common     
-     bTxDone                                    5D0       1       1       4   .common     
-     bRxDone                                    5D1       1       1       3   .common     
-     bDoTx                                      5D2       1       1       2   .common     
+     bTxDone                                    5CE       1       1       5   .common     
+     bRxDone                                    5CF       1       1       3   .common     
+     bScanDone                                  5D0       1       1       1   .common     
+     bDoTx                                      5D1       1       1       2   .common     
+     bestChannel                                5D2       1       1       1   .common     
      smacFlags                                  5D3       1       1      27   .common     
      gpfSpi1CallBack                            5D4       2       2       4   .common     
      gu16RadioIrqStatus                         5D6       2       2       3   .common     
@@ -1576,51 +1576,51 @@ OBJECT LIST SORTED BY ADDRESS
      Init                                      3329      72     114       1   .init       
      _Startup                                  339B       B      11       0   .init       
      Init_uMac                                 33A6      1E      30       2   .text       
-     uMac_Engine                               33C4     105     261       7   .text       
-     InitSmac                                  34C9      3E      62       2   .text       
-     MCPSDataRequest                           3507      4B      75       4   .text       
-     MLMERXEnableRequest                       3552      9A     154       4   .text       
-     MLMERXDisableRequest                      35EC      22      34       2   .text       
-     MLMERadioInit                             360E      61      97       2   .text       
-     MLMEFEGainAdjust                          366F       D      13       2   .text       
-     MLMESetChannelRequest                     367C      38      56       4   .text       
-     MLMEPAOutputAdjust                        36B4      2C      44       2   .text       
-     MLMESetClockRate                          36E0       4       4       2   .text       
-     MLMESetTmrPrescale                        36E4      1C      28       2   .text       
-     SmacScanTheNextChannel                    3700      60      96       6   .text       
-     SmacSetRxTimeout                          3760      27      39       4   .text       
-     SmacFormatTxPacket                        3787      29      41       2   .text       
-     Uart_Init                                 37B0      A9     169       7   .text       
-     Uart_ClearErrors                          3859      1B      27       2   .text       
-     Uart_Configure                            3874      82     130       2   .text       
-     Uart_GetBytesFromRxBuffer                 38F6      AD     173       2   .text       
-     Uart_RegisterRxCallBack                   39A3      2C      44       2   .text       
-     Uart_RegisterTxCallBack                   39CF      30      48       2   .text       
-     Uart_BlockingStringTx                     39FF      33      51       2   .text       
-     Uart_BlockingByteTx                       3A32      28      40       2   .text       
-     Led_PrintValue                            3A5A      41      65       2   .text       
-     Led_OffAll                                3A9B      21      33       2   .text       
-     Lcd_Init                                  3ABC      95     149      20   .text       
-     Lcd_Config                                3B51      59      89       6   .text       
-     LcdWriteCmd                               3BAA      18      24       8   .text       
-     LcdSetPort                                3BC2      3B      59       4   .text       
-     Kbi_Config                                3BFD      40      64       2   .text       
-     Kbi_Init                                  3C3D      2F      47       2   .text       
-     Kbi_PortValue                             3C6C      2B      43       4   .text       
-     IRQ_Init                                  3C97       9       9       4   .text       
-     Gpio_Init                                 3CA0      77     119       2   .text       
-     Gpio_PortWrite                            3D17       B      11       2   .text       
-     Gpio_PinSet                               3D22      1F      31      18   .text       
-     Gpio_PinClear                             3D41      1F      31      30   .text       
-     Gpio_PinToggle                            3D60       9       9       4   .text       
-     Delay_ms                                  3D69      46      70       4   .text       
-     Delay_us                                  3DAF      38      56       6   .text       
-     MCUInit                                   3DE7       B      11       2   .text       
-     MCU_UseExternalClock                      3DF2       A      10       2   .text       
-     Otap_OpcMain                              3DFC       1       1       2   .text       
-     Otap_OpcInit                              3DFD       1       1       2   .text       
-     main                                      3DFE      22      34       2   .text       
-     InitProject                               3E20      84     132       2   .text       
+     uMac_Engine                               33C4     10B     267       7   .text       
+     InitSmac                                  34CF      3B      59       2   .text       
+     MCPSDataRequest                           350A      4B      75       4   .text       
+     MLMERXEnableRequest                       3555      9A     154       4   .text       
+     MLMERXDisableRequest                      35EF      22      34       2   .text       
+     MLMERadioInit                             3611      61      97       2   .text       
+     MLMEFEGainAdjust                          3672       D      13       2   .text       
+     MLMESetChannelRequest                     367F      38      56       4   .text       
+     MLMEPAOutputAdjust                        36B7      2C      44       2   .text       
+     MLMESetClockRate                          36E3       4       4       2   .text       
+     MLMESetTmrPrescale                        36E7      1C      28       2   .text       
+     SmacScanTheNextChannel                    3703      60      96       6   .text       
+     SmacSetRxTimeout                          3763      27      39       4   .text       
+     SmacFormatTxPacket                        378A      29      41       2   .text       
+     Uart_Init                                 37B3      A9     169       7   .text       
+     Uart_ClearErrors                          385C      1B      27       2   .text       
+     Uart_Configure                            3877      82     130       2   .text       
+     Uart_GetBytesFromRxBuffer                 38F9      AD     173       2   .text       
+     Uart_RegisterRxCallBack                   39A6      2C      44       2   .text       
+     Uart_RegisterTxCallBack                   39D2      30      48       2   .text       
+     Uart_BlockingStringTx                     3A02      33      51       2   .text       
+     Uart_BlockingByteTx                       3A35      28      40       2   .text       
+     Led_PrintValue                            3A5D      41      65       2   .text       
+     Led_OffAll                                3A9E      21      33       2   .text       
+     Lcd_Init                                  3ABF      95     149      20   .text       
+     Lcd_Config                                3B54      59      89       6   .text       
+     LcdWriteCmd                               3BAD      18      24       8   .text       
+     LcdSetPort                                3BC5      3B      59       4   .text       
+     Kbi_Config                                3C00      40      64       2   .text       
+     Kbi_Init                                  3C40      2F      47       2   .text       
+     Kbi_PortValue                             3C6F      2B      43       4   .text       
+     IRQ_Init                                  3C9A       9       9       4   .text       
+     Gpio_Init                                 3CA3      77     119       2   .text       
+     Gpio_PortWrite                            3D1A       B      11       2   .text       
+     Gpio_PinSet                               3D25      1F      31      18   .text       
+     Gpio_PinClear                             3D44      1F      31      30   .text       
+     Gpio_PinToggle                            3D63       9       9       4   .text       
+     Delay_ms                                  3D6C      46      70       4   .text       
+     Delay_us                                  3DB2      38      56       6   .text       
+     MCUInit                                   3DEA       B      11       2   .text       
+     MCU_UseExternalClock                      3DF5       A      10       2   .text       
+     Otap_OpcMain                              3DFF       1       1       2   .text       
+     Otap_OpcInit                              3E00       1       1       2   .text       
+     main                                      3E01      22      34       2   .text       
+     InitProject                               3E23      84     132       2   .text       
      ISR_vectors                               FFC0      3E      62       0   .abs_section_ffc0
 
 *********************************************************************************************
@@ -1690,7 +1690,7 @@ rtshc08.o (ansibim.lib):
   _POP_CC _CONV_FAR_TO_NEAR _CONV_FAR_TO_LINEAR _CONV_LINEAR_TO_FAR 
 NOT USED VARIABLES
 uMac_c.obj:
-  bToggle ChannelsToScan uMactype ChannelsEnergy 
+  ChannelsToScan ChannelsEnergy 
 SMAC_c.obj:
   au8SmacVersion u8TestBuffer 
 Timer_c.obj:
@@ -1720,42 +1720,42 @@ rtshc08.o (ansibim.lib):
 *********************************************************************************************
 COPYDOWN SECTION
 ---------------------------------------------------------------------------------------------
-------- ROM-ADDRESS: 0x3EA4 ---- SIZE       4 ---
+------- ROM-ADDRESS: 0x3EA7 ---- SIZE       4 ---
 Filling bytes inserted
  00410300
-------- ROM-ADDRESS: 0x3EA8 ---- RAM-ADDRESS: 0x300 ---- SIZE       1 ---
+------- ROM-ADDRESS: 0x3EAB ---- RAM-ADDRESS: 0x300 ---- SIZE       1 ---
 Name of initialized Object : uMacbroad
  FE
-------- ROM-ADDRESS: 0x3EA9 ---- RAM-ADDRESS: 0x301 ---- SIZE      16 ---
+------- ROM-ADDRESS: 0x3EAC ---- RAM-ADDRESS: 0x301 ---- SIZE      16 ---
 Name of initialized Object : Channels
  0B0C0D0E0F 1011121314 1516171819
  1A
-------- ROM-ADDRESS: 0x3EB9 ---- SIZE       1 ---
+------- ROM-ADDRESS: 0x3EBC ---- SIZE       1 ---
 Filling bytes inserted
  00
-------- ROM-ADDRESS: 0x3EBA ---- RAM-ADDRESS: 0x312 ---- SIZE       5 ---
+------- ROM-ADDRESS: 0x3EBD ---- RAM-ADDRESS: 0x312 ---- SIZE       5 ---
 Name of initialized Object : mu8TmrStartRegs:1
  4000500060
-------- ROM-ADDRESS: 0x3EBF ---- RAM-ADDRESS: 0x317 ---- SIZE       2 ---
+------- ROM-ADDRESS: 0x3EC2 ---- RAM-ADDRESS: 0x317 ---- SIZE       2 ---
 Name of initialized Object : maUartStartOfModule
  1870
-------- ROM-ADDRESS: 0x3EC1 ---- SIZE       1 ---
+------- ROM-ADDRESS: 0x3EC4 ---- SIZE       1 ---
 Filling bytes inserted
  00
-------- ROM-ADDRESS: 0x3EC2 ---- RAM-ADDRESS: 0x31A ---- SIZE       3 ---
+------- ROM-ADDRESS: 0x3EC5 ---- RAM-ADDRESS: 0x31A ---- SIZE       3 ---
 Name of initialized Object : gpKbiControl:1
  0C003C
-------- ROM-ADDRESS: 0x3EC5 ---- SIZE       3 ---
+------- ROM-ADDRESS: 0x3EC8 ---- SIZE       3 ---
 Filling bytes inserted
  000000
-------- ROM-ADDRESS: 0x3EC8 ---- RAM-ADDRESS: 0x320 ---- SIZE      15 ---
+------- ROM-ADDRESS: 0x3ECB ---- RAM-ADDRESS: 0x320 ---- SIZE      15 ---
 Name of initialized Object : gpGpioPortData:3
  0200040006 0008000A00 1C001E002E
-------- ROM-ADDRESS: 0x3ED7 ---- RAM-ADDRESS: 0x32F ---- SIZE      18 ---
+------- ROM-ADDRESS: 0x3EDA ---- RAM-ADDRESS: 0x32F ---- SIZE      18 ---
 Name of initialized Object : gpGpioPullDown
  1840184418 48184C1850 1854185818
  5C1860
-------- ROM-ADDRESS: 0x3EE9 ---- SIZE       2 ---
+------- ROM-ADDRESS: 0x3EEC ---- SIZE       2 ---
 Filling bytes inserted
  0000
 
@@ -1908,9 +1908,9 @@ _LLSL                     USES _ENTER_UNARY_L
 _LCMP                     USES _ENTER_BINARY_L _LCMP_k_rel_j 
 Init                      USES _startupData loadByte 
 _Startup                  USES __SEG_END_SSTACK Init main 
-Init_uMac                 USES uMac_On InitSmac AppRxPacket uMac_RxPacket 
+Init_uMac                 USES InitSmac uMac_On AppRxPacket uMac_RxPacket 
                                 AppTxPacket uMac_TxPacket uMac_Current_State 
-uMac_Engine               USES uMac_Current_State uMac_Engine uMac_On i 
+uMac_Engine               USES uMac_Current_State uMac_Engine uMac_On ui 
                                 Channels MLMESetChannelRequest uMacbroad uMac_TxPacket 
                                 AppTxPacket MCPSDataRequest bTxDone AppRxPacket 
                                 MLMERXEnableRequest bRxDone uMac_RxPacket Led_PrintValue bDoTx 
@@ -2477,5 +2477,5 @@ STATISTIC SECTION
 ExeFile:
 --------
 Number of blocks to be downloaded: 8
-Total size of all blocks to be downloaded: 7829
+Total size of all blocks to be downloaded: 7832
 
