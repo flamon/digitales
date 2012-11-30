@@ -1,26 +1,23 @@
-/*
- * uMac.c
- *
- *  Created on: Nov 1, 2012
- */
-
-#include "McuInit.h"                /*CPU and System Clock related functions*/
-#include "EmbeddedTypes.h"          /*Include special data types*/       
-#include "SMAC_Interface.h"         /*Include all OTA functionality*/
-#include "uMac.h"                   /*Include all OTA functionality*/
+#include "McuInit.h"
+#include "EmbeddedTypes.h"       
+#include "SMAC_Interface.h"
+#include "uMac.h"
 #include "app_config.h"
 #include "OTAP_Interface.h"
 #include "PLM_config.h"
-
+#include "Timer_Interface.h"
 
 #define MyID 1
+#define NOISE_ENERGY 190
+#define MAX_SEND_ATTEMPTS 5
 
 typedef enum {
-    uMac_NoInit = 0,
-    uMac_Init = 1,
-    uMac_WaitRx = 2,
-    uMac_Rx = 3,
-    uMac_Tx = 4
+    uMac_NoInit,
+    uMac_Init,
+    uMac_WaitRx,
+    uMac_Rx,
+    uMac_Tx,
+    uMac_Timer
 } uMac_Engine_State;
 
 static uMac_Engine_State uMac_Current_State;
@@ -44,18 +41,31 @@ static rxPacket_t *AppRxPacket;
 static uMac_Packet *uMac_RxPacket;
 static uMac_Packet *uMac_TxPacket;
 
-bool_t bTxDone, bRxDone, bScanDone, bDoTx;
-uint8_t uMacbroad = 254, ui = 0, ChannelsEnergy[16];
-uint16_t ChannelsToScan = 0xFFF;
+bool_t bTxDone, bRxDone, bDoTx, bTimerFlag1 = FALSE, bTimerFlag2 = FALSE;
+uint8_t uMacbroad = 254, ui = 0, send_attempts = 0;
 channels_t bestChannel, Channels[] = {gChannel11_c, gChannel12_c, gChannel13_c, gChannel14_c, gChannel15_c,
             gChannel16_c, gChannel17_c, gChannel18_c, gChannel19_c, gChannel20_c, gChannel21_c,
             gChannel22_c, gChannel23_c, gChannel24_c, gChannel25_c, gChannel26_c};
 
+tmrChannelConfig_t timerConfig;
 
-void InitSmac (void);  // Poner en memoria bankeada
+void InitSmac (void);
 void uMac_Txf (void);
+void SetTimer (uint16_t, uint8_t);
 
-void Init_uMac (void)
+#ifdef MEMORY_MODEL_BANKED
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+#else
+#pragma CODE_SEG DEFAULT
+#endif /* MEMORY_MODEL_BANKED */
+
+void TimerCallBack1 (void);
+void TimerCallBack2 (void);
+
+#pragma CODE_SEG DEFAULT
+
+void
+Init_uMac (void)
 {
     InitSmac();
 
@@ -65,12 +75,32 @@ void Init_uMac (void)
     uMac_Current_State = uMac_NoInit;
 }
 
-void uMac_Txf (void)
+void
+uMac_Txf (void)
 {
     bDoTx = TRUE;
 }
 
-void uMac_Engine (void)
+void
+SetTimer (uint16_t timerCount, uint8_t t)
+{   
+    timerConfig.tmrChannel = gTmrChannel0_c;
+    timerConfig.tmrChannOptMode = gTmrOutputCompare_c;
+    timerConfig.tmrCompareVal = timerCount; 
+    timerConfig.tmrPinConfig.tmrOutCompState = gTmrPinNotUsedForOutComp_c;
+
+    if (t == 1) {
+        (void) Tmr_SetCallbackFunc(gTmr3_c, gTmrOverEvent_c, TimerCallBack1);
+    } else {
+        (void) Tmr_SetCallbackFunc(gTmr3_c, gTmrOverEvent_c, TimerCallBack2);
+    }
+    (void) Tmr_SetClkConfig(gTmr3_c, gTmrBusRateClk_c, gTmrClkDivBy128_c); //62500 cuentas por segundo
+    (void) Tmr_SetChannelConfig(gTmr3_c, &timerConfig);
+    (void) Tmr_Enable(gTmr3_c,gTmrClkDivBy128_c, timerCount);
+}
+
+void
+uMac_Engine (void)
 {   
     switch (uMac_Current_State) {
     case uMac_NoInit:
@@ -81,39 +111,53 @@ void uMac_Engine (void)
                 ui = 0;
             }
             
-            (void) MLMESetChannelRequest(Channels[0]);
-            //(void) MLMESetChannelRequest(gChannel11_c);
-            uMac_TxPacket->Dest_Add = uMacbroad;
-            uMac_TxPacket->Packet_Type = 0;
-            uMac_TxPacket->Pan_ID = 10;
-            uMac_TxPacket->Source_Add = MyID;
-            (void) MCPSDataRequest(AppTxPacket);
-            uMac_Current_State = uMac_Init;
+            if (send_attempts > MAX_SEND_ATTEMPTS) {
+                ui++;
+                send_attempts = 0;
+            }
+
+            (void) MLMESetChannelRequest(Channels[ui]);
+            
+            if (MLMEEnergyDetect() > NOISE_ENERGY) {
+                ui++;
+                send_attempts = 0;
+                uMac_TxPacket->Dest_Add = uMacbroad;
+                uMac_TxPacket->Packet_Type = 0;
+                uMac_TxPacket->Pan_ID = 10;
+                uMac_TxPacket->Source_Add = MyID;
+                (void) MCPSDataRequest(AppTxPacket);
+                uMac_Current_State = uMac_Init;
+            } else {
+                send_attempts++;
+            }
         }
         break;
     case uMac_Init:
         if (bTxDone == TRUE) {
-            bTxDone = FALSE;
-            (void) MLMERXEnableRequest(AppRxPacket, 0x00000001); 
+            (void) MLMERXEnableRequest(AppRxPacket, 0);
+            (void) SetTimer(10000, 1);
             uMac_Current_State = uMac_WaitRx;
-            // uMac_On = TRUE;
-            // uMac_Current_State = uMac_NoInit;
         }
         break;
     case uMac_WaitRx:
-        if (bRxDone == TRUE) {
+        if (bTimerFlag1 == TRUE) {
+            bTimerFlag1 = FALSE;
+            (void) MLMERXDisableRequest();
+            uMac_Current_State = uMac_NoInit;
+            uMac_On = TRUE;
+        } else if (bRxDone == TRUE) {
             bRxDone = FALSE;
             if (AppRxPacket->rxStatus == rxSuccessStatus_c) {
                 if (uMac_RxPacket->Pan_ID == 10) {
                     if (uMac_RxPacket->Dest_Add == MyID || uMac_RxPacket->Dest_Add == uMacbroad) {
                         switch (uMac_RxPacket->Source_Add) {
-                        case 1:
+                        case 0:
                             Led_PrintValue(0x08);
                             break;
-                        case 2:
+                        case 1:
                             Led_PrintValue(0x06);
                             break;
-                        case 3:
+                        case 2:
                             Led_PrintValue(0x03);
                             break;
                         }
@@ -121,38 +165,50 @@ void uMac_Engine (void)
                         if (uMac_RxPacket->Packet_Type != 0) {
                             // Llamar callback
                         }
-                        
-                        (void) MLMERXEnableRequest(AppRxPacket, 0);
                     }
-                } else {
-                    uMac_Current_State = uMac_NoInit;
-                    uMac_On = TRUE;
                 }
-            } else if (AppRxPacket->rxStatus == rxTimeOutStatus_c) {
-                uMac_Current_State = uMac_NoInit;
-                uMac_On = TRUE;
             }
+            (void) MLMERXEnableRequest(AppRxPacket, 0);
         }
 
         if (bDoTx == TRUE) {
-            bDoTx = FALSE;
             (void) MLMERXDisableRequest();  // Deshabilitar la recepcion antes de transmitir (necesario por SMAC)
-            (void) MCPSDataRequest(AppTxPacket);
-            uMac_Current_State = uMac_Tx;
+
+            if (send_attempts > MAX_SEND_ATTEMPTS) {
+                bDoTx = FALSE;
+                send_attempts = 0;
+                (void) MLMERXEnableRequest(AppRxPacket, 0);
+            }
+
+            if (MLMEEnergyDetect() > NOISE_ENERGY) {    
+                bDoTx = FALSE;
+                (void) MCPSDataRequest(AppTxPacket);
+                uMac_Current_State = uMac_Tx;
+            } else {
+                send_attempts++;
+                (void) SetTimer(MyID*62, 1);
+                uMac_Current_State = uMac_Timer;
+            }
         }
         
+        break;
+    case uMac_Timer:
+        if (bTimerFlag1 == TRUE) {
+            uMac_Current_State = uMac_WaitRx;
+        }
         break;
     case uMac_Tx:
         if (bTxDone == TRUE) {
             bTxDone = FALSE;
-            uMac_Current_State = uMac_Init;
             (void) MLMERXEnableRequest(AppRxPacket, 0);
+            uMac_Current_State = uMac_WaitRx;
         }
         break;
     }
 }
 
-void InitSmac (void)
+void
+InitSmac (void)
 {
     AppTxPacket = (txPacket_t *) gau8TxDataBuffer;
     AppTxPacket->u8DataLength = 10;
@@ -171,31 +227,48 @@ void InitSmac (void)
     (void)MLMEFEGainAdjust(gGainOffset_c);
  }
 
-// Place it in NON_BANKED memory
 #ifdef MEMORY_MODEL_BANKED
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 #else
 #pragma CODE_SEG DEFAULT
 #endif /* MEMORY_MODEL_BANKED */
 
-void MLMEScanComfirm (channels_t ClearestChann)
-{
-    bestChannel = ClearestChann; 
-    bScanDone = TRUE;
-}
-
-void MCPSDataIndication (rxPacket_t *gsRxPacket)
+void
+MCPSDataIndication (rxPacket_t *gsRxPacket)
 {  
     bRxDone = TRUE;
 }
 
-void MCPSDataComfirm (txStatus_t TransmissionResult)
+void
+MCPSDataComfirm (txStatus_t TransmissionResult)
 {  
     bTxDone = TRUE;
 }
 
-void MLMEResetIndication(void) { }
+void
+TimerCallBack1 (void)
+{
+    bTimerFlag1 = TRUE;
+    (void) Tmr_Disable(gTmr3_c); 
+}
 
-void MLMEWakeComfirm(void) { }
+void
+TimerCallBack2 (void)
+{
+    bTimerFlag2 = TRUE;
+    (void) Tmr_Disable(gTmr3_c); 
+}
+
+void
+MLMEResetIndication (void)
+{
+
+}
+
+void
+MLMEWakeComfirm (void)
+{
+
+}
 
 #pragma CODE_SEG DEFAULT

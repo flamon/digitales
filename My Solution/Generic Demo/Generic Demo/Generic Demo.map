@@ -1,3 +1,12 @@
+*********************************************************************************************
+*********************************************************************************************
+LINKING FAILED
+The linking process failed in some stage.
+Depending on the phase the linker failed, part of the information contained in this map file may be inaccurate or wrong.
+If the linking failed before the allocation phase finished, then the addresses might be inaccurate.
+Also summary information like the code size is likely to be misleading.
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 
 PROGRAM "Generic Demo.abs"
 
@@ -6,7 +15,7 @@ TARGET SECTION
 ---------------------------------------------------------------------------------------------
 Processor   : Freescale HC08
 Memory Model: BANKED
-File Format : ELF\DWARF 2.0
+File Format : ELF (no debug info)
 Linker      : SmartLinker V-5.0.48 Build 11346, Dec 13 2011
 
 *********************************************************************************************
@@ -38,26 +47,11 @@ rtshc08.o (ansibim.lib)                 Model: BANKED,        Lang: ANSI-C
 *********************************************************************************************
 STARTUP SECTION
 ---------------------------------------------------------------------------------------------
-Entry point: 0x339B (_Startup)
-_startupData is allocated at 0x2080 and uses 6 Bytes
-extern struct _tagStartup {
-  unsigned nofZeroOut     1
-  _Range   pZeroOut       0x300     884
-  _Copy    *toCopyDownBeg 0x3EA7
-} _startupData;
 
 *********************************************************************************************
 SECTION-ALLOCATION SECTION
 Section Name                    Size  Type     From       To       Segment
 ---------------------------------------------------------------------------------------------
-.data                             65   R/W      0x300      0x340   APP_RAM_1
-NON_BANKED                      4536     R     0x20B0     0x3267   APP_CODE_0
-.copy                             71     R     0x3EA7     0x3EED   APP_CODE_0
-.rodata                          138     R     0x3268     0x32F1   APP_CODE_0
-.rodata1                          41     R     0x32F2     0x331A   APP_CODE_0
-.text                           2817     R     0x33A6     0x3EA6   APP_CODE_0
-.startData                        26     R     0x2080     0x2099   APP_STARTUP_STRUC_FLASH
-.stack                           512   R/W      0x100      0x2FF   APP_STACK_RAM
 .abs_section_0                     1   N/I        0x0        0x0   .absSeg0
 .abs_section_1                     1   N/I        0x1        0x1   .absSeg1
 .abs_section_2                     1   N/I        0x2        0x2   .absSeg2
@@ -239,21 +233,15 @@ NON_BANKED                      4536     R     0x20B0     0x3267   APP_CODE_0
 .abs_section_1816                  2   N/I     0x1816     0x1817   .absSeg178
 .abs_section_1870                  2   N/I     0x1870     0x1871   .absSeg179
 .abs_section_ffc0                 62     R     0xFFC0     0xFFFD   .absSeg180
-.bss                             653   R/W      0x341      0x5CD   APP_RAM_1
-.init                            139     R     0x331B     0x33A5   APP_CODE_0
-.common                          166   R/W      0x5CE      0x673   APP_RAM_1
-RES_RESET_VECTOR_FLASH_vect          2     R     0xFFFE     0xFFFF   RES_RESET_VECTOR_FLASH
 
 Summary of section sizes per section type:
-READ_ONLY (R):        1E98 (dec:     7832)
-READ_WRITE (R/W):      574 (dec:     1396)
+READ_ONLY (R):          3E (dec:       62)
 NO_INIT (N/I):          CF (dec:      207)
 
 *********************************************************************************************
 VECTOR-ALLOCATION SECTION
     Address     InitValue   InitFunction
 ---------------------------------------------------------------------------------------------
-     0xFFFE        0x339B   _Startup
 
 *********************************************************************************************
 OBJECT-ALLOCATION SECTION
@@ -261,273 +249,287 @@ OBJECT-ALLOCATION SECTION
 ---------------------------------------------------------------------------------------------
 MODULE:                 -- uMac_c.obj --
 - PROCEDURES:
-     Init_uMac                                 33A6      1E      30       2   .text       
-     uMac_Engine                               33C4     10B     267       7   .text       
-     InitSmac                                  34CF      3B      59       2   .text       
-     MLMEScanComfirm                           20B0       9       9       2   NON_BANKED  
-     MCPSDataIndication                        20B9       6       6       3   NON_BANKED  
-     MCPSDataComfirm                           20BF       6       6       1   NON_BANKED  
-     MLMEResetIndication                       20C5       1       1       1   NON_BANKED  
-     MLMEWakeComfirm                           20C6       1       1       1   NON_BANKED  
+     Init_uMac                                    0'Error      1E      30       0   .text       
+     SetTimer                                     0'Error      49      73       0   .text       
+     uMac_Engine                                  0'Error     179     377       0   .text       
+     InitSmac                                     0'Error      3B      59       0   .text       
+     MCPSDataIndication                           0'Error       6       6       0   NON_BANKED  
+     MCPSDataComfirm                              0'Error       6       6       0   NON_BANKED  
+     TimerCallBack1                               0'Error       9       9       0   NON_BANKED  
+     TimerCallBack2                               0'Error       9       9       0   NON_BANKED  
+     MLMEResetIndication                          0'Error       1       1       0   NON_BANKED  
+     MLMEWakeComfirm                              0'Error       1       1       0   NON_BANKED  
 - VARIABLES:
-     uMacbroad                                  300       1       1       2   .data       
-     Channels                                   301      10      16       1   .data       
-     uMac_On                                    341       1       1       4   .bss        
-     ui                                         342       1       1       2   .bss        
-     uMac_Current_State                         343       1       1       5   .bss        
-     gau8RxDataBuffer                           344      82     130       1   .bss        
-     gau8TxDataBuffer                           3C6      80     128       1   .bss        
-     AppTxPacket                                446       2       2       4   .bss        
-     AppRxPacket                                448       2       2       5   .bss        
-     uMac_RxPacket                              44A       2       2       3   .bss        
-     uMac_TxPacket                              44C       2       2       2   .bss        
-     bTxDone                                    5CE       1       1       5   .common     
-     bRxDone                                    5CF       1       1       3   .common     
-     bScanDone                                  5D0       1       1       1   .common     
-     bDoTx                                      5D1       1       1       2   .common     
-     bestChannel                                5D2       1       1       1   .common     
+     uMacbroad                                    0'Error       1       1       0   .data       
+     Channels                                     0'Error      10      16       0   .data       
+     uMac_On                                      0'Error       1       1       0   .bss        
+     bTimerFlag1                                  0'Error       1       1       0   .bss        
+     bTimerFlag2                                  0'Error       1       1       0   .bss        
+     ui                                           0'Error       1       1       0   .bss        
+     send_attempts                                0'Error       1       1       0   .bss        
+     uMac_Current_State                           0'Error       1       1       0   .bss        
+     gau8RxDataBuffer                             0'Error      82     130       0   .bss        
+     gau8TxDataBuffer                             0'Error      80     128       0   .bss        
+     AppTxPacket                                  0'Error       2       2       0   .bss        
+     AppRxPacket                                  0'Error       2       2       0   .bss        
+     uMac_RxPacket                                0'Error       2       2       0   .bss        
+     uMac_TxPacket                                0'Error       2       2       0   .bss        
+     bTxDone                                      0'Error       1       1       0   .common     
+     bRxDone                                      0'Error       1       1       0   .common     
+     bDoTx                                        0'Error       1       1       0   .common     
+     timerConfig                                  0'Error       5       5       0   .common     
 MODULE:                 -- SMAC_c.obj --
 - PROCEDURES:
-     MCPSDataRequest                           350A      4B      75       4   .text       
-     MLMERXEnableRequest                       3555      9A     154       4   .text       
-     MLMERXDisableRequest                      35EF      22      34       2   .text       
-     MLMERadioInit                             3611      61      97       2   .text       
-     MLMEFEGainAdjust                          3672       D      13       2   .text       
-     MLMESetChannelRequest                     367F      38      56       4   .text       
-     MLMEPAOutputAdjust                        36B7      2C      44       2   .text       
-     MLMESetClockRate                          36E3       4       4       2   .text       
-     MLMESetTmrPrescale                        36E7      1C      28       2   .text       
-     SmacScanTheNextChannel                    3703      60      96       6   .text       
-     SmacSetRxTimeout                          3763      27      39       4   .text       
-     SmacFormatTxPacket                        378A      29      41       2   .text       
-     PhyPdDataConfirm                          20C7      5F      95       1   NON_BANKED  
-     PhyPdDataIndication                       2126      81     129       1   NON_BANKED  
-     PhyPlmeCcaConfirm                         21A7      4A      74       1   NON_BANKED  
-     PhyPlmeEdConfirm                          21F1      6A     106       1   NON_BANKED  
-     PhyPlmeSyncLossIndication                 225B      63      99       1   NON_BANKED  
-     PhyPlmeResetIndication                    22BE       3       3       1   NON_BANKED  
-     PhyPlmeWakeComfirm                        22C1       3       3       1   NON_BANKED  
-     PhyTimeRxTimeoutIndication                22C4      12      18       1   NON_BANKED  
+     MCPSDataRequest                              0'Error      4B      75       0   .text       
+     MLMERXEnableRequest                          0'Error      9A     154       0   .text       
+     MLMERXDisableRequest                         0'Error      22      34       0   .text       
+     MLMERadioInit                                0'Error      61      97       0   .text       
+     MLMEEnergyDetect                             0'Error      2A      42       0   .text       
+     MLMEFEGainAdjust                             0'Error       D      13       0   .text       
+     MLMESetChannelRequest                        0'Error      38      56       0   .text       
+     MLMEPAOutputAdjust                           0'Error      2C      44       0   .text       
+     MLMESetClockRate                             0'Error       4       4       0   .text       
+     MLMESetTmrPrescale                           0'Error      1C      28       0   .text       
+     SmacScanTheNextChannel                       0'Error      60      96       0   .text       
+     SmacSetRxTimeout                             0'Error      27      39       0   .text       
+     SmacFormatTxPacket                           0'Error      29      41       0   .text       
+     PhyPdDataConfirm                             0'Error      5F      95       0   NON_BANKED  
+     PhyPdDataIndication                          0'Error      81     129       0   NON_BANKED  
+     PhyPlmeCcaConfirm                            0'Error      4A      74       0   NON_BANKED  
+     PhyPlmeEdConfirm                             0'Error      6A     106       0   NON_BANKED  
+     PhyPlmeSyncLossIndication                    0'Error      63      99       0   NON_BANKED  
+     PhyPlmeResetIndication                       0'Error       3       3       0   NON_BANKED  
+     PhyPlmeWakeComfirm                           0'Error       3       3       0   NON_BANKED  
+     PhyTimeRxTimeoutIndication                   0'Error      12      18       0   NON_BANKED  
 - VARIABLES:
-     smacTimeout                                44E       4       4       4   .bss        
-     smacChannelsBeingScanned                   452       2       2       2   .bss        
-     smacEdValue                                454       1       1       5   .bss        
-     smacState                                  455       1       1      18   .bss        
-     smacLastDataRxParams                       456       5       5       6   .bss        
-     smacCurrentChannel                         45B       1       1       4   .bss        
-     smacScanCurrentChannel                     45C       1       1       8   .bss        
-     smacClearestChann                          45D       1       1       5   .bss        
-     pTestPacket                                45E       2       2       1   .bss        
-     smacProccesPacketPtr                       460       2       2      24   .bss        
-     smacFlags                                  5D3       1       1      27   .common     
+     smacTimeout                                  0'Error       4       4       0   .bss        
+     smacChannelsBeingScanned                     0'Error       2       2       0   .bss        
+     smacEdValue                                  0'Error       1       1       0   .bss        
+     smacState                                    0'Error       1       1       0   .bss        
+     smacLastDataRxParams                         0'Error       5       5       0   .bss        
+     smacCurrentChannel                           0'Error       1       1       0   .bss        
+     smacScanCurrentChannel                       0'Error       1       1       0   .bss        
+     smacClearestChann                            0'Error       1       1       0   .bss        
+     pTestPacket                                  0'Error       2       2       0   .bss        
+     smacProccesPacketPtr                         0'Error       2       2       0   .bss        
+     smacFlags                                    0'Error       1       1       0   .common     
 MODULE:                 -- Timer_c.obj --
 - PROCEDURES:
-     Tmr_Init                                  22D6      36      54       1   NON_BANKED  
-     Tmr_Tmr1Isr                               230C      32      50       4   NON_BANKED  
-     Tmr_Tmr2Isr                               233E      32      50       4   NON_BANKED  
-     Tmr_Tmr3Isr                               2370      56      86       7   NON_BANKED  
+     Tmr_Init                                     0'Error      36      54       0   NON_BANKED  
+     Tmr_SetChannelConfig                         0'Error      B7     183       0   NON_BANKED  
+     Tmr_SetCallbackFunc                          0'Error      2F      47       0   NON_BANKED  
+     Tmr_SetClkConfig                             0'Error      29      41       0   NON_BANKED  
+     Tmr_Disable                                  0'Error      11      17       0   NON_BANKED  
+     Tmr_Enable                                   0'Error      28      40       0   NON_BANKED  
+     Tmr_Tmr1Isr                                  0'Error      32      50       0   NON_BANKED  
+     Tmr_Tmr2Isr                                  0'Error      32      50       0   NON_BANKED  
+     Tmr_Tmr3Isr                                  0'Error      56      86       0   NON_BANKED  
 - VARIABLES:
-     mu8TmrStartRegs                            311       6       6       1   .data       
-     mTmrCallbackFuncEvent                      462      2A      42      17   .bss        
+     mu8TmrMaxChannel                             0'Error       3       3       0   .rodata     
+     mu8TmrStartRegs                              0'Error       6       6       0   .data       
+     mu8TmrChannStatCntlReg                       0'Error      24      36       0   .data       
+     mu8TmrChannValueHighReg                      0'Error      24      36       0   .data       
+     mu8TmrChannValueLowReg                       0'Error      24      36       0   .data       
+     mTmrCallbackFuncEvent                        0'Error      2A      42       0   .bss        
 MODULE:                 -- SPI_c.obj --
 - PROCEDURES:
-     SPI1_Init                                 23C6      20      32       1   NON_BANKED  
-     SPI1_AssertPeripheralSsPin                23E6      2B      43       6   NON_BANKED  
-     SPI1_DeassertPeripheralSsPin              2411      1D      29       5   NON_BANKED  
-     SPI1_WriteString                          242E      34      52       3   NON_BANKED  
-     SPI1_WriteStringBlocking                  2462      35      53       2   NON_BANKED  
-     SPI1_ReadString                           2497      2B      43       3   NON_BANKED  
-     SPI1_ReadStringBlocking                   24C2      37      55       3   NON_BANKED  
-     SPI1_WriteByte                            24F9       9       9       4   NON_BANKED  
-     SPI1_WriteByteBlocking                    2502       8       8       5   NON_BANKED  
-     SPI1_ReadByteBlocking                     250A       A      10       1   NON_BANKED  
-     SPI1_Isr                                  2514      5F      95       1   NON_BANKED  
+     SPI1_Init                                    0'Error      20      32       0   NON_BANKED  
+     SPI1_AssertPeripheralSsPin                   0'Error      2B      43       0   NON_BANKED  
+     SPI1_DeassertPeripheralSsPin                 0'Error      1D      29       0   NON_BANKED  
+     SPI1_WriteString                             0'Error      34      52       0   NON_BANKED  
+     SPI1_WriteStringBlocking                     0'Error      35      53       0   NON_BANKED  
+     SPI1_ReadString                              0'Error      2B      43       0   NON_BANKED  
+     SPI1_ReadStringBlocking                      0'Error      37      55       0   NON_BANKED  
+     SPI1_WriteByte                               0'Error       9       9       0   NON_BANKED  
+     SPI1_WriteByteBlocking                       0'Error       8       8       0   NON_BANKED  
+     SPI1_ReadByteBlocking                        0'Error       A      10       0   NON_BANKED  
+     SPI1_Isr                                     0'Error      5F      95       0   NON_BANKED  
 - VARIABLES:
-     mpu8SPI1Ptr                                48C       2       2       8   .bss        
-     mu8SPI1Counter                             48E       1       1       6   .bss        
-     mSPI1Status                                48F       1       1      18   .bss        
-     gpfSpi1CallBack                            5D4       2       2       4   .common     
+     mpu8SPI1Ptr                                  0'Error       2       2       0   .bss        
+     mu8SPI1Counter                               0'Error       1       1       0   .bss        
+     mSPI1Status                                  0'Error       1       1       0   .bss        
+     gpfSpi1CallBack                              0'Error       2       2       0   .common     
 MODULE:                 -- UART_c.obj --
 - PROCEDURES:
-     Uart_Init                                 37B3      A9     169       7   .text       
-     Uart_ClearErrors                          385C      1B      27       2   .text       
-     Uart_Configure                            3877      82     130       2   .text       
-     Uart_GetBytesFromRxBuffer                 38F9      AD     173       2   .text       
-     Uart_RegisterRxCallBack                   39A6      2C      44       2   .text       
-     Uart_RegisterTxCallBack                   39D2      30      48       2   .text       
-     Uart_BlockingStringTx                     3A02      33      51       2   .text       
-     Uart_BlockingByteTx                       3A35      28      40       2   .text       
-     Uart2_TxIsr                               2573      37      55       1   NON_BANKED  
-     Uart2_RxIsr                               25AA      61      97       1   NON_BANKED  
-     Uart2_ErrorIsr                            260B       1       1       1   NON_BANKED  
+     Uart_Init                                    0'Error      A9     169       0   .text       
+     Uart_ClearErrors                             0'Error      1B      27       0   .text       
+     Uart_Configure                               0'Error      82     130       0   .text       
+     Uart_GetBytesFromRxBuffer                    0'Error      AD     173       0   .text       
+     Uart_RegisterRxCallBack                      0'Error      2C      44       0   .text       
+     Uart_RegisterTxCallBack                      0'Error      30      48       0   .text       
+     Uart_BlockingStringTx                        0'Error      33      51       0   .text       
+     Uart_BlockingByteTx                          0'Error      28      40       0   .text       
+     Uart2_TxIsr                                  0'Error      37      55       0   NON_BANKED  
+     Uart2_RxIsr                                  0'Error      61      97       0   NON_BANKED  
+     Uart2_ErrorIsr                               0'Error       1       1       0   NON_BANKED  
 - VARIABLES:
-     maUartStartOfModule                        317       2       2       3   .data       
-     mSciModuleHwErrors                         490       1       1       2   .bss        
-     mIsTxPending                               491       1       1       5   .bss        
-     mUartRxBuff                                492      40      64       3   .bss        
-     mUartTxBuff                                4D2      C8     200       2   .bss        
-     mUartRxBufferIndx                          59A       2       2      13   .bss        
-     mUartTxBufferIndx                          59C       2       2       9   .bss        
-     mUartRxCbFn                                59E       2       2       5   .bss        
-     mUartTxCbFn                                5A0       2       2       5   .bss        
-     mUartRxCbFlags                             5A2       1       1       2   .bss        
-     mUartTxNumOfFreeBytes                      5A3       1       1       2   .bss        
+     maUartStartOfModule                          0'Error       2       2       0   .data       
+     mSciModuleHwErrors                           0'Error       1       1       0   .bss        
+     mIsTxPending                                 0'Error       1       1       0   .bss        
+     mUartRxBuff                                  0'Error      40      64       0   .bss        
+     mUartTxBuff                                  0'Error      C8     200       0   .bss        
+     mUartRxBufferIndx                            0'Error       2       2       0   .bss        
+     mUartTxBufferIndx                            0'Error       2       2       0   .bss        
+     mUartRxCbFn                                  0'Error       2       2       0   .bss        
+     mUartTxCbFn                                  0'Error       2       2       0   .bss        
+     mUartRxCbFlags                               0'Error       1       1       0   .bss        
+     mUartTxNumOfFreeBytes                        0'Error       1       1       0   .bss        
 MODULE:                 -- PhyMC1320X_c.obj --
 - PROCEDURES:
-     PhyInit                                   260C      94     148       1   NON_BANKED  
-     PhyPdDataRequest                          26A0      4B      75       3   NON_BANKED  
-     PhyPlmeRxRequest                          26EB      11      17       3   NON_BANKED  
-     PhyTimeSetEventTimeout                    26FC      2F      47       1   NON_BANKED  
-     PhyTimeReadClock                          272B      4A      74       1   NON_BANKED  
-     PhyPlmeCcaEdRequest                       2775      44      68       3   NON_BANKED  
-     PhyPlmeSetCurrentChannelRequest           27B9      28      40       5   NON_BANKED  
-     PhyPlmeSetPwrLevelRequest                 27E1      23      35       2   NON_BANKED  
-     PhyPpSetPromiscuous                       2804       1       1       1   NON_BANKED  
-     PhyPlmeSetClockOutRate                    2805      24      36       1   NON_BANKED  
-     PhyAbort                                  2829      19      25       1   NON_BANKED  
-     PhyTimeDisableEventTimeout                2842       F      15       2   NON_BANKED  
-     PhyPpSetCcaThreshold                      2851      21      33       1   NON_BANKED  
-     PhyAdjustCcaOffsetCmp                     2872      1D      29       1   NON_BANKED  
-     PhySetRadioTimerPrescaler                 288F      23      35       1   NON_BANKED  
-     PhySetTrxStateRequest                     28B2      41      65       4   NON_BANKED  
-     PhyHREventsReStartSequense                28F3      16      22       2   NON_BANKED  
-     PhyChangePacketEndianess                  2909      52      82       1   NON_BANKED  
-     PhyRadioEvent                             295B     106     262       6   NON_BANKED  
-     PhyHandlingRadioEvents                    2A61     167     359      24   NON_BANKED  
+     PhyInit                                      0'Error      94     148       0   NON_BANKED  
+     PhyPdDataRequest                             0'Error      4B      75       0   NON_BANKED  
+     PhyPlmeRxRequest                             0'Error      11      17       0   NON_BANKED  
+     PhyTimeSetEventTimeout                       0'Error      2F      47       0   NON_BANKED  
+     PhyTimeReadClock                             0'Error      4A      74       0   NON_BANKED  
+     PhyPlmeCcaEdRequest                          0'Error      44      68       0   NON_BANKED  
+     PhyPlmeSetCurrentChannelRequest              0'Error      28      40       0   NON_BANKED  
+     PhyPlmeSetPwrLevelRequest                    0'Error      23      35       0   NON_BANKED  
+     PhyPpSetPromiscuous                          0'Error       1       1       0   NON_BANKED  
+     PhyPlmeSetClockOutRate                       0'Error      24      36       0   NON_BANKED  
+     PhyAbort                                     0'Error      19      25       0   NON_BANKED  
+     PhyTimeDisableEventTimeout                   0'Error       F      15       0   NON_BANKED  
+     PhyPpSetCcaThreshold                         0'Error      21      33       0   NON_BANKED  
+     PhyAdjustCcaOffsetCmp                        0'Error      1D      29       0   NON_BANKED  
+     PhySetRadioTimerPrescaler                    0'Error      23      35       0   NON_BANKED  
+     PhySetTrxStateRequest                        0'Error      41      65       0   NON_BANKED  
+     PhyHREventsReStartSequense                   0'Error      16      22       0   NON_BANKED  
+     PhyChangePacketEndianess                     0'Error      52      82       0   NON_BANKED  
+     PhyRadioEvent                                0'Error     106     262       0   NON_BANKED  
+     PhyHandlingRadioEvents                       0'Error     167     359       0   NON_BANKED  
 - VARIABLES:
-     cu8ChannelRegisterValues                  3268      20      32       2   .rodata     
-     u8PARegisterValues                        3288      10      16       1   .rodata     
-     radioConfiguration                        3298      24      36       2   .rodata     
-     mPhyState                                  5A4       1       1      17   .bss        
-     u16HREReg                                  5A5       2       2      11   .bss        
-     hREState                                   5A7       1       1       5   .bss        
-     mDrvRxPacket                               5A8       2       2       3   .bss        
-     mPhyRxParams                               5AA       2       2       2   .bss        
-     u8DataLength.17                            5AC       1       1       5   .bss        
+     cu8ChannelRegisterValues                     0'Error      20      32       0   .rodata     
+     u8PARegisterValues                           0'Error      10      16       0   .rodata     
+     radioConfiguration                           0'Error      24      36       0   .rodata     
+     mPhyState                                    0'Error       1       1       0   .bss        
+     u16HREReg                                    0'Error       2       2       0   .bss        
+     hREState                                     0'Error       1       1       0   .bss        
+     mDrvRxPacket                                 0'Error       2       2       0   .bss        
+     mPhyRxParams                                 0'Error       2       2       0   .bss        
+     u8DataLength.17                              0'Error       1       1       0   .bss        
 MODULE:                 -- Radio_c.obj --
 - PROCEDURES:
-     Radio_DriverInit                          2BC8      27      39       1   NON_BANKED  
-     Radio_WriteRegister                       2BEF      39      57       4   NON_BANKED  
-     Radio_WriteRegisterBlocking               2C28      38      56      19   NON_BANKED  
-     Radio_ReadRegister                        2C60      39      57       5   NON_BANKED  
-     Radio_ReadRegisterBlocking                2C99      3A      58      12   NON_BANKED  
-     Radio_WriteTxBuffer                       2CD3      C9     201       2   NON_BANKED  
-     Radio_ReadRxBuffer                        2D9C      73     115       1   NON_BANKED  
-     RadioIRQServiceRoutine                    2E0F      17      23       1   NON_BANKED  
-     RadioInitControlSignals                   2E26      18      24       1   NON_BANKED  
-     RadioProcess                              2E3E      7D     125       6   NON_BANKED  
+     Radio_DriverInit                             0'Error      27      39       0   NON_BANKED  
+     Radio_WriteRegister                          0'Error      39      57       0   NON_BANKED  
+     Radio_WriteRegisterBlocking                  0'Error      38      56       0   NON_BANKED  
+     Radio_ReadRegister                           0'Error      39      57       0   NON_BANKED  
+     Radio_ReadRegisterBlocking                   0'Error      3A      58       0   NON_BANKED  
+     Radio_WriteTxBuffer                          0'Error      C9     201       0   NON_BANKED  
+     Radio_ReadRxBuffer                           0'Error      73     115       0   NON_BANKED  
+     RadioIRQServiceRoutine                       0'Error      17      23       0   NON_BANKED  
+     RadioInitControlSignals                      0'Error      18      24       0   NON_BANKED  
+     RadioProcess                                 0'Error      7D     125       0   NON_BANKED  
 - VARIABLES:
-     gu16RadioIrqStatus                         5D6       2       2       3   .common     
-     mRadioDriverState                          5D8       1       1      20   .common     
-     mpfRadioProcessCallback                    5D9       2       2       5   .common     
-     mpfRadioEventCallback                      5DB       2       2       2   .common     
-     mau8RadioDataBuffer                        5DD      80     128       3   .common     
-     mpu8RadioRxPointer                         65D       2       2       3   .common     
-     mau8RadioDataLength                        65F       1       1       4   .common     
-     mu16WrittingRegisterValue                  660       2       2       2   .common     
-     mpu16ReadingRegisterPointer                662       2       2       2   .common     
-     mRadioProcessState                         664       1       1       9   .common     
+     gu16RadioIrqStatus                           0'Error       2       2       0   .common     
+     mRadioDriverState                            0'Error       1       1       0   .common     
+     mpfRadioProcessCallback                      0'Error       2       2       0   .common     
+     mpfRadioEventCallback                        0'Error       2       2       0   .common     
+     mau8RadioDataBuffer                          0'Error      80     128       0   .common     
+     mpu8RadioRxPointer                           0'Error       2       2       0   .common     
+     mau8RadioDataLength                          0'Error       1       1       0   .common     
+     mu16WrittingRegisterValue                    0'Error       2       2       0   .common     
+     mpu16ReadingRegisterPointer                  0'Error       2       2       0   .common     
+     mRadioProcessState                           0'Error       1       1       0   .common     
 MODULE:                 -- LVD_c.obj --
 - PROCEDURES:
-     LowVoltageDetectIsr                       2EBB      23      35       1   NON_BANKED  
+     LowVoltageDetectIsr                          0'Error      23      35       0   NON_BANKED  
 - VARIABLES:
-     LvwCllbk                                   5AD       2       2       1   .bss        
-     LvdCllbk                                   5AF       2       2       1   .bss        
+     LvwCllbk                                     0'Error       2       2       0   .bss        
+     LvdCllbk                                     0'Error       2       2       0   .bss        
 MODULE:                 -- LED_c.obj --
 - PROCEDURES:
-     Led_PrintValue                            3A5D      41      65       2   .text       
-     Led_OffAll                                3A9E      21      33       2   .text       
+     Led_PrintValue                               0'Error      41      65       0   .text       
+     Led_OffAll                                   0'Error      21      33       0   .text       
 - VARIABLES:
 MODULE:                 -- LCD_c.obj --
 - PROCEDURES:
-     Lcd_Init                                  3ABF      95     149      20   .text       
-     Lcd_Config                                3B54      59      89       6   .text       
-     LcdWriteCmd                               3BAD      18      24       8   .text       
-     LcdSetPort                                3BC5      3B      59       4   .text       
+     Lcd_Init                                     0'Error      95     149       0   .text       
+     Lcd_Config                                   0'Error      59      89       0   .text       
+     LcdWriteCmd                                  0'Error      18      24       0   .text       
+     LcdSetPort                                   0'Error      3B      59       0   .text       
 - VARIABLES:
-     mLcdStatus                                 5B1       1       1       5   .bss        
-     mu8LcdString                               5B2       2       2       1   .bss        
-     mu8RsState                                 5B4       1       1       1   .bss        
-     mu8LcdStrFlag                              5B5       1       1       1   .bss        
-     mbLcdBlockingFlag                          5B6       1       1       2   .bss        
-     gpfLcdCallBack                             665       2       2       2   .common     
+     mLcdStatus                                   0'Error       1       1       0   .bss        
+     mu8LcdString                                 0'Error       2       2       0   .bss        
+     mu8RsState                                   0'Error       1       1       0   .bss        
+     mu8LcdStrFlag                                0'Error       1       1       0   .bss        
+     mbLcdBlockingFlag                            0'Error       1       1       0   .bss        
+     gpfLcdCallBack                               0'Error       2       2       0   .common     
 MODULE:                 -- KBI_c.obj --
 - PROCEDURES:
-     Kbi_Config                                3C00      40      64       2   .text       
-     Kbi_Init                                  3C40      2F      47       2   .text       
-     Kbi_PortValue                             3C6F      2B      43       4   .text       
-     KBI1_ISR                                  2EDE      21      33       1   NON_BANKED  
+     Kbi_Config                                   0'Error      40      64       0   .text       
+     Kbi_Init                                     0'Error      2F      47       0   .text       
+     Kbi_PortValue                                0'Error      2B      43       0   .text       
+     KBI1_ISR                                     0'Error      21      33       0   NON_BANKED  
 - VARIABLES:
-     gpKbiControl                               319       4       4       1   .data       
-     pKbiCallback                               5B7       4       4       4   .bss        
+     gpKbiControl                                 0'Error       4       4       0   .data       
+     pKbiCallback                                 0'Error       4       4       0   .bss        
 MODULE:                 -- IRQ_c.obj --
 - PROCEDURES:
-     IRQ_Init                                  3C9A       9       9       4   .text       
-     IRQ_Isr                                   2EFF       B      11       1   NON_BANKED  
+     IRQ_Init                                     0'Error       9       9       0   .text       
+     IRQ_Isr                                      0'Error       B      11       0   NON_BANKED  
 - VARIABLES:
-     IrqCallBack                                5BB       2       2       2   .bss        
+     IrqCallBack                                  0'Error       2       2       0   .bss        
 MODULE:                 -- IIC_c.obj --
 - PROCEDURES:
-     IIC_Isr                                   2F0A      85     133       1   NON_BANKED  
-     iicFinishReadWrite                        2F8F       B      11       1   NON_BANKED  
+     IIC_Isr                                      0'Error      85     133       0   NON_BANKED  
+     iicFinishReadWrite                           0'Error       B      11       0   NON_BANKED  
 - VARIABLES:
-     mIicState                                  5BD       1       1       3   .bss        
-     mpu8IicTxRxPointer                         5BE       2       2       6   .bss        
-     mu8IicDataCounter                          5C0       1       1       4   .bss        
-     mpfIicCallback                             5C1       2       2       1   .bss        
-     bIicDeviceAddressFlag                      5C3       1       1       2   .bss        
+     mIicState                                    0'Error       1       1       0   .bss        
+     mpu8IicTxRxPointer                           0'Error       2       2       0   .bss        
+     mu8IicDataCounter                            0'Error       1       1       0   .bss        
+     mpfIicCallback                               0'Error       2       2       0   .bss        
+     bIicDeviceAddressFlag                        0'Error       1       1       0   .bss        
 MODULE:                 -- GPIO_c.obj --
 - PROCEDURES:
-     Gpio_Init                                 3CA3      77     119       2   .text       
-     Gpio_PortWrite                            3D1A       B      11       2   .text       
-     Gpio_PinSet                               3D25      1F      31      18   .text       
-     Gpio_PinClear                             3D44      1F      31      30   .text       
-     Gpio_PinToggle                            3D63       9       9       4   .text       
+     Gpio_Init                                    0'Error      77     119       0   .text       
+     Gpio_PortWrite                               0'Error       B      11       0   .text       
+     Gpio_PinSet                                  0'Error      1F      31       0   .text       
+     Gpio_PinClear                                0'Error      1F      31       0   .text       
+     Gpio_PinToggle                               0'Error       9       9       0   .text       
 - VARIABLES:
-     GpioDataHandling                          32BC      12      18       2   .rodata     
-     GpioConfigPort                            32CE      1B      27       3   .rodata     
-     GpioLogicConfig                           32E9       9       9       1   .rodata     
-     gpGpioPortData                             31D      12      18       7   .data       
-     gpGpioPullDown                             32F      12      18       1   .data       
-     gGpioPortLogic                             5C4       9       9       4   .bss        
+     GpioDataHandling                             0'Error      12      18       0   .rodata     
+     GpioConfigPort                               0'Error      1B      27       0   .rodata     
+     GpioLogicConfig                              0'Error       9       9       0   .rodata     
+     gpGpioPortData                               0'Error      12      18       0   .data       
+     gpGpioPullDown                               0'Error      12      18       0   .data       
+     gGpioPortLogic                               0'Error       9       9       0   .bss        
 MODULE:                 -- Utilities_c.obj --
 - PROCEDURES:
-     Delay_ms                                  3D6C      46      70       4   .text       
-     Delay_us                                  3DB2      38      56       6   .text       
+     Delay_ms                                     0'Error      46      70       0   .text       
+     Delay_us                                     0'Error      38      56       0   .text       
 - VARIABLES:
 MODULE:                 -- McuInit_c.obj --
 - PROCEDURES:
-     MCUInit                                   3DEA       B      11       2   .text       
-     MCU_UseExternalClock                      3DF5       A      10       2   .text       
+     MCUInit                                      0'Error       B      11       0   .text       
+     MCU_UseExternalClock                         0'Error       A      10       0   .text       
 - VARIABLES:
 MODULE:                 -- Start08_c.obj --
 - PROCEDURES:
-     loadByte                                  331B       E      14       5   .init       
-     Init                                      3329      72     114       1   .init       
-     _Startup                                  339B       B      11       0   .init       
+     loadByte                                     0'Error       E      14       0   NON_BANKED  
+     Init                                         0'Error      72     114       0   NON_BANKED  
+     _Startup                                     0'Error       B      11       0   NON_BANKED  
 - VARIABLES:
-     _startupData                              2080       6       6       4   .startData  
+     _startupData                                 0'Error       6       6       0   _STARTUP    
 - LABELS:
-     __SEG_END_SSTACK                           300       0       0       1               
+     __SEG_END_SSTACK                             0'Error       0       0       0               
 MODULE:                 -- mc9s08qe128_c.obj --
 - PROCEDURES:
 - VARIABLES:
-     _PTAD                                        0       1       1       1   .abs_section_0
+     _PTAD                                        0       1       1       0   .abs_section_0
      _PTADD                                       1       1       1       0   .abs_section_1
-     _PTBD                                        2       1       1       1   .abs_section_2
+     _PTBD                                        2       1       1       0   .abs_section_2
      _PTBDD                                       3       1       1       0   .abs_section_3
      _PTCD                                        4       1       1       0   .abs_section_4
      _PTCDD                                       5       1       1       0   .abs_section_5
-     _PTDD                                        6       1       1       1   .abs_section_6
+     _PTDD                                        6       1       1       0   .abs_section_6
      _PTDDD                                       7       1       1       0   .abs_section_7
      _PTED                                        8       1       1       0   .abs_section_8
      _PTEDD                                       9       1       1       0   .abs_section_9
      _PTFD                                        A       1       1       0   .abs_section_a
      _PTFDD                                       B       1       1       0   .abs_section_b
-     _KBI1SC                                      C       1       1       2   .abs_section_c
-     _KBI1PE                                      D       1       1       1   .abs_section_d
-     _KBI1ES                                      E       1       1       1   .abs_section_e
-     _IRQSC                                       F       1       1      15   .abs_section_f
+     _KBI1SC                                      C       1       1       0   .abs_section_c
+     _KBI1PE                                      D       1       1       0   .abs_section_d
+     _KBI1ES                                      E       1       1       0   .abs_section_e
+     _IRQSC                                       F       1       1       0   .abs_section_f
      _ADCSC1                                     10       1       1       0   .abs_section_10
      _ADCSC2                                     11       1       1       0   .abs_section_11
      _ADCCFG                                     16       1       1       0   .abs_section_16
@@ -546,41 +548,41 @@ MODULE:                 -- mc9s08qe128_c.obj --
      _SCI1S2                                     25       1       1       0   .abs_section_25
      _SCI1C3                                     26       1       1       0   .abs_section_26
      _SCI1D                                      27       1       1       0   .abs_section_27
-     _SPI1C1                                     28       1       1       5   .abs_section_28
-     _SPI1C2                                     29       1       1       1   .abs_section_29
-     _SPI1BR                                     2A       1       1       1   .abs_section_2a
-     _SPI1S                                      2B       1       1       8   .abs_section_2b
-     _SPI1D                                      2D       1       1       8   .abs_section_2d
+     _SPI1C1                                     28       1       1       0   .abs_section_28
+     _SPI1C2                                     29       1       1       0   .abs_section_29
+     _SPI1BR                                     2A       1       1       0   .abs_section_2a
+     _SPI1S                                      2B       1       1       0   .abs_section_2b
+     _SPI1D                                      2D       1       1       0   .abs_section_2d
      _PTJD                                       2E       1       1       0   .abs_section_2e
      _PTJDD                                      2F       1       1       0   .abs_section_2f
      _IIC1A                                      30       1       1       0   .abs_section_30
      _IIC1F                                      31       1       1       0   .abs_section_31
-     _IIC1C1                                     32       1       1       8   .abs_section_32
-     _IIC1S                                      33       1       1       2   .abs_section_33
-     _IIC1D                                      34       1       1       4   .abs_section_34
+     _IIC1C1                                     32       1       1       0   .abs_section_32
+     _IIC1S                                      33       1       1       0   .abs_section_33
+     _IIC1D                                      34       1       1       0   .abs_section_34
      _IIC1C2                                     35       1       1       0   .abs_section_35
-     _ICSC1                                      38       1       1       1   .abs_section_38
-     _ICSC2                                      39       1       1       1   .abs_section_39
+     _ICSC1                                      38       1       1       0   .abs_section_38
+     _ICSC2                                      39       1       1       0   .abs_section_39
      _ICSTRM                                     3A       1       1       0   .abs_section_3a
-     _ICSSC                                      3B       1       1       1   .abs_section_3b
-     _KBI2SC                                     3C       1       1       2   .abs_section_3c
-     _KBI2PE                                     3D       1       1       1   .abs_section_3d
-     _KBI2ES                                     3E       1       1       1   .abs_section_3e
-     _TPM1SC                                     40       1       1       2   .abs_section_40
-     _TPM1C0SC                                   45       1       1       2   .abs_section_45
-     _TPM1C1SC                                   48       1       1       2   .abs_section_48
-     _TPM1C2SC                                   4B       1       1       2   .abs_section_4b
-     _TPM2SC                                     50       1       1       2   .abs_section_50
-     _TPM2C0SC                                   55       1       1       2   .abs_section_55
-     _TPM2C1SC                                   58       1       1       2   .abs_section_58
-     _TPM2C2SC                                   5B       1       1       2   .abs_section_5b
-     _TPM3SC                                     60       1       1       2   .abs_section_60
-     _TPM3C0SC                                   65       1       1       2   .abs_section_65
-     _TPM3C1SC                                   68       1       1       2   .abs_section_68
-     _TPM3C2SC                                   6B       1       1       2   .abs_section_6b
-     _TPM3C3SC                                   6E       1       1       2   .abs_section_6e
-     _TPM3C4SC                                   71       1       1       2   .abs_section_71
-     _TPM3C5SC                                   74       1       1       2   .abs_section_74
+     _ICSSC                                      3B       1       1       0   .abs_section_3b
+     _KBI2SC                                     3C       1       1       0   .abs_section_3c
+     _KBI2PE                                     3D       1       1       0   .abs_section_3d
+     _KBI2ES                                     3E       1       1       0   .abs_section_3e
+     _TPM1SC                                     40       1       1       0   .abs_section_40
+     _TPM1C0SC                                   45       1       1       0   .abs_section_45
+     _TPM1C1SC                                   48       1       1       0   .abs_section_48
+     _TPM1C2SC                                   4B       1       1       0   .abs_section_4b
+     _TPM2SC                                     50       1       1       0   .abs_section_50
+     _TPM2C0SC                                   55       1       1       0   .abs_section_55
+     _TPM2C1SC                                   58       1       1       0   .abs_section_58
+     _TPM2C2SC                                   5B       1       1       0   .abs_section_5b
+     _TPM3SC                                     60       1       1       0   .abs_section_60
+     _TPM3C0SC                                   65       1       1       0   .abs_section_65
+     _TPM3C1SC                                   68       1       1       0   .abs_section_68
+     _TPM3C2SC                                   6B       1       1       0   .abs_section_6b
+     _TPM3C3SC                                   6E       1       1       0   .abs_section_6e
+     _TPM3C4SC                                   71       1       1       0   .abs_section_71
+     _TPM3C5SC                                   74       1       1       0   .abs_section_74
      _PPAGE                                      78       1       1       0   .abs_section_78
      _LAP2                                       79       1       1       0   .abs_section_79
      _LAP1                                       7A       1       1       0   .abs_section_7a
@@ -589,13 +591,13 @@ MODULE:                 -- mc9s08qe128_c.obj --
      _LBP                                        7D       1       1       0   .abs_section_7d
      _LB                                         7E       1       1       0   .abs_section_7e
      _LAPAB                                      7F       1       1       0   .abs_section_7f
-     _SRS                                      1800       1       1       1   .abs_section_1800
+     _SRS                                      1800       1       1       0   .abs_section_1800
      _SBDFR                                    1801       1       1       0   .abs_section_1801
-     _SOPT1                                    1802       1       1       1   .abs_section_1802
+     _SOPT1                                    1802       1       1       0   .abs_section_1802
      _SOPT2                                    1803       1       1       0   .abs_section_1803
-     _SPMSC1                                   1808       1       1       2   .abs_section_1808
-     _SPMSC2                                   1809       1       1       1   .abs_section_1809
-     _SPMSC3                                   180B       1       1       2   .abs_section_180b
+     _SPMSC1                                   1808       1       1       0   .abs_section_1808
+     _SPMSC2                                   1809       1       1       0   .abs_section_1809
+     _SPMSC3                                   180B       1       1       0   .abs_section_180b
      _SCGC1                                    180E       1       1       0   .abs_section_180e
      _SCGC2                                    180F       1       1       0   .abs_section_180f
      _DBGCAX                                   1818       1       1       0   .abs_section_1818
@@ -654,11 +656,11 @@ MODULE:                 -- mc9s08qe128_c.obj --
      _IIC2D                                    186C       1       1       0   .abs_section_186c
      _IIC2C2                                   186D       1       1       0   .abs_section_186d
      _SCI2C1                                   1872       1       1       0   .abs_section_1872
-     _SCI2C2                                   1873       1       1       1   .abs_section_1873
-     _SCI2S1                                   1874       1       1       3   .abs_section_1874
+     _SCI2C2                                   1873       1       1       0   .abs_section_1873
+     _SCI2S1                                   1874       1       1       0   .abs_section_1874
      _SCI2S2                                   1875       1       1       0   .abs_section_1875
      _SCI2C3                                   1876       1       1       0   .abs_section_1876
-     _SCI2D                                    1877       1       1       4   .abs_section_1877
+     _SCI2D                                    1877       1       1       0   .abs_section_1877
      _PTCSET                                   1878       1       1       0   .abs_section_1878
      _PTESET                                   1879       1       1       0   .abs_section_1879
      _PTCCLR                                   187A       1       1       0   .abs_section_187a
@@ -694,934 +696,69 @@ MODULE:                 -- mc9s08qe128_c.obj --
      _SCI2BD                                   1870       2       2       0   .abs_section_1870
 MODULE:                 -- vectortable_c.obj --
 - PROCEDURES:
-     UnimplementedISR                          2F9A       3       3       8   NON_BANKED  
+     UnimplementedISR                             0'Error       3       3       0   NON_BANKED  
 - VARIABLES:
      ISR_vectors                               FFC0      3E      62       0   .abs_section_ffc0
 MODULE:                 -- OTAP_c.obj --
 - PROCEDURES:
-     Otap_OpcMain                              3DFF       1       1       2   .text       
-     Otap_OpcInit                              3E00       1       1       2   .text       
+     Otap_OpcMain                                 0'Error       1       1       0   .text       
+     Otap_OpcInit                                 0'Error       1       1       0   .text       
 - VARIABLES:
 MODULE:                 -- main_c.obj --
 - PROCEDURES:
-     main                                      3E01      22      34       2   .text       
-     InitProject                               3E23      84     132       2   .text       
-     UartTxCallback                            2F9D       6       6       1   NON_BANKED  
-     UartRxCallback                            2FA3      1D      29       1   NON_BANKED  
-     KbiCallback                               2FC0      2B      43       1   NON_BANKED  
-     LCDCallback                               2FEB       1       1       1   NON_BANKED  
+     main                                         0'Error      22      34       0   .text       
+     InitProject                                  0'Error      84     132       0   .text       
+     UartTxCallback                               0'Error       6       6       0   NON_BANKED  
+     UartRxCallback                               0'Error      1D      29       0   NON_BANKED  
+     KbiCallback                                  0'Error      2B      43       0   NON_BANKED  
+     LCDCallback                                  0'Error       1       1       0   NON_BANKED  
 - VARIABLES:
-     STRING........Generic.Demon.1             32F2      29      41       1   .rodata1    
-     KeyPressed                                 5CD       1       1       1   .bss        
-     bUartDataInFlag                            667       1       1       1   .common     
-     bUartTxDone                                668       1       1       1   .common     
-     UartData                                   669       1       1       1   .common     
-     portNumber                                 66A       1       1       5   .common     
-     uartSettings                               66B       4       4       4   .common     
-     gKbiConfiguration                          66F       3       3       2   .common     
-     type                                       672       1       1       2   .common     
-     dest                                       673       1       1       2   .common     
+     STRING........Generic.Demon.1                0'Error      29      41       0   .rodata1    
+     KeyPressed                                   0'Error       1       1       0   .bss        
+     bUartDataInFlag                              0'Error       1       1       0   .common     
+     bUartTxDone                                  0'Error       1       1       0   .common     
+     UartData                                     0'Error       1       1       0   .common     
+     portNumber                                   0'Error       1       1       0   .common     
+     uartSettings                                 0'Error       4       4       0   .common     
+     gKbiConfiguration                            0'Error       3       3       0   .common     
+     type                                         0'Error       1       1       0   .common     
+     dest                                         0'Error       1       1       0   .common     
 MODULE:                 -- rtshc08.o (ansibim.lib) --
 - PROCEDURES:
-     _PUSH_ARGS_L                              2FEC      20      32       2   NON_BANKED  
-     _ENTER_UNARY_L                            300C      29      41       1   NON_BANKED  
-     _ENTER_BINARY_L                           3035      16      22       2   NON_BANKED  
-     _ENTER_BINARY_L_RC                        304B      19      25       3   NON_BANKED  
-     _LADD_k_is_k_plus_j                       3064      1F      31       2   NON_BANKED  
-     _k_is_k_plus_j_l                          3083      1E      30       2   NON_BANKED  
-     _k_is_k_plus_j_i                          30A1      12      18       3   NON_BANKED  
-     _LMUL_k_is_k_mul_j                        30B3      81     129       1   NON_BANKED  
-     _LDIVMOD                                  3134      A4     164       1   NON_BANKED  
-     _LDIVU_k_is_k_div_j                       31D8      17      23       1   NON_BANKED  
-     _LCMP_k_rel_j                             31EF      1F      31       1   NON_BANKED  
-     _ILSL                                     320E       C      12       1   NON_BANKED  
-     _LADD                                     321A       6       6       2   NON_BANKED  
-     _LADD_RC                                  3220       6       6       1   NON_BANKED  
-     _LMUL_RC                                  3226       6       6       1   NON_BANKED  
-     _LDIVU_RC                                 322C       6       6       1   NON_BANKED  
-     _LLSL                                     3232      16      22       2   NON_BANKED  
-     _LCMP                                     3248       6       6       1   NON_BANKED  
-     _POP32                                    324E      1A      26       3   NON_BANKED  
+     _PUSH_ARGS_L                                 0'Error      20      32       0   NON_BANKED  
+     _ENTER_UNARY_L                               0'Error      29      41       0   NON_BANKED  
+     _ENTER_BINARY_L                              0'Error      16      22       0   NON_BANKED  
+     _ENTER_BINARY_L_RC                           0'Error      19      25       0   NON_BANKED  
+     _LADD_k_is_k_plus_j                          0'Error      1F      31       0   NON_BANKED  
+     _k_is_k_plus_j_l                             0'Error      1E      30       0   NON_BANKED  
+     _k_is_k_plus_j_i                             0'Error      12      18       0   NON_BANKED  
+     _LMUL_k_is_k_mul_j                           0'Error      81     129       0   NON_BANKED  
+     _LDIVMOD                                     0'Error      A4     164       0   NON_BANKED  
+     _LDIVU_k_is_k_div_j                          0'Error      17      23       0   NON_BANKED  
+     _LCMP_k_rel_j                                0'Error      1F      31       0   NON_BANKED  
+     _ILSL                                        0'Error       C      12       0   NON_BANKED  
+     _LADD                                        0'Error       6       6       0   NON_BANKED  
+     _LADD_RC                                     0'Error       6       6       0   NON_BANKED  
+     _LMUL_RC                                     0'Error       6       6       0   NON_BANKED  
+     _LDIVU_RC                                    0'Error       6       6       0   NON_BANKED  
+     _LLSL                                        0'Error      16      22       0   NON_BANKED  
+     _LCMP                                        0'Error       6       6       0   NON_BANKED  
+     _POP32                                       0'Error      1A      26       0   NON_BANKED  
 - VARIABLES:
 
 *********************************************************************************************
 MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
-  uMac_c.obj                                 291    379      0
-  SMAC_c.obj                                  21   1208      0
-  Timer_c.obj                                 48    240      0
-  SPI_c.obj                                    6    429      0
-  UART_c.obj                                 278    835      0
-  PhyMC1320X_c.obj                             9   1468     84
-  Radio_c.obj                                143    755      0
-  LVD_c.obj                                    4     35      0
-  LED_c.obj                                    0     98      0
-  LCD_c.obj                                    8    321      0
-  KBI_c.obj                                    8    187      0
-  IRQ_c.obj                                    2     20      0
-  IIC_c.obj                                    7    144      0
-  GPIO_c.obj                                  45    201     54
-  Utilities_c.obj                              0    126      0
-  McuInit_c.obj                                0     21      0
-  Start08_c.obj                                0    139      0
-  mc9s08qe128_c.obj                          207      0      0
-  vectortable_c.obj                            0      3     62
-  OTAP_c.obj                                   0      2      0
-  main_c.obj                                  14    245     41
-  rtshc08.o (ansibim.lib)                      0    636      0
-  other                                      512     28     71
 
 *********************************************************************************************
 SECTION USE IN OBJECT-ALLOCATION SECTION
 ---------------------------------------------------------------------------------------------
-SECTION: ".text"
-  Init_uMac uMac_Engine InitSmac MCPSDataRequest MLMERXEnableRequest 
-  MLMERXDisableRequest MLMERadioInit MLMEFEGainAdjust MLMESetChannelRequest 
-  MLMEPAOutputAdjust MLMESetClockRate MLMESetTmrPrescale SmacScanTheNextChannel 
-  SmacSetRxTimeout SmacFormatTxPacket Uart_Init Uart_ClearErrors Uart_Configure 
-  Uart_GetBytesFromRxBuffer Uart_RegisterRxCallBack Uart_RegisterTxCallBack 
-  Uart_BlockingStringTx Uart_BlockingByteTx Led_PrintValue Led_OffAll Lcd_Init 
-  Lcd_Config LcdWriteCmd LcdSetPort Kbi_Config Kbi_Init Kbi_PortValue IRQ_Init 
-  Gpio_Init Gpio_PortWrite Gpio_PinSet Gpio_PinClear Gpio_PinToggle Delay_ms 
-  Delay_us MCUInit MCU_UseExternalClock Otap_OpcMain Otap_OpcInit main 
-  InitProject 
-SECTION: ".data"
-  uMacbroad Channels mu8TmrStartRegs maUartStartOfModule gpKbiControl 
-  gpGpioPortData gpGpioPullDown 
-SECTION: ".bss"
-  uMac_On ui uMac_Current_State gau8RxDataBuffer gau8TxDataBuffer AppTxPacket 
-  AppRxPacket uMac_RxPacket uMac_TxPacket smacTimeout smacChannelsBeingScanned 
-  smacEdValue smacState smacLastDataRxParams smacCurrentChannel 
-  smacScanCurrentChannel smacClearestChann pTestPacket smacProccesPacketPtr 
-  mTmrCallbackFuncEvent mpu8SPI1Ptr mu8SPI1Counter mSPI1Status 
-  mSciModuleHwErrors mIsTxPending mUartRxBuff mUartTxBuff mUartRxBufferIndx 
-  mUartTxBufferIndx mUartRxCbFn mUartTxCbFn mUartRxCbFlags 
-  mUartTxNumOfFreeBytes mPhyState u16HREReg hREState mDrvRxPacket mPhyRxParams 
-  u8DataLength.17 LvwCllbk LvdCllbk mLcdStatus mu8LcdString mu8RsState 
-  mu8LcdStrFlag mbLcdBlockingFlag pKbiCallback IrqCallBack mIicState 
-  mpu8IicTxRxPointer mu8IicDataCounter mpfIicCallback bIicDeviceAddressFlag 
-  gGpioPortLogic KeyPressed 
-SECTION: ".init"
-  loadByte Init _Startup 
-SECTION: ".rodata"
-  cu8ChannelRegisterValues u8PARegisterValues radioConfiguration 
-  GpioDataHandling GpioConfigPort GpioLogicConfig 
-SECTION: ".rodata1"
-  STRING........Generic.Demon.1 
-SECTION: "NON_BANKED"
-  MLMEScanComfirm MCPSDataIndication MCPSDataComfirm MLMEResetIndication 
-  MLMEWakeComfirm PhyPdDataConfirm PhyPdDataIndication PhyPlmeCcaConfirm 
-  PhyPlmeEdConfirm PhyPlmeSyncLossIndication PhyPlmeResetIndication 
-  PhyPlmeWakeComfirm PhyTimeRxTimeoutIndication Tmr_Init Tmr_Tmr1Isr 
-  Tmr_Tmr2Isr Tmr_Tmr3Isr SPI1_Init SPI1_AssertPeripheralSsPin 
-  SPI1_DeassertPeripheralSsPin SPI1_WriteString SPI1_WriteStringBlocking 
-  SPI1_ReadString SPI1_ReadStringBlocking SPI1_WriteByte SPI1_WriteByteBlocking 
-  SPI1_ReadByteBlocking SPI1_Isr Uart2_TxIsr Uart2_RxIsr Uart2_ErrorIsr PhyInit 
-  PhyPdDataRequest PhyPlmeRxRequest PhyTimeSetEventTimeout PhyTimeReadClock 
-  PhyPlmeCcaEdRequest PhyPlmeSetCurrentChannelRequest PhyPlmeSetPwrLevelRequest 
-  PhyPpSetPromiscuous PhyPlmeSetClockOutRate PhyAbort 
-  PhyTimeDisableEventTimeout PhyPpSetCcaThreshold PhyAdjustCcaOffsetCmp 
-  PhySetRadioTimerPrescaler PhySetTrxStateRequest PhyHREventsReStartSequense 
-  PhyChangePacketEndianess PhyRadioEvent PhyHandlingRadioEvents 
-  Radio_DriverInit Radio_WriteRegister Radio_WriteRegisterBlocking 
-  Radio_ReadRegister Radio_ReadRegisterBlocking Radio_WriteTxBuffer 
-  Radio_ReadRxBuffer RadioIRQServiceRoutine RadioInitControlSignals 
-  RadioProcess LowVoltageDetectIsr KBI1_ISR IRQ_Isr IIC_Isr iicFinishReadWrite 
-  UnimplementedISR UartTxCallback UartRxCallback KbiCallback LCDCallback 
-  _PUSH_ARGS_L _ENTER_UNARY_L _ENTER_BINARY_L _ENTER_BINARY_L_RC 
-  _LADD_k_is_k_plus_j _k_is_k_plus_j_l _k_is_k_plus_j_i _LMUL_k_is_k_mul_j 
-  _LDIVMOD _LDIVU_k_is_k_div_j _LCMP_k_rel_j _ILSL _LADD _LADD_RC _LMUL_RC 
-  _LDIVU_RC _LLSL _LCMP _POP32 
-SECTION: ".common"
-  bTxDone bRxDone bScanDone bDoTx bestChannel smacFlags gpfSpi1CallBack 
-  gu16RadioIrqStatus mRadioDriverState mpfRadioProcessCallback 
-  mpfRadioEventCallback mau8RadioDataBuffer mpu8RadioRxPointer 
-  mau8RadioDataLength mu16WrittingRegisterValue mpu16ReadingRegisterPointer 
-  mRadioProcessState gpfLcdCallBack bUartDataInFlag bUartTxDone UartData 
-  portNumber uartSettings gKbiConfiguration type dest 
-SECTION: ".abs_section_0"
-  _PTAD 
-SECTION: ".abs_section_1"
-  _PTADD 
-SECTION: ".abs_section_2"
-  _PTBD 
-SECTION: ".abs_section_3"
-  _PTBDD 
-SECTION: ".abs_section_4"
-  _PTCD 
-SECTION: ".abs_section_5"
-  _PTCDD 
-SECTION: ".abs_section_6"
-  _PTDD 
-SECTION: ".abs_section_7"
-  _PTDDD 
-SECTION: ".abs_section_8"
-  _PTED 
-SECTION: ".abs_section_9"
-  _PTEDD 
-SECTION: ".abs_section_a"
-  _PTFD 
-SECTION: ".abs_section_b"
-  _PTFDD 
-SECTION: ".abs_section_c"
-  _KBI1SC 
-SECTION: ".abs_section_d"
-  _KBI1PE 
-SECTION: ".abs_section_e"
-  _KBI1ES 
-SECTION: ".abs_section_f"
-  _IRQSC 
-SECTION: ".abs_section_10"
-  _ADCSC1 
-SECTION: ".abs_section_11"
-  _ADCSC2 
-SECTION: ".abs_section_16"
-  _ADCCFG 
-SECTION: ".abs_section_17"
-  _APCTL1 
-SECTION: ".abs_section_18"
-  _APCTL2 
-SECTION: ".abs_section_19"
-  _APCTL3 
-SECTION: ".abs_section_1a"
-  _ACMP1SC 
-SECTION: ".abs_section_1b"
-  _ACMP2SC 
-SECTION: ".abs_section_1c"
-  _PTGD 
-SECTION: ".abs_section_1d"
-  _PTGDD 
-SECTION: ".abs_section_1e"
-  _PTHD 
-SECTION: ".abs_section_1f"
-  _PTHDD 
-SECTION: ".abs_section_22"
-  _SCI1C1 
-SECTION: ".abs_section_23"
-  _SCI1C2 
-SECTION: ".abs_section_24"
-  _SCI1S1 
-SECTION: ".abs_section_25"
-  _SCI1S2 
-SECTION: ".abs_section_26"
-  _SCI1C3 
-SECTION: ".abs_section_27"
-  _SCI1D 
-SECTION: ".abs_section_28"
-  _SPI1C1 
-SECTION: ".abs_section_29"
-  _SPI1C2 
-SECTION: ".abs_section_2a"
-  _SPI1BR 
-SECTION: ".abs_section_2b"
-  _SPI1S 
-SECTION: ".abs_section_2d"
-  _SPI1D 
-SECTION: ".abs_section_2e"
-  _PTJD 
-SECTION: ".abs_section_2f"
-  _PTJDD 
-SECTION: ".abs_section_30"
-  _IIC1A 
-SECTION: ".abs_section_31"
-  _IIC1F 
-SECTION: ".abs_section_32"
-  _IIC1C1 
-SECTION: ".abs_section_33"
-  _IIC1S 
-SECTION: ".abs_section_34"
-  _IIC1D 
-SECTION: ".abs_section_35"
-  _IIC1C2 
-SECTION: ".abs_section_38"
-  _ICSC1 
-SECTION: ".abs_section_39"
-  _ICSC2 
-SECTION: ".abs_section_3a"
-  _ICSTRM 
-SECTION: ".abs_section_3b"
-  _ICSSC 
-SECTION: ".abs_section_3c"
-  _KBI2SC 
-SECTION: ".abs_section_3d"
-  _KBI2PE 
-SECTION: ".abs_section_3e"
-  _KBI2ES 
-SECTION: ".abs_section_40"
-  _TPM1SC 
-SECTION: ".abs_section_45"
-  _TPM1C0SC 
-SECTION: ".abs_section_48"
-  _TPM1C1SC 
-SECTION: ".abs_section_4b"
-  _TPM1C2SC 
-SECTION: ".abs_section_50"
-  _TPM2SC 
-SECTION: ".abs_section_55"
-  _TPM2C0SC 
-SECTION: ".abs_section_58"
-  _TPM2C1SC 
-SECTION: ".abs_section_5b"
-  _TPM2C2SC 
-SECTION: ".abs_section_60"
-  _TPM3SC 
-SECTION: ".abs_section_65"
-  _TPM3C0SC 
-SECTION: ".abs_section_68"
-  _TPM3C1SC 
-SECTION: ".abs_section_6b"
-  _TPM3C2SC 
-SECTION: ".abs_section_6e"
-  _TPM3C3SC 
-SECTION: ".abs_section_71"
-  _TPM3C4SC 
-SECTION: ".abs_section_74"
-  _TPM3C5SC 
-SECTION: ".abs_section_78"
-  _PPAGE 
-SECTION: ".abs_section_79"
-  _LAP2 
-SECTION: ".abs_section_7a"
-  _LAP1 
-SECTION: ".abs_section_7b"
-  _LAP0 
-SECTION: ".abs_section_7c"
-  _LWP 
-SECTION: ".abs_section_7d"
-  _LBP 
-SECTION: ".abs_section_7e"
-  _LB 
-SECTION: ".abs_section_7f"
-  _LAPAB 
-SECTION: ".abs_section_1800"
-  _SRS 
-SECTION: ".abs_section_1801"
-  _SBDFR 
-SECTION: ".abs_section_1802"
-  _SOPT1 
-SECTION: ".abs_section_1803"
-  _SOPT2 
-SECTION: ".abs_section_1808"
-  _SPMSC1 
-SECTION: ".abs_section_1809"
-  _SPMSC2 
-SECTION: ".abs_section_180b"
-  _SPMSC3 
-SECTION: ".abs_section_180e"
-  _SCGC1 
-SECTION: ".abs_section_180f"
-  _SCGC2 
-SECTION: ".abs_section_1818"
-  _DBGCAX 
-SECTION: ".abs_section_1819"
-  _DBGCBX 
-SECTION: ".abs_section_181a"
-  _DBGCCX 
-SECTION: ".abs_section_181b"
-  _DBGFX 
-SECTION: ".abs_section_181c"
-  _DBGC 
-SECTION: ".abs_section_181d"
-  _DBGT 
-SECTION: ".abs_section_181e"
-  _DBGS 
-SECTION: ".abs_section_181f"
-  _DBGCNT 
-SECTION: ".abs_section_1820"
-  _FCDIV 
-SECTION: ".abs_section_1821"
-  _FOPT 
-SECTION: ".abs_section_1823"
-  _FCNFG 
-SECTION: ".abs_section_1824"
-  _FPROT 
-SECTION: ".abs_section_1825"
-  _FSTAT 
-SECTION: ".abs_section_1826"
-  _FCMD 
-SECTION: ".abs_section_1830"
-  _RTCSC 
-SECTION: ".abs_section_1831"
-  _RTCCNT 
-SECTION: ".abs_section_1832"
-  _RTCMOD 
-SECTION: ".abs_section_1838"
-  _SPI2C1 
-SECTION: ".abs_section_1839"
-  _SPI2C2 
-SECTION: ".abs_section_183a"
-  _SPI2BR 
-SECTION: ".abs_section_183b"
-  _SPI2S 
-SECTION: ".abs_section_183d"
-  _SPI2D 
-SECTION: ".abs_section_1840"
-  _PTAPE 
-SECTION: ".abs_section_1841"
-  _PTASE 
-SECTION: ".abs_section_1842"
-  _PTADS 
-SECTION: ".abs_section_1844"
-  _PTBPE 
-SECTION: ".abs_section_1845"
-  _PTBSE 
-SECTION: ".abs_section_1846"
-  _PTBDS 
-SECTION: ".abs_section_1848"
-  _PTCPE 
-SECTION: ".abs_section_1849"
-  _PTCSE 
-SECTION: ".abs_section_184a"
-  _PTCDS 
-SECTION: ".abs_section_184c"
-  _PTDPE 
-SECTION: ".abs_section_184d"
-  _PTDSE 
-SECTION: ".abs_section_184e"
-  _PTDDS 
-SECTION: ".abs_section_1850"
-  _PTEPE 
-SECTION: ".abs_section_1851"
-  _PTESE 
-SECTION: ".abs_section_1852"
-  _PTEDS 
-SECTION: ".abs_section_1854"
-  _PTFPE 
-SECTION: ".abs_section_1855"
-  _PTFSE 
-SECTION: ".abs_section_1856"
-  _PTFDS 
-SECTION: ".abs_section_1858"
-  _PTGPE 
-SECTION: ".abs_section_1859"
-  _PTGSE 
-SECTION: ".abs_section_185a"
-  _PTGDS 
-SECTION: ".abs_section_185c"
-  _PTHPE 
-SECTION: ".abs_section_185d"
-  _PTHSE 
-SECTION: ".abs_section_185e"
-  _PTHDS 
-SECTION: ".abs_section_1860"
-  _PTJPE 
-SECTION: ".abs_section_1861"
-  _PTJSE 
-SECTION: ".abs_section_1862"
-  _PTJDS 
-SECTION: ".abs_section_1868"
-  _IIC2A 
-SECTION: ".abs_section_1869"
-  _IIC2F 
-SECTION: ".abs_section_186a"
-  _IIC2C1 
-SECTION: ".abs_section_186b"
-  _IIC2S 
-SECTION: ".abs_section_186c"
-  _IIC2D 
-SECTION: ".abs_section_186d"
-  _IIC2C2 
-SECTION: ".abs_section_1872"
-  _SCI2C1 
-SECTION: ".abs_section_1873"
-  _SCI2C2 
-SECTION: ".abs_section_1874"
-  _SCI2S1 
-SECTION: ".abs_section_1875"
-  _SCI2S2 
-SECTION: ".abs_section_1876"
-  _SCI2C3 
-SECTION: ".abs_section_1877"
-  _SCI2D 
-SECTION: ".abs_section_1878"
-  _PTCSET 
-SECTION: ".abs_section_1879"
-  _PTESET 
-SECTION: ".abs_section_187a"
-  _PTCCLR 
-SECTION: ".abs_section_187b"
-  _PTECLR 
-SECTION: ".abs_section_187c"
-  _PTCTOG 
-SECTION: ".abs_section_187d"
-  _PTETOG 
-SECTION: ".abs_section_12"
-  _ADCR 
-SECTION: ".abs_section_14"
-  _ADCCV 
-SECTION: ".abs_section_20"
-  _SCI1BD 
-SECTION: ".abs_section_41"
-  _TPM1CNT 
-SECTION: ".abs_section_43"
-  _TPM1MOD 
-SECTION: ".abs_section_46"
-  _TPM1C0V 
-SECTION: ".abs_section_49"
-  _TPM1C1V 
-SECTION: ".abs_section_4c"
-  _TPM1C2V 
-SECTION: ".abs_section_51"
-  _TPM2CNT 
-SECTION: ".abs_section_53"
-  _TPM2MOD 
-SECTION: ".abs_section_56"
-  _TPM2C0V 
-SECTION: ".abs_section_59"
-  _TPM2C1V 
-SECTION: ".abs_section_5c"
-  _TPM2C2V 
-SECTION: ".abs_section_61"
-  _TPM3CNT 
-SECTION: ".abs_section_63"
-  _TPM3MOD 
-SECTION: ".abs_section_66"
-  _TPM3C0V 
-SECTION: ".abs_section_69"
-  _TPM3C1V 
-SECTION: ".abs_section_6c"
-  _TPM3C2V 
-SECTION: ".abs_section_6f"
-  _TPM3C3V 
-SECTION: ".abs_section_72"
-  _TPM3C4V 
-SECTION: ".abs_section_75"
-  _TPM3C5V 
-SECTION: ".abs_section_1806"
-  _SDID 
-SECTION: ".abs_section_1810"
-  _DBGCA 
-SECTION: ".abs_section_1812"
-  _DBGCB 
-SECTION: ".abs_section_1814"
-  _DBGCC 
-SECTION: ".abs_section_1816"
-  _DBGF 
-SECTION: ".abs_section_1870"
-  _SCI2BD 
-SECTION: ".abs_section_ffc0"
-  ISR_vectors 
 
 *********************************************************************************************
 OBJECT LIST SORTED BY ADDRESS
      Name                                      Addr   hSize   dSize     Ref    Section   RLIB
 ---------------------------------------------------------------------------------------------
-     _PTAD                                        0       1       1       1   .abs_section_0
-     _PTADD                                       1       1       1       0   .abs_section_1
-     _PTBD                                        2       1       1       1   .abs_section_2
-     _PTBDD                                       3       1       1       0   .abs_section_3
-     _PTCD                                        4       1       1       0   .abs_section_4
-     _PTCDD                                       5       1       1       0   .abs_section_5
-     _PTDD                                        6       1       1       1   .abs_section_6
-     _PTDDD                                       7       1       1       0   .abs_section_7
-     _PTED                                        8       1       1       0   .abs_section_8
-     _PTEDD                                       9       1       1       0   .abs_section_9
-     _PTFD                                        A       1       1       0   .abs_section_a
-     _PTFDD                                       B       1       1       0   .abs_section_b
-     _KBI1SC                                      C       1       1       2   .abs_section_c
-     _KBI1PE                                      D       1       1       1   .abs_section_d
-     _KBI1ES                                      E       1       1       1   .abs_section_e
-     _IRQSC                                       F       1       1      15   .abs_section_f
-     _ADCSC1                                     10       1       1       0   .abs_section_10
-     _ADCSC2                                     11       1       1       0   .abs_section_11
-     _ADCR                                       12       2       2       0   .abs_section_12
-     _ADCCV                                      14       2       2       0   .abs_section_14
-     _ADCCFG                                     16       1       1       0   .abs_section_16
-     _APCTL1                                     17       1       1       0   .abs_section_17
-     _APCTL2                                     18       1       1       0   .abs_section_18
-     _APCTL3                                     19       1       1       0   .abs_section_19
-     _ACMP1SC                                    1A       1       1       0   .abs_section_1a
-     _ACMP2SC                                    1B       1       1       0   .abs_section_1b
-     _PTGD                                       1C       1       1       0   .abs_section_1c
-     _PTGDD                                      1D       1       1       0   .abs_section_1d
-     _PTHD                                       1E       1       1       0   .abs_section_1e
-     _PTHDD                                      1F       1       1       0   .abs_section_1f
-     _SCI1BD                                     20       2       2       0   .abs_section_20
-     _SCI1C1                                     22       1       1       0   .abs_section_22
-     _SCI1C2                                     23       1       1       0   .abs_section_23
-     _SCI1S1                                     24       1       1       0   .abs_section_24
-     _SCI1S2                                     25       1       1       0   .abs_section_25
-     _SCI1C3                                     26       1       1       0   .abs_section_26
-     _SCI1D                                      27       1       1       0   .abs_section_27
-     _SPI1C1                                     28       1       1       5   .abs_section_28
-     _SPI1C2                                     29       1       1       1   .abs_section_29
-     _SPI1BR                                     2A       1       1       1   .abs_section_2a
-     _SPI1S                                      2B       1       1       8   .abs_section_2b
-     _SPI1D                                      2D       1       1       8   .abs_section_2d
-     _PTJD                                       2E       1       1       0   .abs_section_2e
-     _PTJDD                                      2F       1       1       0   .abs_section_2f
-     _IIC1A                                      30       1       1       0   .abs_section_30
-     _IIC1F                                      31       1       1       0   .abs_section_31
-     _IIC1C1                                     32       1       1       8   .abs_section_32
-     _IIC1S                                      33       1       1       2   .abs_section_33
-     _IIC1D                                      34       1       1       4   .abs_section_34
-     _IIC1C2                                     35       1       1       0   .abs_section_35
-     _ICSC1                                      38       1       1       1   .abs_section_38
-     _ICSC2                                      39       1       1       1   .abs_section_39
-     _ICSTRM                                     3A       1       1       0   .abs_section_3a
-     _ICSSC                                      3B       1       1       1   .abs_section_3b
-     _KBI2SC                                     3C       1       1       2   .abs_section_3c
-     _KBI2PE                                     3D       1       1       1   .abs_section_3d
-     _KBI2ES                                     3E       1       1       1   .abs_section_3e
-     _TPM1SC                                     40       1       1       2   .abs_section_40
-     _TPM1CNT                                    41       2       2       0   .abs_section_41
-     _TPM1MOD                                    43       2       2       0   .abs_section_43
-     _TPM1C0SC                                   45       1       1       2   .abs_section_45
-     _TPM1C0V                                    46       2       2       0   .abs_section_46
-     _TPM1C1SC                                   48       1       1       2   .abs_section_48
-     _TPM1C1V                                    49       2       2       0   .abs_section_49
-     _TPM1C2SC                                   4B       1       1       2   .abs_section_4b
-     _TPM1C2V                                    4C       2       2       0   .abs_section_4c
-     _TPM2SC                                     50       1       1       2   .abs_section_50
-     _TPM2CNT                                    51       2       2       0   .abs_section_51
-     _TPM2MOD                                    53       2       2       0   .abs_section_53
-     _TPM2C0SC                                   55       1       1       2   .abs_section_55
-     _TPM2C0V                                    56       2       2       0   .abs_section_56
-     _TPM2C1SC                                   58       1       1       2   .abs_section_58
-     _TPM2C1V                                    59       2       2       0   .abs_section_59
-     _TPM2C2SC                                   5B       1       1       2   .abs_section_5b
-     _TPM2C2V                                    5C       2       2       0   .abs_section_5c
-     _TPM3SC                                     60       1       1       2   .abs_section_60
-     _TPM3CNT                                    61       2       2       0   .abs_section_61
-     _TPM3MOD                                    63       2       2       0   .abs_section_63
-     _TPM3C0SC                                   65       1       1       2   .abs_section_65
-     _TPM3C0V                                    66       2       2       0   .abs_section_66
-     _TPM3C1SC                                   68       1       1       2   .abs_section_68
-     _TPM3C1V                                    69       2       2       0   .abs_section_69
-     _TPM3C2SC                                   6B       1       1       2   .abs_section_6b
-     _TPM3C2V                                    6C       2       2       0   .abs_section_6c
-     _TPM3C3SC                                   6E       1       1       2   .abs_section_6e
-     _TPM3C3V                                    6F       2       2       0   .abs_section_6f
-     _TPM3C4SC                                   71       1       1       2   .abs_section_71
-     _TPM3C4V                                    72       2       2       0   .abs_section_72
-     _TPM3C5SC                                   74       1       1       2   .abs_section_74
-     _TPM3C5V                                    75       2       2       0   .abs_section_75
-     _PPAGE                                      78       1       1       0   .abs_section_78
-     _LAP2                                       79       1       1       0   .abs_section_79
-     _LAP1                                       7A       1       1       0   .abs_section_7a
-     _LAP0                                       7B       1       1       0   .abs_section_7b
-     _LWP                                        7C       1       1       0   .abs_section_7c
-     _LBP                                        7D       1       1       0   .abs_section_7d
-     _LB                                         7E       1       1       0   .abs_section_7e
-     _LAPAB                                      7F       1       1       0   .abs_section_7f
-     uMacbroad                                  300       1       1       2   .data       
-     Channels                                   301      10      16       1   .data       
-     mu8TmrStartRegs                            311       6       6       1   .data       
-     maUartStartOfModule                        317       2       2       3   .data       
-     gpKbiControl                               319       4       4       1   .data       
-     gpGpioPortData                             31D      12      18       7   .data       
-     gpGpioPullDown                             32F      12      18       1   .data       
-     uMac_On                                    341       1       1       4   .bss        
-     ui                                         342       1       1       2   .bss        
-     uMac_Current_State                         343       1       1       5   .bss        
-     gau8RxDataBuffer                           344      82     130       1   .bss        
-     gau8TxDataBuffer                           3C6      80     128       1   .bss        
-     AppTxPacket                                446       2       2       4   .bss        
-     AppRxPacket                                448       2       2       5   .bss        
-     uMac_RxPacket                              44A       2       2       3   .bss        
-     uMac_TxPacket                              44C       2       2       2   .bss        
-     smacTimeout                                44E       4       4       4   .bss        
-     smacChannelsBeingScanned                   452       2       2       2   .bss        
-     smacEdValue                                454       1       1       5   .bss        
-     smacState                                  455       1       1      18   .bss        
-     smacLastDataRxParams                       456       5       5       6   .bss        
-     smacCurrentChannel                         45B       1       1       4   .bss        
-     smacScanCurrentChannel                     45C       1       1       8   .bss        
-     smacClearestChann                          45D       1       1       5   .bss        
-     pTestPacket                                45E       2       2       1   .bss        
-     smacProccesPacketPtr                       460       2       2      24   .bss        
-     mTmrCallbackFuncEvent                      462      2A      42      17   .bss        
-     mpu8SPI1Ptr                                48C       2       2       8   .bss        
-     mu8SPI1Counter                             48E       1       1       6   .bss        
-     mSPI1Status                                48F       1       1      18   .bss        
-     mSciModuleHwErrors                         490       1       1       2   .bss        
-     mIsTxPending                               491       1       1       5   .bss        
-     mUartRxBuff                                492      40      64       3   .bss        
-     mUartTxBuff                                4D2      C8     200       2   .bss        
-     mUartRxBufferIndx                          59A       2       2      13   .bss        
-     mUartTxBufferIndx                          59C       2       2       9   .bss        
-     mUartRxCbFn                                59E       2       2       5   .bss        
-     mUartTxCbFn                                5A0       2       2       5   .bss        
-     mUartRxCbFlags                             5A2       1       1       2   .bss        
-     mUartTxNumOfFreeBytes                      5A3       1       1       2   .bss        
-     mPhyState                                  5A4       1       1      17   .bss        
-     u16HREReg                                  5A5       2       2      11   .bss        
-     hREState                                   5A7       1       1       5   .bss        
-     mDrvRxPacket                               5A8       2       2       3   .bss        
-     mPhyRxParams                               5AA       2       2       2   .bss        
-     u8DataLength.17                            5AC       1       1       5   .bss        
-     LvwCllbk                                   5AD       2       2       1   .bss        
-     LvdCllbk                                   5AF       2       2       1   .bss        
-     mLcdStatus                                 5B1       1       1       5   .bss        
-     mu8LcdString                               5B2       2       2       1   .bss        
-     mu8RsState                                 5B4       1       1       1   .bss        
-     mu8LcdStrFlag                              5B5       1       1       1   .bss        
-     mbLcdBlockingFlag                          5B6       1       1       2   .bss        
-     pKbiCallback                               5B7       4       4       4   .bss        
-     IrqCallBack                                5BB       2       2       2   .bss        
-     mIicState                                  5BD       1       1       3   .bss        
-     mpu8IicTxRxPointer                         5BE       2       2       6   .bss        
-     mu8IicDataCounter                          5C0       1       1       4   .bss        
-     mpfIicCallback                             5C1       2       2       1   .bss        
-     bIicDeviceAddressFlag                      5C3       1       1       2   .bss        
-     gGpioPortLogic                             5C4       9       9       4   .bss        
-     KeyPressed                                 5CD       1       1       1   .bss        
-     bTxDone                                    5CE       1       1       5   .common     
-     bRxDone                                    5CF       1       1       3   .common     
-     bScanDone                                  5D0       1       1       1   .common     
-     bDoTx                                      5D1       1       1       2   .common     
-     bestChannel                                5D2       1       1       1   .common     
-     smacFlags                                  5D3       1       1      27   .common     
-     gpfSpi1CallBack                            5D4       2       2       4   .common     
-     gu16RadioIrqStatus                         5D6       2       2       3   .common     
-     mRadioDriverState                          5D8       1       1      20   .common     
-     mpfRadioProcessCallback                    5D9       2       2       5   .common     
-     mpfRadioEventCallback                      5DB       2       2       2   .common     
-     mau8RadioDataBuffer                        5DD      80     128       3   .common     
-     mpu8RadioRxPointer                         65D       2       2       3   .common     
-     mau8RadioDataLength                        65F       1       1       4   .common     
-     mu16WrittingRegisterValue                  660       2       2       2   .common     
-     mpu16ReadingRegisterPointer                662       2       2       2   .common     
-     mRadioProcessState                         664       1       1       9   .common     
-     gpfLcdCallBack                             665       2       2       2   .common     
-     bUartDataInFlag                            667       1       1       1   .common     
-     bUartTxDone                                668       1       1       1   .common     
-     UartData                                   669       1       1       1   .common     
-     portNumber                                 66A       1       1       5   .common     
-     uartSettings                               66B       4       4       4   .common     
-     gKbiConfiguration                          66F       3       3       2   .common     
-     type                                       672       1       1       2   .common     
-     dest                                       673       1       1       2   .common     
-     _SRS                                      1800       1       1       1   .abs_section_1800
-     _SBDFR                                    1801       1       1       0   .abs_section_1801
-     _SOPT1                                    1802       1       1       1   .abs_section_1802
-     _SOPT2                                    1803       1       1       0   .abs_section_1803
-     _SDID                                     1806       2       2       0   .abs_section_1806
-     _SPMSC1                                   1808       1       1       2   .abs_section_1808
-     _SPMSC2                                   1809       1       1       1   .abs_section_1809
-     _SPMSC3                                   180B       1       1       2   .abs_section_180b
-     _SCGC1                                    180E       1       1       0   .abs_section_180e
-     _SCGC2                                    180F       1       1       0   .abs_section_180f
-     _DBGCA                                    1810       2       2       0   .abs_section_1810
-     _DBGCB                                    1812       2       2       0   .abs_section_1812
-     _DBGCC                                    1814       2       2       0   .abs_section_1814
-     _DBGF                                     1816       2       2       0   .abs_section_1816
-     _DBGCAX                                   1818       1       1       0   .abs_section_1818
-     _DBGCBX                                   1819       1       1       0   .abs_section_1819
-     _DBGCCX                                   181A       1       1       0   .abs_section_181a
-     _DBGFX                                    181B       1       1       0   .abs_section_181b
-     _DBGC                                     181C       1       1       0   .abs_section_181c
-     _DBGT                                     181D       1       1       0   .abs_section_181d
-     _DBGS                                     181E       1       1       0   .abs_section_181e
-     _DBGCNT                                   181F       1       1       0   .abs_section_181f
-     _FCDIV                                    1820       1       1       0   .abs_section_1820
-     _FOPT                                     1821       1       1       0   .abs_section_1821
-     _FCNFG                                    1823       1       1       0   .abs_section_1823
-     _FPROT                                    1824       1       1       0   .abs_section_1824
-     _FSTAT                                    1825       1       1       0   .abs_section_1825
-     _FCMD                                     1826       1       1       0   .abs_section_1826
-     _RTCSC                                    1830       1       1       0   .abs_section_1830
-     _RTCCNT                                   1831       1       1       0   .abs_section_1831
-     _RTCMOD                                   1832       1       1       0   .abs_section_1832
-     _SPI2C1                                   1838       1       1       0   .abs_section_1838
-     _SPI2C2                                   1839       1       1       0   .abs_section_1839
-     _SPI2BR                                   183A       1       1       0   .abs_section_183a
-     _SPI2S                                    183B       1       1       0   .abs_section_183b
-     _SPI2D                                    183D       1       1       0   .abs_section_183d
-     _PTAPE                                    1840       1       1       0   .abs_section_1840
-     _PTASE                                    1841       1       1       0   .abs_section_1841
-     _PTADS                                    1842       1       1       0   .abs_section_1842
-     _PTBPE                                    1844       1       1       0   .abs_section_1844
-     _PTBSE                                    1845       1       1       0   .abs_section_1845
-     _PTBDS                                    1846       1       1       0   .abs_section_1846
-     _PTCPE                                    1848       1       1       0   .abs_section_1848
-     _PTCSE                                    1849       1       1       0   .abs_section_1849
-     _PTCDS                                    184A       1       1       0   .abs_section_184a
-     _PTDPE                                    184C       1       1       0   .abs_section_184c
-     _PTDSE                                    184D       1       1       0   .abs_section_184d
-     _PTDDS                                    184E       1       1       0   .abs_section_184e
-     _PTEPE                                    1850       1       1       0   .abs_section_1850
-     _PTESE                                    1851       1       1       0   .abs_section_1851
-     _PTEDS                                    1852       1       1       0   .abs_section_1852
-     _PTFPE                                    1854       1       1       0   .abs_section_1854
-     _PTFSE                                    1855       1       1       0   .abs_section_1855
-     _PTFDS                                    1856       1       1       0   .abs_section_1856
-     _PTGPE                                    1858       1       1       0   .abs_section_1858
-     _PTGSE                                    1859       1       1       0   .abs_section_1859
-     _PTGDS                                    185A       1       1       0   .abs_section_185a
-     _PTHPE                                    185C       1       1       0   .abs_section_185c
-     _PTHSE                                    185D       1       1       0   .abs_section_185d
-     _PTHDS                                    185E       1       1       0   .abs_section_185e
-     _PTJPE                                    1860       1       1       0   .abs_section_1860
-     _PTJSE                                    1861       1       1       0   .abs_section_1861
-     _PTJDS                                    1862       1       1       0   .abs_section_1862
-     _IIC2A                                    1868       1       1       0   .abs_section_1868
-     _IIC2F                                    1869       1       1       0   .abs_section_1869
-     _IIC2C1                                   186A       1       1       0   .abs_section_186a
-     _IIC2S                                    186B       1       1       0   .abs_section_186b
-     _IIC2D                                    186C       1       1       0   .abs_section_186c
-     _IIC2C2                                   186D       1       1       0   .abs_section_186d
-     _SCI2BD                                   1870       2       2       0   .abs_section_1870
-     _SCI2C1                                   1872       1       1       0   .abs_section_1872
-     _SCI2C2                                   1873       1       1       1   .abs_section_1873
-     _SCI2S1                                   1874       1       1       3   .abs_section_1874
-     _SCI2S2                                   1875       1       1       0   .abs_section_1875
-     _SCI2C3                                   1876       1       1       0   .abs_section_1876
-     _SCI2D                                    1877       1       1       4   .abs_section_1877
-     _PTCSET                                   1878       1       1       0   .abs_section_1878
-     _PTESET                                   1879       1       1       0   .abs_section_1879
-     _PTCCLR                                   187A       1       1       0   .abs_section_187a
-     _PTECLR                                   187B       1       1       0   .abs_section_187b
-     _PTCTOG                                   187C       1       1       0   .abs_section_187c
-     _PTETOG                                   187D       1       1       0   .abs_section_187d
-     MLMEScanComfirm                           20B0       9       9       2   NON_BANKED  
-     MCPSDataIndication                        20B9       6       6       3   NON_BANKED  
-     MCPSDataComfirm                           20BF       6       6       1   NON_BANKED  
-     MLMEResetIndication                       20C5       1       1       1   NON_BANKED  
-     MLMEWakeComfirm                           20C6       1       1       1   NON_BANKED  
-     PhyPdDataConfirm                          20C7      5F      95       1   NON_BANKED  
-     PhyPdDataIndication                       2126      81     129       1   NON_BANKED  
-     PhyPlmeCcaConfirm                         21A7      4A      74       1   NON_BANKED  
-     PhyPlmeEdConfirm                          21F1      6A     106       1   NON_BANKED  
-     PhyPlmeSyncLossIndication                 225B      63      99       1   NON_BANKED  
-     PhyPlmeResetIndication                    22BE       3       3       1   NON_BANKED  
-     PhyPlmeWakeComfirm                        22C1       3       3       1   NON_BANKED  
-     PhyTimeRxTimeoutIndication                22C4      12      18       1   NON_BANKED  
-     Tmr_Init                                  22D6      36      54       1   NON_BANKED  
-     Tmr_Tmr1Isr                               230C      32      50       4   NON_BANKED  
-     Tmr_Tmr2Isr                               233E      32      50       4   NON_BANKED  
-     Tmr_Tmr3Isr                               2370      56      86       7   NON_BANKED  
-     SPI1_Init                                 23C6      20      32       1   NON_BANKED  
-     SPI1_AssertPeripheralSsPin                23E6      2B      43       6   NON_BANKED  
-     SPI1_DeassertPeripheralSsPin              2411      1D      29       5   NON_BANKED  
-     SPI1_WriteString                          242E      34      52       3   NON_BANKED  
-     SPI1_WriteStringBlocking                  2462      35      53       2   NON_BANKED  
-     SPI1_ReadString                           2497      2B      43       3   NON_BANKED  
-     SPI1_ReadStringBlocking                   24C2      37      55       3   NON_BANKED  
-     SPI1_WriteByte                            24F9       9       9       4   NON_BANKED  
-     SPI1_WriteByteBlocking                    2502       8       8       5   NON_BANKED  
-     SPI1_ReadByteBlocking                     250A       A      10       1   NON_BANKED  
-     SPI1_Isr                                  2514      5F      95       1   NON_BANKED  
-     Uart2_TxIsr                               2573      37      55       1   NON_BANKED  
-     Uart2_RxIsr                               25AA      61      97       1   NON_BANKED  
-     Uart2_ErrorIsr                            260B       1       1       1   NON_BANKED  
-     PhyInit                                   260C      94     148       1   NON_BANKED  
-     PhyPdDataRequest                          26A0      4B      75       3   NON_BANKED  
-     PhyPlmeRxRequest                          26EB      11      17       3   NON_BANKED  
-     PhyTimeSetEventTimeout                    26FC      2F      47       1   NON_BANKED  
-     PhyTimeReadClock                          272B      4A      74       1   NON_BANKED  
-     PhyPlmeCcaEdRequest                       2775      44      68       3   NON_BANKED  
-     PhyPlmeSetCurrentChannelRequest           27B9      28      40       5   NON_BANKED  
-     PhyPlmeSetPwrLevelRequest                 27E1      23      35       2   NON_BANKED  
-     PhyPpSetPromiscuous                       2804       1       1       1   NON_BANKED  
-     PhyPlmeSetClockOutRate                    2805      24      36       1   NON_BANKED  
-     PhyAbort                                  2829      19      25       1   NON_BANKED  
-     PhyTimeDisableEventTimeout                2842       F      15       2   NON_BANKED  
-     PhyPpSetCcaThreshold                      2851      21      33       1   NON_BANKED  
-     PhyAdjustCcaOffsetCmp                     2872      1D      29       1   NON_BANKED  
-     PhySetRadioTimerPrescaler                 288F      23      35       1   NON_BANKED  
-     PhySetTrxStateRequest                     28B2      41      65       4   NON_BANKED  
-     PhyHREventsReStartSequense                28F3      16      22       2   NON_BANKED  
-     PhyChangePacketEndianess                  2909      52      82       1   NON_BANKED  
-     PhyRadioEvent                             295B     106     262       6   NON_BANKED  
-     PhyHandlingRadioEvents                    2A61     167     359      24   NON_BANKED  
-     Radio_DriverInit                          2BC8      27      39       1   NON_BANKED  
-     Radio_WriteRegister                       2BEF      39      57       4   NON_BANKED  
-     Radio_WriteRegisterBlocking               2C28      38      56      19   NON_BANKED  
-     Radio_ReadRegister                        2C60      39      57       5   NON_BANKED  
-     Radio_ReadRegisterBlocking                2C99      3A      58      12   NON_BANKED  
-     Radio_WriteTxBuffer                       2CD3      C9     201       2   NON_BANKED  
-     Radio_ReadRxBuffer                        2D9C      73     115       1   NON_BANKED  
-     RadioIRQServiceRoutine                    2E0F      17      23       1   NON_BANKED  
-     RadioInitControlSignals                   2E26      18      24       1   NON_BANKED  
-     RadioProcess                              2E3E      7D     125       6   NON_BANKED  
-     LowVoltageDetectIsr                       2EBB      23      35       1   NON_BANKED  
-     KBI1_ISR                                  2EDE      21      33       1   NON_BANKED  
-     IRQ_Isr                                   2EFF       B      11       1   NON_BANKED  
-     IIC_Isr                                   2F0A      85     133       1   NON_BANKED  
-     iicFinishReadWrite                        2F8F       B      11       1   NON_BANKED  
-     UnimplementedISR                          2F9A       3       3       8   NON_BANKED  
-     UartTxCallback                            2F9D       6       6       1   NON_BANKED  
-     UartRxCallback                            2FA3      1D      29       1   NON_BANKED  
-     KbiCallback                               2FC0      2B      43       1   NON_BANKED  
-     LCDCallback                               2FEB       1       1       1   NON_BANKED  
-     _PUSH_ARGS_L                              2FEC      20      32       2   NON_BANKED  
-     _ENTER_UNARY_L                            300C      29      41       1   NON_BANKED  
-     _ENTER_BINARY_L                           3035      16      22       2   NON_BANKED  
-     _ENTER_BINARY_L_RC                        304B      19      25       3   NON_BANKED  
-     _LADD_k_is_k_plus_j                       3064      1F      31       2   NON_BANKED  
-     _k_is_k_plus_j_l                          3083      1E      30       2   NON_BANKED  
-     _k_is_k_plus_j_i                          30A1      12      18       3   NON_BANKED  
-     _LMUL_k_is_k_mul_j                        30B3      81     129       1   NON_BANKED  
-     _LDIVMOD                                  3134      A4     164       1   NON_BANKED  
-     _LDIVU_k_is_k_div_j                       31D8      17      23       1   NON_BANKED  
-     _LCMP_k_rel_j                             31EF      1F      31       1   NON_BANKED  
-     _ILSL                                     320E       C      12       1   NON_BANKED  
-     _LADD                                     321A       6       6       2   NON_BANKED  
-     _LADD_RC                                  3220       6       6       1   NON_BANKED  
-     _LMUL_RC                                  3226       6       6       1   NON_BANKED  
-     _LDIVU_RC                                 322C       6       6       1   NON_BANKED  
-     _LLSL                                     3232      16      22       2   NON_BANKED  
-     _LCMP                                     3248       6       6       1   NON_BANKED  
-     _POP32                                    324E      1A      26       3   NON_BANKED  
-     cu8ChannelRegisterValues                  3268      20      32       2   .rodata     
-     u8PARegisterValues                        3288      10      16       1   .rodata     
-     radioConfiguration                        3298      24      36       2   .rodata     
-     GpioDataHandling                          32BC      12      18       2   .rodata     
-     GpioConfigPort                            32CE      1B      27       3   .rodata     
-     GpioLogicConfig                           32E9       9       9       1   .rodata     
-     STRING........Generic.Demon.1             32F2      29      41       1   .rodata1    
-     loadByte                                  331B       E      14       5   .init       
-     Init                                      3329      72     114       1   .init       
-     _Startup                                  339B       B      11       0   .init       
-     Init_uMac                                 33A6      1E      30       2   .text       
-     uMac_Engine                               33C4     10B     267       7   .text       
-     InitSmac                                  34CF      3B      59       2   .text       
-     MCPSDataRequest                           350A      4B      75       4   .text       
-     MLMERXEnableRequest                       3555      9A     154       4   .text       
-     MLMERXDisableRequest                      35EF      22      34       2   .text       
-     MLMERadioInit                             3611      61      97       2   .text       
-     MLMEFEGainAdjust                          3672       D      13       2   .text       
-     MLMESetChannelRequest                     367F      38      56       4   .text       
-     MLMEPAOutputAdjust                        36B7      2C      44       2   .text       
-     MLMESetClockRate                          36E3       4       4       2   .text       
-     MLMESetTmrPrescale                        36E7      1C      28       2   .text       
-     SmacScanTheNextChannel                    3703      60      96       6   .text       
-     SmacSetRxTimeout                          3763      27      39       4   .text       
-     SmacFormatTxPacket                        378A      29      41       2   .text       
-     Uart_Init                                 37B3      A9     169       7   .text       
-     Uart_ClearErrors                          385C      1B      27       2   .text       
-     Uart_Configure                            3877      82     130       2   .text       
-     Uart_GetBytesFromRxBuffer                 38F9      AD     173       2   .text       
-     Uart_RegisterRxCallBack                   39A6      2C      44       2   .text       
-     Uart_RegisterTxCallBack                   39D2      30      48       2   .text       
-     Uart_BlockingStringTx                     3A02      33      51       2   .text       
-     Uart_BlockingByteTx                       3A35      28      40       2   .text       
-     Led_PrintValue                            3A5D      41      65       2   .text       
-     Led_OffAll                                3A9E      21      33       2   .text       
-     Lcd_Init                                  3ABF      95     149      20   .text       
-     Lcd_Config                                3B54      59      89       6   .text       
-     LcdWriteCmd                               3BAD      18      24       8   .text       
-     LcdSetPort                                3BC5      3B      59       4   .text       
-     Kbi_Config                                3C00      40      64       2   .text       
-     Kbi_Init                                  3C40      2F      47       2   .text       
-     Kbi_PortValue                             3C6F      2B      43       4   .text       
-     IRQ_Init                                  3C9A       9       9       4   .text       
-     Gpio_Init                                 3CA3      77     119       2   .text       
-     Gpio_PortWrite                            3D1A       B      11       2   .text       
-     Gpio_PinSet                               3D25      1F      31      18   .text       
-     Gpio_PinClear                             3D44      1F      31      30   .text       
-     Gpio_PinToggle                            3D63       9       9       4   .text       
-     Delay_ms                                  3D6C      46      70       4   .text       
-     Delay_us                                  3DB2      38      56       6   .text       
-     MCUInit                                   3DEA       B      11       2   .text       
-     MCU_UseExternalClock                      3DF5       A      10       2   .text       
-     Otap_OpcMain                              3DFF       1       1       2   .text       
-     Otap_OpcInit                              3E00       1       1       2   .text       
-     main                                      3E01      22      34       2   .text       
-     InitProject                               3E23      84     132       2   .text       
-     ISR_vectors                               FFC0      3E      62       0   .abs_section_ffc0
 
 *********************************************************************************************
 UNUSED-OBJECTS SECTION
@@ -1630,14 +767,11 @@ NOT USED PROCEDURES
 uMac_c.obj:
   uMac_Txf 
 SMAC_c.obj:
-  MLMELinkQuality MLMEDozeRequest MLMEEnergyDetect MLMEGetChannelRequest 
-  MLMEHibernateRequest MLMEXtalAdjust MLMESoftReset MLMEWakeRequest 
-  XCVRContReset XCVRRestart MLMEGetRficVersion MLMESetPromiscuousMode 
-  MLMEGetPromiscuousMode MLMEScanRequest MLMETestMode SMACEnableInterrupts 
-  SMACDisableInterrupts PhyTimeStartEventIndication 
-Timer_c.obj:
-  Tmr_SetChannelConfig Tmr_SetCallbackFunc Tmr_SetClkConfig Tmr_Disable 
-  Tmr_Enable 
+  MLMELinkQuality MLMEDozeRequest MLMEGetChannelRequest MLMEHibernateRequest 
+  MLMEXtalAdjust MLMESoftReset MLMEWakeRequest XCVRContReset XCVRRestart 
+  MLMEGetRficVersion MLMESetPromiscuousMode MLMEGetPromiscuousMode 
+  MLMEScanRequest MLMETestMode SMACEnableInterrupts SMACDisableInterrupts 
+  PhyTimeStartEventIndication 
 SPI_c.obj:
   SPI1_ReadByte 
 UART_c.obj:
@@ -1690,12 +824,9 @@ rtshc08.o (ansibim.lib):
   _POP_CC _CONV_FAR_TO_NEAR _CONV_FAR_TO_LINEAR _CONV_LINEAR_TO_FAR 
 NOT USED VARIABLES
 uMac_c.obj:
-  ChannelsToScan ChannelsEnergy 
+  bestChannel 
 SMAC_c.obj:
   au8SmacVersion u8TestBuffer 
-Timer_c.obj:
-  mu8TmrMaxChannel mu8TmrChannStatCntlReg mu8TmrChannValueHighReg 
-  mu8TmrChannValueLowReg 
 PhyMC1320X_c.obj:
   u8DataLength.1 u8DataLength.2 u8DataLength.3 u8DataLength.4 u8DataLength.5 
   u8DataLength.6 u8DataLength.7 u8DataLength.8 u8DataLength.9 u8DataLength.10 
@@ -1720,762 +851,17 @@ rtshc08.o (ansibim.lib):
 *********************************************************************************************
 COPYDOWN SECTION
 ---------------------------------------------------------------------------------------------
-------- ROM-ADDRESS: 0x3EA7 ---- SIZE       4 ---
-Filling bytes inserted
- 00410300
-------- ROM-ADDRESS: 0x3EAB ---- RAM-ADDRESS: 0x300 ---- SIZE       1 ---
-Name of initialized Object : uMacbroad
- FE
-------- ROM-ADDRESS: 0x3EAC ---- RAM-ADDRESS: 0x301 ---- SIZE      16 ---
-Name of initialized Object : Channels
- 0B0C0D0E0F 1011121314 1516171819
- 1A
-------- ROM-ADDRESS: 0x3EBC ---- SIZE       1 ---
-Filling bytes inserted
- 00
-------- ROM-ADDRESS: 0x3EBD ---- RAM-ADDRESS: 0x312 ---- SIZE       5 ---
-Name of initialized Object : mu8TmrStartRegs:1
- 4000500060
-------- ROM-ADDRESS: 0x3EC2 ---- RAM-ADDRESS: 0x317 ---- SIZE       2 ---
-Name of initialized Object : maUartStartOfModule
- 1870
-------- ROM-ADDRESS: 0x3EC4 ---- SIZE       1 ---
-Filling bytes inserted
- 00
-------- ROM-ADDRESS: 0x3EC5 ---- RAM-ADDRESS: 0x31A ---- SIZE       3 ---
-Name of initialized Object : gpKbiControl:1
- 0C003C
-------- ROM-ADDRESS: 0x3EC8 ---- SIZE       3 ---
-Filling bytes inserted
- 000000
-------- ROM-ADDRESS: 0x3ECB ---- RAM-ADDRESS: 0x320 ---- SIZE      15 ---
-Name of initialized Object : gpGpioPortData:3
- 0200040006 0008000A00 1C001E002E
-------- ROM-ADDRESS: 0x3EDA ---- RAM-ADDRESS: 0x32F ---- SIZE      18 ---
-Name of initialized Object : gpGpioPullDown
- 1840184418 48184C1850 1854185818
- 5C1860
-------- ROM-ADDRESS: 0x3EEC ---- SIZE       2 ---
-Filling bytes inserted
- 0000
 
 *********************************************************************************************
 OBJECT-DEPENDENCIES SECTION
 ---------------------------------------------------------------------------------------------
-MLMEScanComfirm           USES bestChannel bScanDone 
-MCPSDataIndication        USES bRxDone 
-MCPSDataComfirm           USES bTxDone 
-PhyPdDataConfirm          USES smacState smacFlags smacProccesPacketPtr 
-                                MCPSDataComfirm pTestPacket PhyPdDataRequest 
-PhyPdDataIndication       USES smacFlags smacProccesPacketPtr 
-                                smacLastDataRxParams PhyPlmeRxRequest smacTimeout SmacSetRxTimeout 
-                                PhyTimeDisableEventTimeout MCPSDataIndication smacState 
-PhyPlmeCcaConfirm         USES smacScanCurrentChannel smacProccesPacketPtr 
-                                SmacScanTheNextChannel smacClearestChann smacCurrentChannel 
-                                PhyPlmeSetCurrentChannelRequest MLMEScanComfirm smacFlags smacState 
-PhyPlmeEdConfirm          USES smacFlags smacEdValue smacScanCurrentChannel 
-                                smacClearestChann smacProccesPacketPtr SmacScanTheNextChannel 
-                                MLMEScanComfirm smacCurrentChannel 
-                                PhyPlmeSetCurrentChannelRequest smacState 
-PhyPlmeSyncLossIndication USES smacState smacProccesPacketPtr 
-                                smacLastDataRxParams PhyPlmeRxRequest PhyTimeDisableEventTimeout 
-                                MCPSDataIndication PhyPdDataRequest SmacScanTheNextChannel 
-                                smacFlags PhyPlmeCcaEdRequest smacEdValue 
-PhyPlmeResetIndication    USES MLMEResetIndication 
-PhyPlmeWakeComfirm        USES MLMEWakeComfirm 
-PhyTimeRxTimeoutIndication USES smacProccesPacketPtr MCPSDataIndication 
-                                smacState 
-Tmr_Init                  USES mu8TmrStartRegs mTmrCallbackFuncEvent 
-Tmr_Tmr1Isr               USES _TPM1SC mTmrCallbackFuncEvent _TPM1C0SC 
-                                _TPM1C1SC _TPM1C2SC 
-Tmr_Tmr2Isr               USES _TPM2SC mTmrCallbackFuncEvent _TPM2C0SC 
-                                _TPM2C1SC _TPM2C2SC 
-Tmr_Tmr3Isr               USES _TPM3SC mTmrCallbackFuncEvent _TPM3C0SC 
-                                _TPM3C1SC _TPM3C2SC _TPM3C3SC _TPM3C4SC _TPM3C5SC 
-SPI1_Init                 USES Gpio_PinClear _SPI1S _SPI1BR _SPI1C1 _SPI1C2 
-                                gpfSpi1CallBack mSPI1Status mpu8SPI1Ptr 
-SPI1_AssertPeripheralSsPin USES mSPI1Status Gpio_PinSet gpfSpi1CallBack 
-SPI1_DeassertPeripheralSsPin USES mSPI1Status Gpio_PinClear 
-SPI1_WriteString          USES mSPI1Status _SPI1S mu8SPI1Counter mpu8SPI1Ptr 
-                                _SPI1D _SPI1C1 
-SPI1_WriteStringBlocking  USES mSPI1Status SPI1_WriteByteBlocking 
-SPI1_ReadString           USES mSPI1Status _SPI1S mu8SPI1Counter mpu8SPI1Ptr 
-                                _SPI1D _SPI1C1 
-SPI1_ReadStringBlocking   USES mSPI1Status SPI1_ReadByteBlocking 
-SPI1_WriteByte            USES SPI1_WriteString 
-SPI1_WriteByteBlocking    USES _SPI1S _SPI1D 
-SPI1_ReadByteBlocking     USES _SPI1S _SPI1D 
-SPI1_Isr                  USES _SPI1S _SPI1D mSPI1Status mu8SPI1Counter 
-                                _SPI1C1 gpfSpi1CallBack mpu8SPI1Ptr 
-Uart2_TxIsr               USES mUartTxBufferIndx mUartTxNumOfFreeBytes _SCI2S1 
-                                _SCI2C2 mUartTxCbFn mIsTxPending mUartTxBuff _SCI2D 
-Uart2_RxIsr               USES _SCI2S1 mUartRxBufferIndx _SCI2D mUartRxBuff 
-                                mUartTxBufferIndx mUartRxCbFlags mUartRxCbFn 
-PhyInit                   USES PhyRadioEvent Radio_DriverInit Gpio_PinClear 
-                                mPhyState Radio_ReadRegisterBlocking radioConfiguration 
-                                Radio_WriteRegisterBlocking 
-PhyPdDataRequest          USES mPhyState Radio_ReadRegisterBlocking 
-                                Radio_WriteRegisterBlocking Radio_WriteTxBuffer PhySetTrxStateRequest 
-PhyPlmeRxRequest          USES mPhyRxParams mDrvRxPacket mPhyState 
-                                PhySetTrxStateRequest 
-PhyTimeSetEventTimeout    USES Radio_WriteRegisterBlocking mPhyState 
-PhyTimeReadClock          USES Radio_ReadRegisterBlocking _LLSL _POP32 _LADD 
-PhyPlmeCcaEdRequest       USES Radio_ReadRegisterBlocking mPhyState 
-                                Radio_WriteRegisterBlocking PhySetTrxStateRequest 
-PhyPlmeSetCurrentChannelRequest USES cu8ChannelRegisterValues 
-                                Radio_WriteRegisterBlocking 
-PhyPlmeSetPwrLevelRequest USES Radio_ReadRegisterBlocking u8PARegisterValues 
-                                Radio_WriteRegisterBlocking 
-PhyPlmeSetClockOutRate    USES Radio_ReadRegisterBlocking 
-                                Radio_WriteRegisterBlocking 
-PhyAbort                  USES Radio_WriteRegisterBlocking 
-                                PhySetTrxStateRequest mPhyState 
-PhyTimeDisableEventTimeout USES Radio_WriteRegisterBlocking 
-PhyPpSetCcaThreshold      USES Radio_ReadRegisterBlocking 
-                                Radio_WriteRegisterBlocking 
-PhyAdjustCcaOffsetCmp     USES Radio_ReadRegisterBlocking 
-                                Radio_WriteRegisterBlocking 
-PhySetRadioTimerPrescaler USES Radio_ReadRegisterBlocking 
-                                Radio_WriteRegisterBlocking 
-PhySetTrxStateRequest     USES Gpio_PinClear Radio_ReadRegisterBlocking 
-                                Radio_WriteRegisterBlocking Gpio_PinSet 
-PhyHREventsReStartSequense USES u16HREReg PhyHandlingRadioEvents 
-                                Radio_ReadRegister hREState 
-PhyRadioEvent             USES gu16RadioIrqStatus Gpio_PinClear mPhyState 
-                                PhyRadioEvent u16HREReg PhyHandlingRadioEvents 
-                                Radio_ReadRegister PhyPlmeSyncLossIndication PhyPdDataConfirm 
-                                PhyPlmeCcaConfirm PhyHREventsReStartSequense hREState 
-                                Radio_WriteRegister 
-PhyHandlingRadioEvents    USES hREState PhyHandlingRadioEvents u16HREReg 
-                                Radio_ReadRegister PhyPlmeWakeComfirm mPhyState 
-                                PhyPlmeResetIndication PhyTimeRxTimeoutIndication PhyPlmeEdConfirm 
-                                Gpio_PinSet u8DataLength.17 mPhyRxParams 
-                                PhyHREventsReStartSequense mDrvRxPacket Radio_ReadRxBuffer 
-                                PhyChangePacketEndianess PhyPdDataIndication Radio_WriteRegister 
-Radio_DriverInit          USES RadioIRQServiceRoutine IRQ_Init 
-                                gu16RadioIrqStatus mRadioDriverState mpfRadioEventCallback 
-                                mRadioProcessState RadioInitControlSignals 
-Radio_WriteRegister       USES mRadioDriverState RadioProcess 
-                                SPI1_AssertPeripheralSsPin _IRQSC mu16WrittingRegisterValue 
-                                mpfRadioProcessCallback mRadioProcessState SPI1_WriteByte 
-Radio_WriteRegisterBlocking USES mRadioDriverState RadioProcess 
-                                SPI1_AssertPeripheralSsPin _IRQSC SPI1_WriteByteBlocking 
-                                SPI1_WriteStringBlocking SPI1_DeassertPeripheralSsPin 
-Radio_ReadRegister        USES mRadioDriverState RadioProcess 
-                                SPI1_AssertPeripheralSsPin _IRQSC mpu16ReadingRegisterPointer 
-                                mpfRadioProcessCallback mRadioProcessState SPI1_WriteByte 
-Radio_ReadRegisterBlocking USES mRadioDriverState RadioProcess 
-                                SPI1_AssertPeripheralSsPin _IRQSC SPI1_WriteByteBlocking 
-                                SPI1_ReadStringBlocking SPI1_DeassertPeripheralSsPin 
-Radio_WriteTxBuffer       USES mRadioDriverState RadioProcess 
-                                SPI1_AssertPeripheralSsPin Radio_WriteTxBuffer _IRQSC mau8RadioDataBuffer 
-                                mpfRadioProcessCallback mau8RadioDataLength mRadioProcessState 
-                                SPI1_WriteByte SPI1_WriteByteBlocking 
-                                SPI1_WriteStringBlocking SPI1_DeassertPeripheralSsPin 
-Radio_ReadRxBuffer        USES mRadioDriverState RadioProcess 
-                                SPI1_AssertPeripheralSsPin _IRQSC mpu8RadioRxPointer 
-                                mpfRadioProcessCallback mau8RadioDataLength mRadioProcessState 
-                                SPI1_WriteByte SPI1_WriteByteBlocking SPI1_ReadStringBlocking 
-                                SPI1_DeassertPeripheralSsPin 
-RadioIRQServiceRoutine    USES _IRQSC gu16RadioIrqStatus mpfRadioEventCallback 
-                                Radio_ReadRegister 
-RadioInitControlSignals   USES Gpio_PinClear Gpio_PinSet 
-RadioProcess              USES mRadioProcessState mRadioDriverState 
-                                mu16WrittingRegisterValue SPI1_WriteString mpu16ReadingRegisterPointer 
-                                SPI1_ReadString mau8RadioDataBuffer mau8RadioDataLength 
-                                mpu8RadioRxPointer SPI1_DeassertPeripheralSsPin 
-                                mpfRadioProcessCallback _IRQSC 
-LowVoltageDetectIsr       USES _SPMSC1 LvdCllbk _SPMSC3 LvwCllbk 
-KBI1_ISR                  USES _KBI1SC Kbi_PortValue pKbiCallback _KBI2SC 
-IRQ_Isr                   USES _IRQSC IrqCallBack 
-IIC_Isr                   USES _IIC1S _IIC1C1 mIicState mu8IicDataCounter 
-                                mpu8IicTxRxPointer _IIC1D bIicDeviceAddressFlag 
-                                iicFinishReadWrite 
-iicFinishReadWrite        USES mIicState _IIC1C1 mpfIicCallback 
-UartTxCallback            USES bUartTxDone 
-UartRxCallback            USES UartData portNumber Uart_GetBytesFromRxBuffer 
-                                bUartDataInFlag 
-KbiCallback               USES KeyPressed type dest 
-_ENTER_BINARY_L           USES _PUSH_ARGS_L 
-_ENTER_BINARY_L_RC        USES _PUSH_ARGS_L 
-_LMUL_k_is_k_mul_j        USES _k_is_k_plus_j_l _k_is_k_plus_j_i 
-_LDIVU_k_is_k_div_j       USES _LDIVMOD 
-_LADD                     USES _ENTER_BINARY_L _LADD_k_is_k_plus_j 
-_LADD_RC                  USES _ENTER_BINARY_L_RC _LADD_k_is_k_plus_j 
-_LMUL_RC                  USES _ENTER_BINARY_L_RC _LMUL_k_is_k_mul_j 
-_LDIVU_RC                 USES _ENTER_BINARY_L_RC _LDIVU_k_is_k_div_j 
-_LLSL                     USES _ENTER_UNARY_L 
-_LCMP                     USES _ENTER_BINARY_L _LCMP_k_rel_j 
-Init                      USES _startupData loadByte 
-_Startup                  USES __SEG_END_SSTACK Init main 
-Init_uMac                 USES InitSmac uMac_On AppRxPacket uMac_RxPacket 
-                                AppTxPacket uMac_TxPacket uMac_Current_State 
-uMac_Engine               USES uMac_Current_State uMac_Engine uMac_On ui 
-                                Channels MLMESetChannelRequest uMacbroad uMac_TxPacket 
-                                AppTxPacket MCPSDataRequest bTxDone AppRxPacket 
-                                MLMERXEnableRequest bRxDone uMac_RxPacket Led_PrintValue bDoTx 
-                                MLMERXDisableRequest 
-InitSmac                  USES gau8TxDataBuffer AppTxPacket gau8RxDataBuffer 
-                                AppRxPacket MLMERadioInit MLMESetClockRate 
-                                MCU_UseExternalClock MLMESetTmrPrescale MLMESetChannelRequest 
-                                MLMEPAOutputAdjust MLMEFEGainAdjust 
-MCPSDataRequest           USES smacFlags smacState SmacFormatTxPacket 
-                                smacProccesPacketPtr PhyPdDataRequest 
-MLMERXEnableRequest       USES smacFlags smacState smacLastDataRxParams 
-                                PhyPlmeRxRequest smacTimeout SmacSetRxTimeout 
-                                smacProccesPacketPtr 
-MLMERXDisableRequest      USES smacFlags smacState PhyAbort 
-MLMERadioInit             USES PhyInit PhyPlmeSetCurrentChannelRequest 
-                                PhyPlmeSetPwrLevelRequest PhyPpSetCcaThreshold PhyPpSetPromiscuous 
-                                smacCurrentChannel smacState smacLastDataRxParams smacEdValue 
-                                smacClearestChann smacFlags 
-MLMEFEGainAdjust          USES smacState PhyAdjustCcaOffsetCmp 
-MLMESetChannelRequest     USES smacFlags smacState 
-                                PhyPlmeSetCurrentChannelRequest smacCurrentChannel 
-MLMEPAOutputAdjust        USES smacFlags smacState PhyPlmeSetPwrLevelRequest 
-MLMESetClockRate          USES PhyPlmeSetClockOutRate 
-MLMESetTmrPrescale        USES smacFlags PhySetRadioTimerPrescaler 
-SmacScanTheNextChannel    USES smacScanCurrentChannel _ILSL 
-                                smacChannelsBeingScanned PhyPlmeSetCurrentChannelRequest smacFlags 
-                                PhyPlmeCcaEdRequest 
-SmacSetRxTimeout          USES PhyTimeReadClock _LADD_RC _LADD _POP32 
-                                PhyTimeSetEventTimeout 
-SmacFormatTxPacket        USES smacFlags 
-Uart_Init                 USES mSciModuleHwErrors mIsTxPending 
-                                maUartStartOfModule mUartRxBufferIndx mUartTxBufferIndx Uart_Init 
-                                mUartRxBuff mUartTxBuff mUartTxNumOfFreeBytes mUartRxCbFn 
-                                mUartTxCbFn Uart_ClearErrors 
-Uart_ClearErrors          USES _SCI2D mSciModuleHwErrors _SCI2S1 
-Uart_Configure            USES maUartStartOfModule 
-Uart_GetBytesFromRxBuffer USES mUartRxBufferIndx mUartRxBuff 
-Uart_RegisterRxCallBack   USES mUartRxCbFn mUartRxCbFlags 
-Uart_RegisterTxCallBack   USES mIsTxPending mUartTxCbFn 
-Uart_BlockingStringTx     USES mIsTxPending Uart_BlockingByteTx 
-Uart_BlockingByteTx       USES mIsTxPending maUartStartOfModule 
-Led_PrintValue            USES Led_OffAll Gpio_PinSet 
-Led_OffAll                USES Gpio_PinClear 
-Lcd_Init                  USES mu8LcdString mbLcdBlockingFlag mLcdStatus 
-                                Delay_ms Gpio_PinClear Lcd_Init gpfLcdCallBack 
-                                mu8LcdStrFlag LcdWriteCmd Delay_us 
-Lcd_Config                USES mLcdStatus mbLcdBlockingFlag Lcd_Config 
-                                LcdWriteCmd gpfLcdCallBack Delay_us 
-LcdWriteCmd               USES mu8RsState LcdSetPort 
-LcdSetPort                USES Gpio_PinToggle Gpio_PinSet Gpio_PinClear 
-                                Delay_us Gpio_PortWrite 
-Kbi_Config                USES gpKbiControl 
-Kbi_Init                  USES pKbiCallback Kbi_Config 
-Kbi_PortValue             USES _PTBD _PTAD _KBI1ES _KBI1PE _KBI2ES _PTDD 
-                                _KBI2PE 
-IRQ_Init                  USES _IRQSC IrqCallBack 
-Gpio_Init                 USES gpGpioPortData GpioDataHandling gpGpioPullDown 
-                                GpioConfigPort GpioLogicConfig gGpioPortLogic 
-Gpio_PortWrite            USES gGpioPortLogic gpGpioPortData 
-Gpio_PinSet               USES gGpioPortLogic gpGpioPortData 
-Gpio_PinClear             USES gGpioPortLogic gpGpioPortData 
-Gpio_PinToggle            USES gpGpioPortData 
-Delay_ms                  USES _LMUL_RC _LCMP 
-Delay_us                  USES _LLSL _LDIVU_RC 
-MCUInit                   USES _SOPT1 _SPMSC2 
-MCU_UseExternalClock      USES _ICSC1 _ICSC2 _ICSSC 
-main                      USES MCUInit InitProject Init_uMac 
-                                STRING........Generic.Demon.1 Uart_BlockingStringTx Otap_OpcMain uMac_Engine 
-                                _SRS 
-InitProject               USES Gpio_Init portNumber uartSettings Uart_Init 
-                                Uart_Configure UartRxCallback Uart_RegisterRxCallBack 
-                                UartTxCallback Uart_RegisterTxCallBack Tmr_Init 
-                                gKbiConfiguration KbiCallback Kbi_Init SPI1_Init IRQ_Init 
-                                LCDCallback Lcd_Init Lcd_Config Otap_OpcInit 
-ISR_vectors               USES Tmr_Tmr3Isr UnimplementedISR Uart2_TxIsr 
-                                Uart2_RxIsr Uart2_ErrorIsr KBI1_ISR IIC_Isr SPI1_Isr 
-                                Tmr_Tmr2Isr Tmr_Tmr1Isr LowVoltageDetectIsr IRQ_Isr 
 
-*********************************************************************************************
-DEPENDENCY TREE
-*********************************************************************************************
- main and _Startup Group
- | 
- +- main                
- |  | 
- |  +- MCUInit             
- |  |    
- |  +- InitProject         
- |  |  | 
- |  |  +- Gpio_Init           
- |  |  |    
- |  |  +- Uart_Init           
- |  |  |  | 
- |  |  |  +- Uart_ClearErrors    
- |  |  |       
- |  |  +- Uart_Configure      
- |  |  |    
- |  |  +- UartRxCallback      
- |  |  |  | 
- |  |  |  +- Uart_GetBytesFromRxBuffer
- |  |  |       
- |  |  +- Uart_RegisterRxCallBack
- |  |  |    
- |  |  +- UartTxCallback      
- |  |  |    
- |  |  +- Uart_RegisterTxCallBack
- |  |  |    
- |  |  +- Tmr_Init            
- |  |  |    
- |  |  +- KbiCallback         
- |  |  |    
- |  |  +- Kbi_Init            
- |  |  |  | 
- |  |  |  +- Kbi_Config          
- |  |  |       
- |  |  +- SPI1_Init           
- |  |  |  | 
- |  |  |  +- Gpio_PinClear       
- |  |  |       
- |  |  +- IRQ_Init            
- |  |  |    
- |  |  +- LCDCallback         
- |  |  |    
- |  |  +- Lcd_Init            
- |  |  |  | 
- |  |  |  +- Delay_ms            
- |  |  |  |  | 
- |  |  |  |  +- _LMUL_RC            
- |  |  |  |  |  | 
- |  |  |  |  |  +- _ENTER_BINARY_L_RC  
- |  |  |  |  |  |  | 
- |  |  |  |  |  |  +- _PUSH_ARGS_L        
- |  |  |  |  |  |       
- |  |  |  |  |  +- _LMUL_k_is_k_mul_j  
- |  |  |  |  |     | 
- |  |  |  |  |     +- _k_is_k_plus_j_l    
- |  |  |  |  |     |    
- |  |  |  |  |     +- _k_is_k_plus_j_i    
- |  |  |  |  |          
- |  |  |  |  +- _LCMP               
- |  |  |  |     | 
- |  |  |  |     +- _ENTER_BINARY_L     
- |  |  |  |     |  | 
- |  |  |  |     |  +- _PUSH_ARGS_L         (see above)
- |  |  |  |     |     
- |  |  |  |     +- _LCMP_k_rel_j       
- |  |  |  |          
- |  |  |  +- Gpio_PinClear        (see above)
- |  |  |  |  
- |  |  |  +- LcdWriteCmd         
- |  |  |  |  | 
- |  |  |  |  +- LcdSetPort          
- |  |  |  |     | 
- |  |  |  |     +- Gpio_PinToggle      
- |  |  |  |     |    
- |  |  |  |     +- Gpio_PinSet         
- |  |  |  |     |    
- |  |  |  |     +- Gpio_PinClear        (see above)
- |  |  |  |     |  
- |  |  |  |     +- Delay_us            
- |  |  |  |     |  | 
- |  |  |  |     |  +- _LLSL               
- |  |  |  |     |  |  | 
- |  |  |  |     |  |  +- _ENTER_UNARY_L      
- |  |  |  |     |  |       
- |  |  |  |     |  +- _LDIVU_RC           
- |  |  |  |     |     | 
- |  |  |  |     |     +- _ENTER_BINARY_L_RC   (see above)
- |  |  |  |     |     |  
- |  |  |  |     |     +- _LDIVU_k_is_k_div_j 
- |  |  |  |     |        | 
- |  |  |  |     |        +- _LDIVMOD            
- |  |  |  |     |             
- |  |  |  |     +- Gpio_PortWrite      
- |  |  |  |          
- |  |  |  +- Delay_us             (see above)
- |  |  |     
- |  |  +- Lcd_Config          
- |  |  |  | 
- |  |  |  +- LcdWriteCmd          (see above)
- |  |  |  |  
- |  |  |  +- Delay_us             (see above)
- |  |  |     
- |  |  +- Otap_OpcInit        
- |  |       
- |  +- Init_uMac           
- |  |  | 
- |  |  +- InitSmac            
- |  |     | 
- |  |     +- MLMERadioInit       
- |  |     |  | 
- |  |     |  +- PhyInit             
- |  |     |  |  | 
- |  |     |  |  +- PhyRadioEvent       
- |  |     |  |  |  | 
- |  |     |  |  |  +- Gpio_PinClear        (see above)
- |  |     |  |  |  |  
- |  |     |  |  |  +- PhyHandlingRadioEvents (recursive dependency)
- |  |     |  |  |  |  | 
- |  |     |  |  |  |  +- Radio_ReadRegister  
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- RadioProcess        
- |  |     |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  +- SPI1_WriteString    
- |  |     |  |  |  |  |  |  |    
- |  |     |  |  |  |  |  |  +- SPI1_ReadString     
- |  |     |  |  |  |  |  |  |    
- |  |     |  |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin
- |  |     |  |  |  |  |  |     | 
- |  |     |  |  |  |  |  |     +- Gpio_PinClear        (see above)
- |  |     |  |  |  |  |  |        
- |  |     |  |  |  |  |  +- SPI1_AssertPeripheralSsPin
- |  |     |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  +- Gpio_PinSet          (see above)
- |  |     |  |  |  |  |  |     
- |  |     |  |  |  |  |  +- SPI1_WriteByte      
- |  |     |  |  |  |  |     | 
- |  |     |  |  |  |  |     +- SPI1_WriteString     (see above)
- |  |     |  |  |  |  |        
- |  |     |  |  |  |  +- PhyPlmeWakeComfirm  
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- MLMEWakeComfirm     
- |  |     |  |  |  |  |       
- |  |     |  |  |  |  +- PhyPlmeResetIndication
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- MLMEResetIndication 
- |  |     |  |  |  |  |       
- |  |     |  |  |  |  +- PhyTimeRxTimeoutIndication
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- MCPSDataIndication  
- |  |     |  |  |  |  |       
- |  |     |  |  |  |  +- PhyPlmeEdConfirm    
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- SmacScanTheNextChannel
- |  |     |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  +- _ILSL               
- |  |     |  |  |  |  |  |  |    
- |  |     |  |  |  |  |  |  +- PhyPlmeSetCurrentChannelRequest
- |  |     |  |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  |  +- Radio_WriteRegisterBlocking
- |  |     |  |  |  |  |  |  |     | 
- |  |     |  |  |  |  |  |  |     +- RadioProcess         (see above)
- |  |     |  |  |  |  |  |  |     |  
- |  |     |  |  |  |  |  |  |     +- SPI1_AssertPeripheralSsPin (see above)
- |  |     |  |  |  |  |  |  |     |  
- |  |     |  |  |  |  |  |  |     +- SPI1_WriteByteBlocking
- |  |     |  |  |  |  |  |  |     |    
- |  |     |  |  |  |  |  |  |     +- SPI1_WriteStringBlocking
- |  |     |  |  |  |  |  |  |     |  | 
- |  |     |  |  |  |  |  |  |     |  +- SPI1_WriteByteBlocking (see above)
- |  |     |  |  |  |  |  |  |     |     
- |  |     |  |  |  |  |  |  |     +- SPI1_DeassertPeripheralSsPin (see above)
- |  |     |  |  |  |  |  |  |        
- |  |     |  |  |  |  |  |  +- PhyPlmeCcaEdRequest 
- |  |     |  |  |  |  |  |     | 
- |  |     |  |  |  |  |  |     +- Radio_ReadRegisterBlocking
- |  |     |  |  |  |  |  |     |  | 
- |  |     |  |  |  |  |  |     |  +- RadioProcess         (see above)
- |  |     |  |  |  |  |  |     |  |  
- |  |     |  |  |  |  |  |     |  +- SPI1_AssertPeripheralSsPin (see above)
- |  |     |  |  |  |  |  |     |  |  
- |  |     |  |  |  |  |  |     |  +- SPI1_WriteByteBlocking (see above)
- |  |     |  |  |  |  |  |     |  |  
- |  |     |  |  |  |  |  |     |  +- SPI1_ReadStringBlocking
- |  |     |  |  |  |  |  |     |  |  | 
- |  |     |  |  |  |  |  |     |  |  +- SPI1_ReadByteBlocking
- |  |     |  |  |  |  |  |     |  |       
- |  |     |  |  |  |  |  |     |  +- SPI1_DeassertPeripheralSsPin (see above)
- |  |     |  |  |  |  |  |     |     
- |  |     |  |  |  |  |  |     +- Radio_WriteRegisterBlocking (see above)
- |  |     |  |  |  |  |  |     |  
- |  |     |  |  |  |  |  |     +- PhySetTrxStateRequest
- |  |     |  |  |  |  |  |        | 
- |  |     |  |  |  |  |  |        +- Gpio_PinClear        (see above)
- |  |     |  |  |  |  |  |        |  
- |  |     |  |  |  |  |  |        +- Radio_ReadRegisterBlocking (see above)
- |  |     |  |  |  |  |  |        |  
- |  |     |  |  |  |  |  |        +- Radio_WriteRegisterBlocking (see above)
- |  |     |  |  |  |  |  |        |  
- |  |     |  |  |  |  |  |        +- Gpio_PinSet          (see above)
- |  |     |  |  |  |  |  |           
- |  |     |  |  |  |  |  +- MLMEScanComfirm     
- |  |     |  |  |  |  |  |    
- |  |     |  |  |  |  |  +- PhyPlmeSetCurrentChannelRequest (see above)
- |  |     |  |  |  |  |     
- |  |     |  |  |  |  +- Gpio_PinSet          (see above)
- |  |     |  |  |  |  |  
- |  |     |  |  |  |  +- PhyHREventsReStartSequense (recursive dependency)
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- PhyHandlingRadioEvents (see above) (recursive dependency)
- |  |     |  |  |  |  |  |  
- |  |     |  |  |  |  |  +- Radio_ReadRegister   (see above)
- |  |     |  |  |  |  |     
- |  |     |  |  |  |  +- Radio_ReadRxBuffer  
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- RadioProcess         (see above)
- |  |     |  |  |  |  |  |  
- |  |     |  |  |  |  |  +- SPI1_AssertPeripheralSsPin (see above)
- |  |     |  |  |  |  |  |  
- |  |     |  |  |  |  |  +- SPI1_WriteByte       (see above)
- |  |     |  |  |  |  |  |  
- |  |     |  |  |  |  |  +- SPI1_WriteByteBlocking (see above)
- |  |     |  |  |  |  |  |  
- |  |     |  |  |  |  |  +- SPI1_ReadStringBlocking (see above)
- |  |     |  |  |  |  |  |  
- |  |     |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin (see above)
- |  |     |  |  |  |  |     
- |  |     |  |  |  |  +- PhyChangePacketEndianess
- |  |     |  |  |  |  |    
- |  |     |  |  |  |  +- PhyPdDataIndication 
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- PhyPlmeRxRequest    
- |  |     |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  +- PhySetTrxStateRequest (see above)
- |  |     |  |  |  |  |  |     
- |  |     |  |  |  |  |  +- SmacSetRxTimeout    
- |  |     |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  +- PhyTimeReadClock    
- |  |     |  |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  |  +- Radio_ReadRegisterBlocking (see above)
- |  |     |  |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  |  +- _LLSL                (see above)
- |  |     |  |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  |  +- _POP32              
- |  |     |  |  |  |  |  |  |  |    
- |  |     |  |  |  |  |  |  |  +- _LADD               
- |  |     |  |  |  |  |  |  |     | 
- |  |     |  |  |  |  |  |  |     +- _ENTER_BINARY_L      (see above)
- |  |     |  |  |  |  |  |  |     |  
- |  |     |  |  |  |  |  |  |     +- _LADD_k_is_k_plus_j 
- |  |     |  |  |  |  |  |  |          
- |  |     |  |  |  |  |  |  +- _LADD_RC            
- |  |     |  |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  |  +- _ENTER_BINARY_L_RC   (see above)
- |  |     |  |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  |  +- _LADD_k_is_k_plus_j  (see above)
- |  |     |  |  |  |  |  |  |     
- |  |     |  |  |  |  |  |  +- _LADD                (see above)
- |  |     |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  +- _POP32               (see above)
- |  |     |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  +- PhyTimeSetEventTimeout
- |  |     |  |  |  |  |  |     | 
- |  |     |  |  |  |  |  |     +- Radio_WriteRegisterBlocking (see above)
- |  |     |  |  |  |  |  |        
- |  |     |  |  |  |  |  +- PhyTimeDisableEventTimeout
- |  |     |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  +- Radio_WriteRegisterBlocking (see above)
- |  |     |  |  |  |  |  |     
- |  |     |  |  |  |  |  +- MCPSDataIndication   (see above)
- |  |     |  |  |  |  |     
- |  |     |  |  |  |  +- Radio_WriteRegister 
- |  |     |  |  |  |     | 
- |  |     |  |  |  |     +- RadioProcess         (see above)
- |  |     |  |  |  |     |  
- |  |     |  |  |  |     +- SPI1_AssertPeripheralSsPin (see above)
- |  |     |  |  |  |     |  
- |  |     |  |  |  |     +- SPI1_WriteByte       (see above)
- |  |     |  |  |  |        
- |  |     |  |  |  +- Radio_ReadRegister   (see above)
- |  |     |  |  |  |  
- |  |     |  |  |  +- PhyPlmeSyncLossIndication
- |  |     |  |  |  |  | 
- |  |     |  |  |  |  +- PhyPlmeRxRequest     (see above)
- |  |     |  |  |  |  |  
- |  |     |  |  |  |  +- PhyTimeDisableEventTimeout (see above)
- |  |     |  |  |  |  |  
- |  |     |  |  |  |  +- MCPSDataIndication   (see above)
- |  |     |  |  |  |  |  
- |  |     |  |  |  |  +- PhyPdDataRequest    
- |  |     |  |  |  |  |  | 
- |  |     |  |  |  |  |  +- Radio_ReadRegisterBlocking (see above)
- |  |     |  |  |  |  |  |  
- |  |     |  |  |  |  |  +- Radio_WriteRegisterBlocking (see above)
- |  |     |  |  |  |  |  |  
- |  |     |  |  |  |  |  +- Radio_WriteTxBuffer 
- |  |     |  |  |  |  |  |  | 
- |  |     |  |  |  |  |  |  +- RadioProcess         (see above)
- |  |     |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  +- SPI1_AssertPeripheralSsPin (see above)
- |  |     |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  +- SPI1_WriteByte       (see above)
- |  |     |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  +- SPI1_WriteByteBlocking (see above)
- |  |     |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  +- SPI1_WriteStringBlocking (see above)
- |  |     |  |  |  |  |  |  |  
- |  |     |  |  |  |  |  |  +- SPI1_DeassertPeripheralSsPin (see above)
- |  |     |  |  |  |  |  |     
- |  |     |  |  |  |  |  +- PhySetTrxStateRequest (see above)
- |  |     |  |  |  |  |     
- |  |     |  |  |  |  +- SmacScanTheNextChannel (see above)
- |  |     |  |  |  |  |  
- |  |     |  |  |  |  +- PhyPlmeCcaEdRequest  (see above)
- |  |     |  |  |  |     
- |  |     |  |  |  +- PhyPdDataConfirm    
- |  |     |  |  |  |  | 
- |  |     |  |  |  |  +- MCPSDataComfirm     
- |  |     |  |  |  |  |    
- |  |     |  |  |  |  +- PhyPdDataRequest     (see above)
- |  |     |  |  |  |     
- |  |     |  |  |  +- PhyPlmeCcaConfirm   
- |  |     |  |  |  |  | 
- |  |     |  |  |  |  +- SmacScanTheNextChannel (see above)
- |  |     |  |  |  |  |  
- |  |     |  |  |  |  +- PhyPlmeSetCurrentChannelRequest (see above)
- |  |     |  |  |  |  |  
- |  |     |  |  |  |  +- MLMEScanComfirm      (see above)
- |  |     |  |  |  |     
- |  |     |  |  |  +- PhyHREventsReStartSequense (see above) (recursive dependency)
- |  |     |  |  |  |  
- |  |     |  |  |  +- Radio_WriteRegister  (see above)
- |  |     |  |  |     
- |  |     |  |  +- Radio_DriverInit    
- |  |     |  |  |  | 
- |  |     |  |  |  +- RadioIRQServiceRoutine
- |  |     |  |  |  |  | 
- |  |     |  |  |  |  +- Radio_ReadRegister   (see above)
- |  |     |  |  |  |     
- |  |     |  |  |  +- IRQ_Init             (see above)
- |  |     |  |  |  |  
- |  |     |  |  |  +- RadioInitControlSignals
- |  |     |  |  |     | 
- |  |     |  |  |     +- Gpio_PinClear        (see above)
- |  |     |  |  |     |  
- |  |     |  |  |     +- Gpio_PinSet          (see above)
- |  |     |  |  |        
- |  |     |  |  +- Gpio_PinClear        (see above)
- |  |     |  |  |  
- |  |     |  |  +- Radio_ReadRegisterBlocking (see above)
- |  |     |  |  |  
- |  |     |  |  +- Radio_WriteRegisterBlocking (see above)
- |  |     |  |     
- |  |     |  +- PhyPlmeSetCurrentChannelRequest (see above)
- |  |     |  |  
- |  |     |  +- PhyPlmeSetPwrLevelRequest
- |  |     |  |  | 
- |  |     |  |  +- Radio_ReadRegisterBlocking (see above)
- |  |     |  |  |  
- |  |     |  |  +- Radio_WriteRegisterBlocking (see above)
- |  |     |  |     
- |  |     |  +- PhyPpSetCcaThreshold
- |  |     |  |  | 
- |  |     |  |  +- Radio_ReadRegisterBlocking (see above)
- |  |     |  |  |  
- |  |     |  |  +- Radio_WriteRegisterBlocking (see above)
- |  |     |  |     
- |  |     |  +- PhyPpSetPromiscuous 
- |  |     |       
- |  |     +- MLMESetClockRate    
- |  |     |  | 
- |  |     |  +- PhyPlmeSetClockOutRate
- |  |     |     | 
- |  |     |     +- Radio_ReadRegisterBlocking (see above)
- |  |     |     |  
- |  |     |     +- Radio_WriteRegisterBlocking (see above)
- |  |     |        
- |  |     +- MCU_UseExternalClock
- |  |     |    
- |  |     +- MLMESetTmrPrescale  
- |  |     |  | 
- |  |     |  +- PhySetRadioTimerPrescaler
- |  |     |     | 
- |  |     |     +- Radio_ReadRegisterBlocking (see above)
- |  |     |     |  
- |  |     |     +- Radio_WriteRegisterBlocking (see above)
- |  |     |        
- |  |     +- MLMESetChannelRequest
- |  |     |  | 
- |  |     |  +- PhyPlmeSetCurrentChannelRequest (see above)
- |  |     |     
- |  |     +- MLMEPAOutputAdjust  
- |  |     |  | 
- |  |     |  +- PhyPlmeSetPwrLevelRequest (see above)
- |  |     |     
- |  |     +- MLMEFEGainAdjust    
- |  |        | 
- |  |        +- PhyAdjustCcaOffsetCmp
- |  |           | 
- |  |           +- Radio_ReadRegisterBlocking (see above)
- |  |           |  
- |  |           +- Radio_WriteRegisterBlocking (see above)
- |  |              
- |  +- Uart_BlockingStringTx
- |  |  | 
- |  |  +- Uart_BlockingByteTx 
- |  |       
- |  +- Otap_OpcMain        
- |  |    
- |  +- uMac_Engine         
- |     | 
- |     +- MLMESetChannelRequest (see above)
- |     |  
- |     +- MCPSDataRequest     
- |     |  | 
- |     |  +- SmacFormatTxPacket  
- |     |  |    
- |     |  +- PhyPdDataRequest     (see above)
- |     |     
- |     +- MLMERXEnableRequest 
- |     |  | 
- |     |  +- PhyPlmeRxRequest     (see above)
- |     |  |  
- |     |  +- SmacSetRxTimeout     (see above)
- |     |     
- |     +- Led_PrintValue      
- |     |  | 
- |     |  +- Led_OffAll          
- |     |  |  | 
- |     |  |  +- Gpio_PinClear        (see above)
- |     |  |     
- |     |  +- Gpio_PinSet          (see above)
- |     |     
- |     +- MLMERXDisableRequest
- |        | 
- |        +- PhyAbort            
- |           | 
- |           +- Radio_WriteRegisterBlocking (see above)
- |           |  
- |           +- PhySetTrxStateRequest (see above)
- |              
- +- _Startup            
-    | 
-    +- Init                
-    |  | 
-    |  +- loadByte            
-    |       
-    +- main                 (see above)
-       
- ISR_vectors         
- | 
- +- Tmr_Tmr3Isr         
- |    
- +- UnimplementedISR    
- |    
- +- Uart2_TxIsr         
- |    
- +- Uart2_RxIsr         
- |    
- +- Uart2_ErrorIsr      
- |    
- +- KBI1_ISR            
- |  | 
- |  +- Kbi_PortValue       
- |       
- +- IIC_Isr             
- |  | 
- |  +- iicFinishReadWrite  
- |       
- +- SPI1_Isr            
- |    
- +- Tmr_Tmr2Isr         
- |    
- +- Tmr_Tmr1Isr         
- |    
- +- LowVoltageDetectIsr 
- |    
- +- IRQ_Isr             
-      
 *********************************************************************************************
 STATISTIC SECTION
 ---------------------------------------------------------------------------------------------
 
 ExeFile:
 --------
-Number of blocks to be downloaded: 8
-Total size of all blocks to be downloaded: 7832
+Number of blocks to be downloaded: 0
+Total size of all blocks to be downloaded: 0
 

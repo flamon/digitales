@@ -1,5 +1,4 @@
 
-
 Application/Source/main_c.obj: \
 	C:/Users/hbarba/repos/digitales/My\ Solution/Generic\ Demo/OTAP/../Application/Source/main.c \
 	C:/Freescale/CW\ MCU\ v10.2/MCU/lib/hc08c/include/hidef.h \

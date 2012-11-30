@@ -13,16 +13,16 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="KbiCallback" key="selection"/>
+		<item value="Scan" key="selection"/>
 		<list key="findhistory">
+			<item value="scan"/>
+			<item value="scanconfirm"/>
+			<item value="bTimerFlag"/>
+			<item value="settime"/>
+			<item value="settie"/>
 			<item value="KbiCallback"/>
 			<item value="led"/>
 			<item value="InitSmac"/>
-			<item value="uMac_On"/>
-			<item value="uMac_Best_Channel"/>
-			<item value="keyp"/>
-			<item value="bsca"/>
-			<item value="btx"/>
 		</list>
 		<list key="replacehistory">
 		</list>
